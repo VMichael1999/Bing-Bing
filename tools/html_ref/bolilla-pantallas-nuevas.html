@@ -1,0 +1,408 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Bolilla · pantallas nuevas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#EDF0F6; --text:#181C33; --muted:#59607A; --line:#DCE1EC; --panel:#FFFFFF; --bezel:#181C33; --accent:#C81B60;
+  --display:"Bungee","Arial Black",Impact,sans-serif; --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --b:#2B6BE0; --i:#D93A33; --n:#EEF0F6; --g:#13895A; --o:#F2B400; --face:#FFFFFF; --face-ink:#181C33;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ color-scheme:dark; --bg:#0D1024; --text:#EEF0F8; --muted:#A5ABC6; --line:#262B4C; --panel:#161A33; --bezel:#2C3256; --accent:#FF4C8B; } }
+:root[data-theme="dark"]{ color-scheme:dark; --bg:#0D1024; --text:#EEF0F8; --muted:#A5ABC6; --line:#262B4C; --panel:#161A33; --bezel:#2C3256; --accent:#FF4C8B; }
+*{ box-sizing:border-box; } [hidden]{ display:none !important; }
+body{ background:var(--bg); color:var(--text); font-family:var(--body); font-size:15px; line-height:1.5; padding-inline:16px; padding-block:28px 64px; }
+h1,h2,h3{ margin:0; text-wrap:balance; } p{ margin:0; }
+.wrap{ max-width:1180px; margin:0 auto; display:grid; gap:40px; }
+.intro{ display:grid; gap:12px; max-width:760px; }
+.eyebrow{ font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--muted); }
+.intro h1{ font-family:var(--display); font-weight:400; font-size:clamp(30px,5.4vw,50px); line-height:1.02; letter-spacing:.005em; }
+.intro p{ color:var(--muted); max-width:68ch; }
+.intro strong{ color:var(--text); font-weight:700; }
+.panels{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.pn{ background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px 18px; display:grid; gap:10px; align-content:start; }
+.pn h2{ font-size:16px; font-weight:800; }
+.pn ul{ margin:0; padding-left:18px; display:grid; gap:5px; font-size:14px; color:var(--muted); }
+.pn ul b{ color:var(--text); font-weight:700; }
+.pn.rec{ border:2px solid var(--accent); }
+.pn .tag{ justify-self:start; font-size:11.5px; font-weight:800; letter-spacing:.05em; padding:3px 9px; border-radius:8px; background:var(--accent); color:var(--panel); }
+.flow{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; counter-reset:f; }
+.flow div{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:12px 14px; font-size:13.5px; display:grid; gap:4px; counter-increment:f; }
+.flow div::before{ content:counter(f); font-family:var(--display); font-size:18px; color:var(--accent); line-height:1; }
+.flow b{ font-weight:800; }
+.flow small{ color:var(--muted); font-size:12.5px; }
+.flow .who-o, .flow .who-j{ justify-self:start; font-size:11px; font-weight:800; padding:1px 7px; border-radius:6px; }
+.flow .who-o{ background:var(--text); color:var(--bg); } .flow .who-j{ border:1px solid var(--line); color:var(--muted); }
+.note{ border-left:3px solid var(--accent); padding:4px 0 4px 14px; color:var(--muted); font-size:14px; max-width:86ch; }
+.note b{ color:var(--text); font-weight:700; }
+.group-h{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:22px; }
+.group-h h2{ font-size:22px; font-weight:800; letter-spacing:-.01em; }
+.group-h p{ color:var(--muted); font-size:14.5px; }
+.group-h .role{ font-size:12px; font-weight:800; padding:3px 10px; border-radius:20px; }
+.role.o{ background:var(--text); color:var(--bg); } .role.j{ border:1.5px solid var(--line); color:var(--muted); }
+.screens{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:44px 28px; }
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; }
+@media (max-width:760px){ .two-col{ grid-template-columns:1fr; } }
+.colh{ display:flex; align-items:center; gap:10px; }
+.colh h2{ font-size:20px; font-weight:800; }
+.stack{ display:grid; gap:44px; }
+figure{ margin:0; display:grid; gap:14px; justify-items:center; align-content:start; }
+figcaption{ width:min(100%,340px); display:grid; gap:4px; }
+figcaption h3{ font-size:16.5px; font-weight:700; }
+figcaption p{ font-size:14px; color:var(--muted); }
+figcaption code.sid{ justify-self:start; font-size:11.5px; font-weight:700; color:var(--muted); background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:1px 7px; }
+figcaption .fix{ font-size:12.5px; font-weight:700; color:var(--accent); }
+.phone{ width:min(100%,340px); height:720px; border:10px solid var(--bezel); border-radius:44px; overflow:hidden; position:relative; box-shadow:0 18px 40px rgba(14,17,38,.22); }
+
+/* ---------- app ---------- */
+.app{ --a-bg:#EDF0F6; --a-card:#FFFFFF; --a-ink:#181C33; --a-muted:#59607A; --a-line:#DCE1EC; --a-soft:#F3F5FA; --dauber:#C81B60; --d-ink:#FFFFFF; --near:#8A5A00; --near-soft:#FFF1CC; --win:#B07E00; --win-soft:#FFE9A8; --n-ink:#181C33; --ok:#13895A; --ok-soft:#DDF2E8;
+  height:100%; display:flex; flex-direction:column; position:relative; overflow:hidden; background:var(--a-bg); color:var(--a-ink); font-family:var(--body); font-size:14px; line-height:1.38; }
+.app.dark{ --a-bg:#10132A; --a-card:#1A1E3A; --a-ink:#EEF0F8; --a-muted:#A5ABC6; --a-line:#2C3256; --a-soft:#232849; --dauber:#FF4C8B; --d-ink:#1A0812; --near:#F5C04A; --near-soft:#3A3115; --win:#F5C04A; --win-soft:#4A3C10; --ok:#3DCB8E; --ok-soft:#163626; }
+.app *{ box-sizing:border-box; }
+.ic{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.ic.s{ width:16px; height:16px; } .ic.xs{ width:13px; height:13px; } .ic.l{ width:24px; height:24px; }
+.num{ font-variant-numeric:tabular-nums; }
+.sb{ display:flex; justify-content:space-between; align-items:center; padding:12px 26px 6px; font-size:13.5px; font-weight:700; position:relative; z-index:9; min-height:44px; flex:none; }
+.sb .dots{ display:flex; gap:5px; align-items:center; }
+.sb .dots i{ display:block; width:15px; height:9px; border-radius:2px; background:currentColor; opacity:.9; }
+.sb .dots i:first-child{ width:17px; clip-path:polygon(0 100%,100% 0,100% 100%); border-radius:0; }
+.sb::after{ content:""; position:absolute; left:50%; top:10px; width:92px; height:26px; border-radius:18px; background:#000; transform:translateX(-50%); }
+.body{ flex:1; overflow:hidden; padding:4px 14px 14px; display:grid; gap:12px; align-content:start; position:relative; }
+.body > *{ min-width:0; }
+.top{ display:flex; align-items:center; gap:10px; }
+.top h2{ font-size:17px; font-weight:800; }
+.top small{ display:block; font-size:12px; color:var(--a-muted); font-weight:600; }
+.top .sp{ margin-left:auto; }
+.icb{ width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--a-card); color:var(--a-ink); flex:none; border:1px solid var(--a-line); }
+.btn{ height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:15.5px; }
+.btn.ink{ background:var(--a-ink); color:var(--a-bg); }
+.btn.dau{ background:var(--dauber); color:var(--d-ink); }
+.btn.line{ border:1.5px solid var(--a-line); color:var(--a-ink); background:var(--a-card); }
+.foot{ padding:10px 14px 22px; display:grid; gap:8px; flex:none; background:var(--a-bg); border-top:1px solid var(--a-line); }
+.foot small{ text-align:center; font-size:12px; color:var(--a-muted); font-weight:600; }
+.sec{ background:var(--a-card); border-radius:16px; padding:12px 14px; display:grid; gap:9px; }
+.sec .h{ font-size:12.5px; font-weight:800; color:var(--a-muted); letter-spacing:.03em; }
+.chip{ display:inline-flex; align-items:center; gap:5px; height:26px; padding:0 9px; border-radius:8px; font-size:12px; font-weight:800; background:var(--a-soft); color:var(--a-muted); }
+.chip.live{ background:var(--dauber); color:var(--d-ink); }
+.chip.live i{ width:7px; height:7px; border-radius:50%; background:currentColor; }
+.chip.ok{ background:var(--ok-soft); color:var(--ok); }
+
+/* bolillas */
+.k-b{ --c:var(--b); --ci:#FFFFFF; } .k-i{ --c:var(--i); --ci:#FFFFFF; } .k-n{ --c:var(--n); --ci:#181C33; } .k-g{ --c:var(--g); --ci:#FFFFFF; } .k-o{ --c:var(--o); --ci:#181C33; }
+.ball{ --s:34px; width:var(--s); height:var(--s); border-radius:50%; flex:none; display:grid; place-items:center;
+  background:radial-gradient(circle at 32% 26%, rgba(255,255,255,.6) 0 10%, rgba(255,255,255,0) 34%), radial-gradient(circle at 50% 120%, rgba(0,0,0,.28), rgba(0,0,0,0) 60%), var(--c);
+  box-shadow:inset 0 -3px 6px rgba(0,0,0,.18), 0 2px 5px rgba(14,17,38,.2); }
+.k-n.ball{ box-shadow:inset 0 -3px 6px rgba(0,0,0,.12), 0 2px 5px rgba(14,17,38,.2), inset 0 0 0 1px rgba(24,28,51,.12); }
+.ball .face{ width:66%; height:66%; border-radius:50%; background:var(--face); color:var(--face-ink); display:grid; place-items:center; align-content:center; line-height:1; font-weight:800; font-size:calc(var(--s) * .3); font-variant-numeric:tabular-nums; }
+.ball .face small{ font-size:.5em; font-weight:800; color:#59607A; margin-bottom:1px; }
+.ball.lg{ --s:48px; } .ball.lg .face, .ball.xl .face{ font-family:var(--display); font-weight:400; }
+.ball.xl{ --s:150px; box-shadow:inset 0 -8px 16px rgba(0,0,0,.2), 0 18px 34px rgba(0,0,0,.35); }
+.ball.xl .face small{ font-family:var(--body); font-size:.28em; }
+.ball.xl .face{ font-size:52px; }
+.balls{ display:flex; align-items:center; gap:6px; overflow:hidden; }
+.dot{ width:22px; height:22px; border-radius:50%; background:var(--c); color:var(--ci); display:grid; place-items:center; font-family:var(--display); font-size:11px; box-shadow:inset 0 -2px 4px rgba(0,0,0,.15); flex:none; }
+.k-n.dot{ box-shadow:inset 0 0 0 1px rgba(24,28,51,.18); }
+
+/* cartilla compacta */
+.grid{ display:grid; gap:2px; background:var(--a-card); border-radius:16px; padding:6px 4px; }
+.row{ display:grid; grid-template-columns:18px repeat(5, 33px) minmax(0,1fr); gap:4px; align-items:center; padding:3px 4px; border-radius:11px; }
+.row.head{ padding-bottom:6px; border-bottom:1px solid var(--a-line); border-radius:0; margin-bottom:2px; }
+.hc{ display:grid; place-items:center; }
+.hn{ font-size:11px; font-weight:800; color:var(--a-muted); padding-left:3px; }
+.idx{ font-size:11px; font-weight:700; color:var(--a-muted); text-align:center; font-variant-numeric:tabular-nums; }
+.cell{ position:relative; height:33px; border-radius:9px; background:var(--a-soft); display:grid; place-items:center; font-weight:800; font-size:13.5px; font-variant-numeric:tabular-nums; }
+.cell::before{ content:""; position:absolute; inset:3px; border-radius:50%; background:var(--dauber); opacity:.92; transform:scale(0); }
+.cell span{ position:relative; }
+.cell.on::before{ transform:scale(1); } .cell.on span{ color:var(--d-ink); }
+.cell.fresh::before{ box-shadow:0 0 0 2px var(--a-card), 0 0 0 4px var(--dauber); }
+.row.near{ background:var(--near-soft); }
+.row.won{ background:var(--win-soft); box-shadow:inset 0 0 0 2px var(--win); }
+.row.me{ box-shadow:inset 0 0 0 2px var(--a-ink); }
+.who{ display:grid; min-width:0; padding-left:3px; }
+.who b{ font-size:12.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.prog{ font-size:11px; font-weight:700; color:var(--a-muted); }
+.prog.is-near{ color:var(--near); } .prog.is-won{ color:var(--win); }
+
+/* fila grande del jugador */
+.mine{ background:var(--a-card); border-radius:18px; padding:12px; display:grid; gap:10px; box-shadow:inset 0 0 0 2px var(--a-ink); }
+.mine .between{ display:flex; justify-content:space-between; align-items:center; }
+.mine b.t{ font-size:15px; font-weight:800; }
+.bigrow{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+.bcell{ position:relative; display:grid; justify-items:center; gap:6px; padding:8px 0 10px; border-radius:14px; background:var(--a-soft); }
+.bcell b{ position:relative; font-size:22px; font-weight:800; font-variant-numeric:tabular-nums; width:44px; height:44px; display:grid; place-items:center; border-radius:50%; }
+.bcell.on b{ background:var(--dauber); color:var(--d-ink); }
+.bcell.fresh b{ box-shadow:0 0 0 3px var(--a-soft), 0 0 0 5px var(--dauber); }
+
+/* sala de espera */
+.code{ display:grid; grid-template-columns:1fr auto; gap:4px 12px; align-items:center; background:var(--a-card); border-radius:18px; padding:14px; }
+.code small{ font-size:12px; font-weight:700; color:var(--a-muted); }
+.code b{ font-family:var(--display); font-weight:400; font-size:36px; letter-spacing:.08em; line-height:1; }
+.code .acts{ grid-column:1 / -1; }
+.code .qrw{ display:block; grid-row:span 2; grid-column:2; width:72px; height:72px; padding:6px; background:#fff; border-radius:12px; color:#181C33; }
+.code .qrw svg{ width:100%; height:100%; display:block; }
+.code .acts{ display:flex; gap:8px; }
+.mini{ height:32px; padding:0 10px; border-radius:10px; background:var(--a-soft); display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; }
+.plist{ background:var(--a-card); border-radius:16px; padding:2px 12px; }
+.pl{ display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center; min-height:40px; font-size:13.5px; }
+.pl + .pl{ border-top:1px solid var(--a-line); }
+.pl .n{ font-size:12px; font-weight:800; color:var(--a-muted); text-align:center; font-variant-numeric:tabular-nums; }
+.pl b{ font-weight:800; }
+.pl .src{ display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; color:var(--a-muted); }
+.pl.free{ color:var(--a-muted); }
+.pl.free .add{ display:inline-flex; align-items:center; gap:4px; font-weight:800; color:var(--a-ink); font-size:12.5px; }
+.pl.edit{ background:var(--a-soft); margin:0 -12px; padding:0 12px; }
+.pl.edit .inp{ height:32px; border-radius:9px; border:1.5px solid var(--a-ink); background:var(--a-card); display:flex; align-items:center; padding:0 10px; font-weight:700; }
+.pl.edit .inp i{ width:1.5px; height:16px; background:var(--a-ink); margin-left:1px; }
+
+/* elegir fila */
+.pick{ display:grid; grid-template-columns:22px repeat(5,1fr) 74px; gap:4px; align-items:center; padding:6px; border-radius:12px; background:var(--a-card); }
+.pick .pc{ height:30px; border-radius:8px; background:var(--a-soft); display:grid; place-items:center; font-weight:800; font-size:13px; font-variant-numeric:tabular-nums; }
+.pick .st{ font-size:11.5px; font-weight:800; text-align:right; color:var(--a-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pick.taken{ opacity:.5; }
+.pick.sel{ box-shadow:inset 0 0 0 2px var(--dauber); }
+.pick.sel .st{ color:var(--dauber); }
+.pick .idx{ font-size:11px; }
+.picks{ display:grid; gap:5px; }
+
+/* juego organizador */
+.stage{ display:grid; justify-items:center; gap:10px; padding:6px 0 2px; }
+.stage .hint{ font-size:13px; font-weight:800; color:var(--a-muted); }
+.stage .said{ font-size:14px; font-weight:700; text-align:center; }
+.stage .said b{ font-weight:800; }
+.trayline{ display:flex; align-items:center; gap:10px; background:var(--a-card); border-radius:16px; padding:8px 10px; }
+.trayline .cnt{ margin-left:auto; text-align:right; font-size:11.5px; font-weight:700; color:var(--a-muted); }
+.trayline .cnt b{ display:block; font-family:var(--display); font-weight:400; font-size:17px; color:var(--a-ink); }
+.tabs{ display:grid; grid-template-columns:repeat(3,1fr); background:var(--a-card); border-top:1px solid var(--a-line); padding:7px 6px 20px; flex:none; }
+.tabs span{ display:grid; justify-items:center; gap:2px; font-size:11px; font-weight:700; color:var(--a-muted); }
+.tabs span i{ width:52px; height:28px; border-radius:14px; display:grid; place-items:center; }
+.tabs span.on{ color:var(--a-ink); } .tabs span.on i{ background:var(--a-soft); }
+.brows{ display:grid; gap:5px; background:var(--a-card); border-radius:16px; padding:10px; }
+.brow{ display:grid; grid-template-columns:22px repeat(15,minmax(0,1fr)); gap:2px; align-items:center; }
+.bn{ aspect-ratio:1; border-radius:50%; display:grid; place-items:center; font-size:8px; font-weight:800; color:var(--a-muted); background:var(--a-soft); font-variant-numeric:tabular-nums; }
+.bn.on{ background:var(--c); color:var(--ci); }
+.bn.last{ box-shadow:0 0 0 1.5px var(--a-card), 0 0 0 3px var(--a-ink); }
+
+/* entrada */
+.hero{ display:grid; justify-items:center; gap:10px; text-align:center; padding:26px 8px 6px; }
+.hero h1{ font-family:var(--display); font-weight:400; font-size:42px; line-height:1; }
+.hero p{ color:var(--a-muted); font-size:14.5px; max-width:250px; }
+.heroballs{ display:flex; gap:6px; margin-bottom:6px; }
+.field{ height:50px; border-radius:14px; border:1.5px solid var(--a-line); background:var(--a-card); display:flex; align-items:center; gap:10px; padding:0 14px; color:var(--a-muted); font-size:14.5px; }
+.or{ display:flex; align-items:center; gap:10px; font-size:12px; font-weight:700; color:var(--a-muted); }
+.or::before, .or::after{ content:""; flex:1; height:1px; background:var(--a-line); }
+.choice{ display:grid; grid-template-columns:48px 1fr auto; gap:12px; align-items:center; background:var(--a-card); border-radius:18px; padding:14px; }
+.choice .ci{ width:48px; height:48px; border-radius:14px; display:grid; place-items:center; }
+.choice b{ font-size:16px; font-weight:800; display:block; }
+.choice small{ font-size:12.5px; color:var(--a-muted); }
+.codebox{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.codebox span{ height:62px; border-radius:14px; background:var(--a-card); border:2px solid var(--a-line); display:grid; place-items:center; font-family:var(--display); font-size:28px; }
+.codebox span.f{ border-color:var(--a-ink); }
+.found{ display:grid; grid-template-columns:auto 1fr; gap:2px 12px; align-items:center; background:var(--ok-soft); border-radius:14px; padding:10px 12px; }
+.found .ic{ color:var(--ok); grid-row:span 2; }
+.found b{ font-weight:800; } .found small{ font-size:12px; color:var(--a-muted); font-weight:600; }
+.seg{ display:grid; grid-template-columns:1fr 1fr; background:var(--a-soft); border-radius:12px; padding:3px; }
+.seg span{ text-align:center; padding:8px 0; border-radius:9px; font-weight:800; font-size:13px; color:var(--a-muted); }
+.seg span.on{ background:var(--a-card); color:var(--a-ink); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.opt{ display:grid; grid-template-columns:22px 1fr; gap:10px; align-items:center; min-height:40px; font-size:13.5px; }
+.opt .rd{ width:20px; height:20px; border-radius:50%; border:2px solid var(--a-muted); }
+.opt.on .rd{ border:6px solid var(--a-ink); }
+.opt small{ display:block; font-size:12px; color:var(--a-muted); }
+.list .it{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; background:var(--a-card); border-radius:16px; padding:12px; }
+.list{ display:grid; gap:8px; }
+.list .it b{ font-weight:800; display:block; } .list .it small{ font-size:12px; color:var(--a-muted); font-weight:600; }
+
+/* ganador */
+.winp{ flex:1; display:grid; align-content:center; justify-items:center; gap:14px; padding:10px 16px; text-align:center; position:relative; }
+.winp h2{ font-family:var(--display); font-weight:400; font-size:52px; line-height:1; color:var(--dauber); }
+.winp .nm{ font-size:22px; font-weight:800; }
+.winp .sub{ font-size:13.5px; color:var(--a-muted); }
+.wrow{ display:grid; gap:8px; justify-items:center; background:var(--win-soft); border-radius:16px; padding:12px; width:100%; }
+.wrow .balls{ justify-content:center; }
+.conf{ position:absolute; inset:0; pointer-events:none; }
+.conf i{ position:absolute; width:8px; height:4px; border-radius:1px; }
+.verify{ display:grid; grid-template-columns:auto 1fr; gap:2px 10px; text-align:left; background:var(--ok-soft); border-radius:14px; padding:10px 12px; width:100%; }
+.verify .ic{ color:var(--ok); grid-row:span 2; }
+.verify b{ font-weight:800; font-size:13.5px; } .verify small{ font-size:12px; color:var(--a-muted); font-weight:600; }
+
+.progress{ display:grid; gap:6px; background:var(--a-card); border-radius:16px; padding:12px 14px; }
+.progress .tr{ height:8px; border-radius:8px; background:var(--a-soft); overflow:hidden; }
+.progress .tr i{ display:block; height:100%; background:var(--dauber); border-radius:8px; }
+.progress .between{ display:flex; justify-content:space-between; align-items:baseline; }
+.progress b{ font-family:var(--display); font-weight:400; font-size:20px; }
+.progress small{ font-size:12px; color:var(--a-muted); font-weight:700; }
+.slots{ display:grid; grid-template-columns:repeat(10,1fr); gap:4px; }
+.slots i{ aspect-ratio:1; border-radius:50%; background:var(--a-soft); display:grid; place-items:center; font-style:normal; font-size:9px; font-weight:800; color:var(--a-muted); }
+.slots i.on{ background:var(--dauber); color:var(--d-ink); }
+.pl .t{ font-size:11.5px; font-weight:700; color:var(--a-muted); font-variant-numeric:tabular-nums; }
+.pl.new{ background:var(--ok-soft); margin:0 -12px; padding:0 12px; }
+.pl.new .t{ color:var(--ok); }
+.pick .st .ic{ vertical-align:-2px; }
+.pick.mine{ box-shadow:inset 0 0 0 2px var(--a-ink); }
+.pick .chk{ width:18px; height:18px; border-radius:6px; border:2px solid var(--a-muted); display:inline-grid; place-items:center; vertical-align:-4px; margin-right:4px; }
+.pick.sel .chk{ background:var(--dauber); border-color:var(--dauber); color:var(--d-ink); }
+.warn{ display:grid; grid-template-columns:auto 1fr; gap:10px; background:var(--near-soft); border-radius:14px; padding:10px 12px; font-size:13px; font-weight:600; }
+.warn .ic{ color:var(--near); }
+.sel-sum{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; font-weight:700; }
+.sel-sum b{ font-family:var(--display); font-weight:400; font-size:19px; }
+.modal{ position:absolute; inset:0; z-index:10; background:rgba(4,5,14,.66); display:grid; align-items:end; }
+.sheet{ background:var(--a-card); border-radius:26px 26px 0 0; padding:20px 18px 24px; display:grid; gap:14px; text-align:center; justify-items:center; }
+.sheet h3{ font-family:var(--display); font-weight:400; font-size:34px; line-height:1.05; color:var(--dauber); }
+.sheet p{ font-size:14px; color:var(--a-muted); max-width:260px; }
+.sheet .acts{ display:grid; gap:8px; width:100%; }
+.sheet .slots{ width:100%; }
+.lockbox{ display:grid; gap:8px; position:relative; }
+.lockbox .row2{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; font-weight:700; color:var(--a-muted); }
+.chip.soon{ background:var(--near-soft); color:var(--near); }
+.prize{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; background:var(--win-soft); border-radius:14px; padding:10px 12px; }
+.prize b{ font-family:var(--display); font-weight:400; font-size:20px; }
+.prize small{ font-size:12px; font-weight:700; color:var(--a-muted); display:block; }
+.paidchip{ font-size:11px; font-weight:800; padding:2px 7px; border-radius:6px; background:var(--ok-soft); color:var(--ok); }
+.paidchip.no{ background:var(--near-soft); color:var(--near); }
+.legal{ border:2px solid var(--accent); }
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18h2"/></symbol>
+<symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+<symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5L12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-3.6 4.1-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M2.5 19.5c1-3.1 3.5-4.6 6.5-4.6s5.5 1.5 6.5 4.6"/><path d="M15.5 5.6a3.3 3.3 0 0 1 0 6M17.5 14.9c2 .5 3.4 2 4 4.6"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><rect x="14.5" y="3.5" width="6" height="6" rx="1"/><rect x="3.5" y="14.5" width="6" height="6" rx="1"/><path d="M14.5 14.5h2v2h-2zM18.5 18.5h2v2h-2zM18.5 14.5h2M14.5 18.5v2"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5L12 13l8.5-6.5"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8M9 18h6"/></symbol>
+<symbol id="i-swap" viewBox="0 0 24 24"><path d="M7 4L3 8l4 4M3 8h14M17 12l4 4-4 4M21 16H7"/></symbol>
+
+<symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><path d="M4 7.5V17a2 2 0 0 0 2 2h12a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 18 8H6.5A2.5 2.5 0 0 1 4 5.5"/><circle cx="15.5" cy="13.5" r="1.1"/></symbol>
+<symbol id="i-flash" viewBox="0 0 24 24"><path d="M13 3L5.5 13.5H11L10 21l7.5-10.5H12z"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.3 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.3-3.8-8.5S9.4 5.9 12 3.5z"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8.5A1.5 1.5 0 0 1 5.5 7H8l1.5-2h5L16 7h2.5A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="12" cy="13" r="3.4"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+</defs></svg>
+<style>
+/* ---------- pantallas nuevas ---------- */
+.sala{ display:grid; gap:8px; background:var(--a-card); border-radius:16px; padding:12px 14px; }
+.sala .t{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+.sala .t b{ font-weight:800; font-size:15px; display:block; }
+.sala small{ font-size:12px; color:var(--a-muted); font-weight:600; }
+.sala .tr{ height:6px; border-radius:6px; background:var(--a-soft); overflow:hidden; }
+.sala .tr i{ display:block; height:100%; background:var(--dauber); border-radius:6px; }
+.sala .m{ display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:700; color:var(--a-muted); }
+.sala .m b{ font-family:var(--display); font-weight:400; font-size:15px; color:var(--a-ink); }
+.sala.off{ opacity:.58; }
+.sala.mia{ box-shadow:inset 0 0 0 2px var(--a-ink); }
+.lbl{ font-size:12.5px; font-weight:800; color:var(--a-muted); letter-spacing:.03em; padding:0 2px; }
+.finder{ display:grid; grid-template-columns:1fr 52px; gap:8px; }
+.qrb{ height:50px; border-radius:14px; background:var(--a-ink); color:var(--a-bg); display:grid; place-items:center; }
+.chip.money{ background:var(--win-soft); color:var(--win); }
+.chip.me{ background:var(--a-ink); color:var(--a-bg); }
+.chip.off{ background:var(--a-soft); color:var(--a-muted); }
+.cam{ flex:1; position:relative; background:linear-gradient(165deg,#222844 0%,#0B0D1C 70%); display:grid; place-items:center; overflow:hidden; color:#fff; }
+.cam::before{ content:""; position:absolute; inset:0; background:radial-gradient(circle at 50% 46%, rgba(255,255,255,.07), rgba(0,0,0,.55) 70%); }
+.cam .frame{ position:relative; width:226px; height:226px; }
+.cam .frame i{ position:absolute; width:42px; height:42px; border:4px solid #fff; }
+.cam .frame i:nth-child(1){ left:0; top:0; border-right:0; border-bottom:0; border-radius:14px 0 0 0; }
+.cam .frame i:nth-child(2){ right:0; top:0; border-left:0; border-bottom:0; border-radius:0 14px 0 0; }
+.cam .frame i:nth-child(3){ left:0; bottom:0; border-right:0; border-top:0; border-radius:0 0 0 14px; }
+.cam .frame i:nth-child(4){ right:0; bottom:0; border-left:0; border-top:0; border-radius:0 0 14px 0; }
+.cam .scan{ position:absolute; left:14px; right:14px; top:52%; height:2px; background:var(--dauber); box-shadow:0 0 14px var(--dauber); }
+.cam .hint{ position:absolute; top:78px; left:0; right:0; text-align:center; font-weight:800; font-size:16px; }
+.cam .hint small{ display:block; font-size:12.5px; font-weight:600; opacity:.75; margin-top:2px; }
+.cam .tools{ position:absolute; bottom:24px; left:0; right:0; display:flex; justify-content:center; gap:14px; }
+.cam .rb{ height:44px; padding:0 16px; border-radius:22px; background:rgba(255,255,255,.14); display:inline-flex; align-items:center; gap:8px; font-weight:800; font-size:14px; backdrop-filter:blur(6px); }
+.cam .top2{ position:absolute; top:6px; left:14px; right:14px; display:flex; align-items:center; justify-content:space-between; }
+.cam .top2 .icb{ background:rgba(255,255,255,.14); border-color:transparent; color:#fff; }
+.empty{ display:grid; justify-items:center; align-content:center; gap:12px; text-align:center; padding:0 22px; flex:1; min-height:430px; }
+.empty .big{ width:84px; height:84px; border-radius:26px; background:var(--a-card); display:grid; place-items:center; color:var(--a-muted); }
+.empty h2{ font-size:19px; font-weight:800; }
+.empty p{ color:var(--a-muted); font-size:14px; }
+.wallet{ background:var(--a-card); border-radius:18px; padding:16px; display:grid; gap:6px; }
+.wallet .v{ display:flex; align-items:baseline; gap:8px; }
+.wallet .v b{ font-family:var(--display); font-weight:400; font-size:54px; line-height:1; }
+.wallet .v span{ font-size:16px; font-weight:800; color:var(--a-muted); }
+.mov{ display:grid; grid-template-columns:34px 1fr auto; gap:10px; align-items:center; min-height:50px; }
+.mov + .mov{ border-top:1px solid var(--a-line); }
+.mov .mi{ width:34px; height:34px; border-radius:11px; background:var(--a-soft); display:grid; place-items:center; }
+.mov b{ font-weight:800; font-size:13.5px; display:block; } .mov small{ font-size:11.5px; color:var(--a-muted); font-weight:600; }
+.mov .amt{ font-weight:800; font-variant-numeric:tabular-nums; }
+.mov .amt.pos{ color:var(--ok); }
+.amounts{ display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; }
+.amounts span{ height:54px; border-radius:14px; border:1.5px solid var(--a-line); display:grid; place-items:center; font-weight:800; font-size:16px; }
+.amounts span small{ font-size:11px; color:var(--a-muted); font-weight:700; margin-top:-8px; display:block; }
+.amounts span.on{ border-color:var(--a-ink); background:var(--a-soft); }
+.sheet.left{ text-align:left; justify-items:stretch; }
+.sheet.left h3{ font-size:26px; }
+.sheet.left p{ max-width:none; }
+.grab{ width:38px; height:4px; border-radius:4px; background:var(--a-line); justify-self:center; }
+.avatar{ width:64px; height:64px; border-radius:50%; background:var(--dauber); color:var(--d-ink); display:grid; place-items:center; font-family:var(--display); font-size:28px; }
+.who2{ display:grid; justify-items:center; gap:2px; text-align:center; background:var(--a-card); border-radius:18px; padding:16px; }
+.who2 b{ font-size:18px; font-weight:800; } .who2 small{ color:var(--a-muted); font-weight:600; font-size:13px; }
+.kv{ display:grid; grid-template-columns:24px 1fr auto; gap:10px; align-items:center; min-height:44px; font-size:13.5px; font-weight:700; }
+.kv + .kv{ border-top:1px solid var(--a-line); }
+.kv small{ display:block; font-size:12px; color:var(--a-muted); font-weight:600; }
+.danger{ text-align:center; font-weight:800; font-size:13.5px; color:var(--dauber); padding:6px 0; }
+.stepper{ display:flex; align-items:center; gap:10px; }
+.stepper i{ width:32px; height:32px; border-radius:10px; background:var(--a-soft); display:grid; place-items:center; font-style:normal; }
+.stepper b{ font-family:var(--display); font-weight:400; font-size:20px; min-width:26px; text-align:center; }
+.opt.on small{ color:var(--a-muted); }
+.qrcard{ background:#fff; border-radius:22px; padding:14px; display:grid; justify-items:center; gap:6px; color:#181C33; }
+.qrcard .qrw{ display:block; width:196px; height:196px; }
+.qrcard .qrw svg{ width:100%; height:100%; display:block; }
+.qrcard b{ font-family:var(--display); font-weight:400; font-size:32px; letter-spacing:.1em; line-height:1; }
+.qrcard small{ font-size:12px; font-weight:700; color:#59607A; }
+.linkf{ display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:center; height:48px; border-radius:14px; background:var(--a-card); padding:0 12px; font-size:13px; font-weight:700; }
+.linkf span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--a-muted); }
+.full{ flex:1; display:grid; align-content:center; justify-items:center; gap:14px; padding:0 18px 24px; }
+.full .qrcard{ width:100%; padding:20px 18px; border-radius:26px; }
+.full .qrcard .qrw{ width:100%; height:auto; aspect-ratio:1; }
+.full .qrcard b{ font-size:50px; }
+.full h2{ font-size:18px; font-weight:800; text-align:center; }
+</style>
+<main class="wrap">
+<header class="intro"><span class="eyebrow">BOLILLA · PANTALLAS NUEVAS · v0.4 · PARA APROBAR</span>
+<h1>Salas abiertas, QR, cuenta y billetera.</h1>
+<p>Estas pantallas completan el flujo con lo que decidimos: <strong>las salas públicas se ven sin iniciar sesión</strong>, pero para <strong>elegir una fila hace falta una cuenta con saldo</strong>. Los créditos son <strong>de prueba</strong> (sin valor en dinero) hasta resolver lo legal. Mismo sistema visual que las 15 pantallas anteriores; Host en oscuro y Play en claro.</p></header>
+<section class="panels">
+<div class="pn rec"><span class="tag">REGLAS ACORDADAS</span><h2>Quién puede qué</h2><ul>
+<li><b>Pública:</b> aparece en la lista de Play para cualquiera, aunque no haya iniciado sesión.</li>
+<li><b>Privada:</b> solo se entra con el código, el enlace o el QR.</li>
+<li><b>Elegir fila</b> exige sesión y saldo suficiente; si no hay sesión, sube una hoja para iniciarla (Google o celular).</li>
+<li>El saldo se comprueba <b>en el servidor</b>, no solo en la app.</li></ul></div>
+<div class="pn"><h2>Créditos de prueba</h2><ul><li>Sin valor en dinero, no se retiran.</li><li>Quien organiza fija el precio por fila; el premio es lo recaudado.</li><li>Los pagos reales llegan después de validar lo legal.</li></ul></div>
+<div class="pn"><h2>Enlaces y QR</h2><ul><li>Dominio gratis de Firebase: <b>bingbing-f1491.web.app/sala/CÓDIGO</b>.</li><li>El QR contiene ese enlace.</li><li>Si la app no está instalada, el enlace muestra una página con las tiendas.</li></ul></div>
+</section>
+<div class="flow">
+<div><b>Salas abiertas</b><small>Play, sin sesión</small><span class="who-j">JUGADOR</span></div>
+<div><b>Elegir fila</b><small>Sin sesión: hoja de inicio</small><span class="who-j">JUGADOR</span></div>
+<div><b>Billetera</b><small>Saldo y recarga de prueba</small><span class="who-j">JUGADOR</span></div>
+<div><b>Reservar</b><small>El servidor cobra y reserva</small><span class="who-j">JUGADOR</span></div>
+<div><b>Compartir</b><small>QR, enlace y código</small><span class="who-o">ORGANIZADOR</span></div>
+</div>
+<div class="group-h"><span class="role j">PLAY</span><h2>Bing Bing Play</h2><p>Jugador · tema claro</p></div>
+<div class="screens"><figure id=jug-07-salas data-screen=jug-07-salas><div class="phone"><div class="app"><div class="sb"><span>20:48</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:10px"><div class="top"><div><h2>Salas abiertas</h2><small>Entra a una y elige tu fila</small></div><span class="chip sp" style="margin-left:auto"><svg class="ic xs"><use href="#i-user"/></svg>Iniciar sesión</span></div><div class="finder"><div class="field"><svg class="ic "><use href="#i-pen"/></svg>Escribir el código</div><span class="qrb"><svg class="ic "><use href="#i-qr"/></svg></span></div><span class="lbl">ABIERTAS AHORA</span><div class="sala "><div class="t"><div><b>Bingo de los sábados</b><small>Organiza Carmen</small></div><span class="chip ok">Quedan 16</span></div><div class="tr"><i style="width:20%"></i></div><div class="m"><span>4 de 20 filas</span><span><b>5</b> créditos por fila</span></div></div><div class="sala "><div class="t"><div><b>Cumpleaños de Pilar</b><small>Organiza Renzo</small></div><span class="chip ok">Quedan 9</span></div><div class="tr"><i style="width:55%"></i></div><div class="m"><span>11 de 20 filas</span><span><b>3</b> créditos por fila</span></div></div><div class="sala "><div class="t"><div><b>Bingo familiar</b><small>Organiza Don Luis</small></div><span class="chip ok">Queda 1</span></div><div class="tr"><i style="width:95%"></i></div><div class="m"><span>19 de 20 filas</span><span><b>10</b> créditos por fila</span></div></div><div class="sala off"><div class="t"><div><b>Bingo del club</b><small>Organiza Marta</small></div><span class="chip off">Llena</span></div><div class="tr"><i style="width:100%"></i></div><div class="m"><span>20 de 20 filas</span><span><b>5</b> créditos por fila</span></div></div></div></div></div><figcaption><code class=sid>jug-07-salas</code><h3>Salas abiertas (sin sesión)</h3><p>Cualquiera ve las salas públicas, aunque no haya iniciado sesión. Escribir el código o escanear el QR sigue estando arriba, para las privadas.</p><span class=fix>Nuevo: pantalla de inicio de Play</span></figcaption></figure>
+<figure id=jug-07b-salas-con-sesion data-screen=jug-07b-salas-con-sesion><div class="phone"><div class="app"><div class="sb"><span>20:52</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:10px"><div class="top"><div><h2>Salas abiertas</h2><small>Hola, Lucía</small></div><span class="chip money sp" style="margin-left:auto"><svg class="ic xs"><use href="#i-wallet"/></svg>25 créditos</span></div><div class="finder"><div class="field"><svg class="ic "><use href="#i-pen"/></svg>Escribir el código</div><span class="qrb"><svg class="ic "><use href="#i-qr"/></svg></span></div><span class="lbl">TUS SALAS</span><div class="sala mia"><div class="t"><div><b>Bingo de los sábados</b><small>Organiza Carmen</small></div><span class="chip me">Tu fila 5</span></div><div class="tr"><i style="width:100%"></i></div><div class="m"><span>20 de 20 filas</span><span><b>5</b> créditos por fila</span></div></div><span class="lbl">ABIERTAS AHORA</span><div class="sala "><div class="t"><div><b>Cumpleaños de Pilar</b><small>Organiza Renzo</small></div><span class="chip ok">Quedan 9</span></div><div class="tr"><i style="width:55%"></i></div><div class="m"><span>11 de 20 filas</span><span><b>3</b> créditos por fila</span></div></div><div class="sala "><div class="t"><div><b>Bingo familiar</b><small>Organiza Don Luis</small></div><span class="chip ok">Queda 1</span></div><div class="tr"><i style="width:95%"></i></div><div class="m"><span>19 de 20 filas</span><span><b>10</b> créditos por fila</span></div></div></div></div></div><figcaption><code class=sid>jug-07b-salas-con-sesion</code><h3>Salas abiertas (con sesión)</h3><p>Con sesión se ve el saldo arriba y, si ya reservaste fila en una sala, aparece marcada para volver a entrar.</p></figcaption></figure>
+<figure id=jug-08-escanear data-screen=jug-08-escanear><div class="phone"><div class="app"><div class="sb"><span>20:49</span><span class="dots"><i></i><i></i></span></div><div class="cam"><div class="top2"><span class="icb"><svg class="ic "><use href="#i-left"/></svg></span><span class="icb"><svg class="ic "><use href="#i-flash"/></svg></span></div><div class="hint">Apunta al QR de la sala<small>Lo lee solo, sin tocar nada</small></div><div class="frame"><i></i><i></i><i></i><i></i><span class="scan"></span></div><div class="tools"><span class="rb"><svg class="ic s"><use href="#i-pen"/></svg>Escribir el código</span></div></div></div></div><figcaption><code class=sid>jug-08-escanear</code><h3>Escanear el QR</h3><p>Cámara con marco, linterna y la salida de siempre: escribir el código. Al leer un QR válido pasa directo a la sala.</p></figcaption></figure>
+<figure id=jug-08b-camara-denegada data-screen=jug-08b-camara-denegada><div class="phone"><div class="app"><div class="sb"><span>20:49</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Escanear el QR</h2><small></small></div></div><div class="empty"><span class="big"><svg class="ic l"><use href="#i-camera"/></svg></span><h2>Necesitamos la cámara</h2><p>Solo la usamos para leer el QR de la sala. No guardamos fotos ni video.</p></div></div><div class="foot"><div class="btn ink">Abrir ajustes</div><div class="btn line"><svg class="ic "><use href="#i-pen"/></svg>Escribir el código</div></div></div></div><figcaption><code class=sid>jug-08b-camara-denegada</code><h3>Escanear: sin permiso de cámara</h3><p>Si la persona negó el permiso, se explica por qué se pide y se ofrece abrir Ajustes o escribir el código.</p></figcaption></figure>
+<figure id=jug-09-iniciar-sesion data-screen=jug-09-iniciar-sesion><div class="phone"><div class="app"><div class="sb"><span>20:50</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Elige tu fila</h2><small>Bingo de los sábados · puedes elegir 1</small></div></div><div class="picks"><div class="pick taken"><span class="idx">1</span><span class="pc">4</span><span class="pc">17</span><span class="pc">32</span><span class="pc">56</span><span class="pc">72</span><span class="st"><svg class="ic xs"><use href="#i-lock"/></svg> Jugador 1</span></div><div class="pick taken"><span class="idx">2</span><span class="pc">13</span><span class="pc">22</span><span class="pc">31</span><span class="pc">50</span><span class="pc">65</span><span class="st"><svg class="ic xs"><use href="#i-lock"/></svg> Jugador 2</span></div><div class="pick taken"><span class="idx">3</span><span class="pc">3</span><span class="pc">28</span><span class="pc">42</span><span class="pc">52</span><span class="pc">65</span><span class="st"><svg class="ic xs"><use href="#i-lock"/></svg> Jugador 3</span></div><div class="pick taken"><span class="idx">4</span><span class="pc">2</span><span class="pc">30</span><span class="pc">33</span><span class="pc">47</span><span class="pc">62</span><span class="st"><svg class="ic xs"><use href="#i-lock"/></svg> Jugador 4</span></div><div class="pick sel"><span class="idx">5</span><span class="pc">3</span><span class="pc">20</span><span class="pc">43</span><span class="pc">59</span><span class="pc">69</span><span class="st">Elegida</span></div><div class="pick "><span class="idx">6</span><span class="pc">4</span><span class="pc">25</span><span class="pc">37</span><span class="pc">54</span><span class="pc">68</span><span class="st">Libre</span></div></div></div><div class="foot"><div class="btn ink">Seguir con la fila 5</div><small>Las filas con candado ya tienen dueño</small></div><div class="modal"><div class="sheet left"><span class="grab"></span><h3>Inicia sesión para jugar</h3><p>Puedes mirar la sala sin cuenta. Para elegir una fila necesitas iniciar sesión y tener saldo en tu billetera.</p><div class="acts"><div class="btn ink"><svg class="ic "><use href="#i-mail"/></svg>Continuar con Google</div><div class="btn line"><svg class="ic "><use href="#i-phone"/></svg>Continuar con celular</div></div><small style="text-align:center;color:var(--a-muted);font-weight:700;font-size:13px">Ahora no</small></div></div></div></div><figcaption><code class=sid>jug-09-iniciar-sesion</code><h3>Elegir fila sin sesión</h3><p>Mirar la sala es libre. Al tocar "Seguir con la fila", si no hay sesión sube esta hoja: sin cuenta con saldo no se puede jugar.</p><span class=fix>Nuevo: hoja de inicio de sesión</span></figcaption></figure>
+<figure id=jug-10-sin-saldo data-screen=jug-10-sin-saldo><div class="phone"><div class="app"><div class="sb"><span>20:51</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:10px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Elige tu fila</h2><small>Bingo de los sábados · 5 créditos por fila</small></div></div><div class="warn"><svg class="ic "><use href="#i-wallet"/></svg><span><b>Tu saldo es 0 créditos.</b> Cada fila cuesta 5. Recarga para poder elegir.</span></div><div class="picks" style="opacity:.55"><div class="pick "><span class="idx">5</span><span class="pc">3</span><span class="pc">20</span><span class="pc">43</span><span class="pc">59</span><span class="pc">69</span><span class="st">Libre</span></div><div class="pick "><span class="idx">6</span><span class="pc">4</span><span class="pc">25</span><span class="pc">37</span><span class="pc">54</span><span class="pc">68</span><span class="st">Libre</span></div><div class="pick "><span class="idx">7</span><span class="pc">8</span><span class="pc">20</span><span class="pc">43</span><span class="pc">60</span><span class="pc">69</span><span class="st">Libre</span></div><div class="pick "><span class="idx">8</span><span class="pc">9</span><span class="pc">18</span><span class="pc">45</span><span class="pc">49</span><span class="pc">64</span><span class="st">Libre</span></div><div class="pick "><span class="idx">9</span><span class="pc">14</span><span class="pc">27</span><span class="pc">40</span><span class="pc">47</span><span class="pc">67</span><span class="st">Libre</span></div></div></div><div class="foot"><div class="btn dau"><svg class="ic "><use href="#i-wallet"/></svg>Recargar créditos</div><small>Con saldo podrás elegir tu fila</small></div></div></div><figcaption><code class=sid>jug-10-sin-saldo</code><h3>Elegir fila sin saldo</h3><p>Con sesión pero sin saldo suficiente las filas se ven, pero no se pueden elegir. La comprobación se repite en el servidor.</p><span class=fix>Nuevo: bloqueo por saldo</span></figcaption></figure>
+<figure id=jug-11-billetera data-screen=jug-11-billetera><div class="phone"><div class="app"><div class="sb"><span>20:53</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Mi billetera</h2><small>Créditos de prueba</small></div></div><div class="wallet"><span class="lbl" style="padding:0">SALDO</span><div class="v"><b>25</b><span>créditos</span></div><span class="chip money" style="justify-self:start">De prueba · sin valor en dinero</span></div><div class="btn dau"><svg class="ic "><use href="#i-plus"/></svg>Recargar</div><span class="lbl">MOVIMIENTOS</span><div class="plist" style="padding:2px 12px"><div class="mov"><span class="mi"><svg class="ic s"><use href="#i-plus"/></svg></span><div><b>Recarga</b><small>Hoy 20:45</small></div><span class="amt pos">+30</span></div><div class="mov"><span class="mi"><svg class="ic s"><use href="#i-grid"/></svg></span><div><b>Fila 5 · Bingo de los sábados</b><small>Hoy 20:46</small></div><span class="amt">−5</span></div><div class="mov"><span class="mi"><svg class="ic s"><use href="#i-trophy"/></svg></span><div><b>Premio · Cumpleaños de Pilar</b><small>19 set</small></div><span class="amt pos">+60</span></div><div class="mov"><span class="mi"><svg class="ic s"><use href="#i-grid"/></svg></span><div><b>Fila 12 · Cumpleaños de Pilar</b><small>19 set</small></div><span class="amt">−3</span></div></div></div></div></div><figcaption><code class=sid>jug-11-billetera</code><h3>Mi billetera</h3><p>Saldo en créditos de prueba (sin valor en dinero, no se retiran) y el historial de movimientos.</p><span class=fix>Nuevo: billetera</span></figcaption></figure>
+<figure id=jug-12-recargar data-screen=jug-12-recargar><div class="phone"><div class="app"><div class="sb"><span>20:53</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Mi billetera</h2><small>Créditos de prueba</small></div></div><div class="wallet"><span class="lbl" style="padding:0">SALDO</span><div class="v"><b>25</b><span>créditos</span></div></div></div><div class="modal"><div class="sheet left"><span class="grab"></span><h3>Recargar créditos</h3><div class="amounts"><span>10</span><span class="on">20</span><span>50</span><span>100</span></div><p>Recibirás <b style="color:var(--a-ink)">20 créditos de prueba</b>. No tienen valor en dinero.</p><div class="btn dau">Agregar 20 créditos</div></div></div></div></div><figcaption><code class=sid>jug-12-recargar</code><h3>Recargar créditos</h3><p>Hoja de recarga con montos fijos. En esta etapa los créditos son de prueba y se agregan al instante, sin cobro.</p></figcaption></figure>
+<figure id=jug-13-cuenta data-screen=jug-13-cuenta><div class="phone"><div class="app"><div class="sb"><span>20:54</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:10px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Mi cuenta</h2><small></small></div></div><div class="who2"><span class="avatar">L</span><b>Lucía Torres</b><small>lucia@correo.com</small></div><div class="sec"><span class="h">INICIO DE SESIÓN</span><div class="kv"><svg class="ic s"><use href="#i-mail"/></svg><div>Google<small>lucia@correo.com</small></div><span class="chip ok"><svg class="ic xs"><use href="#i-check"/></svg>Vinculado</span></div><div class="kv"><svg class="ic s"><use href="#i-phone"/></svg><div>Celular<small>Para entrar con un código SMS</small></div><span class="chip">Agregar</span></div></div><div class="sec"><div class="kv"><svg class="ic s"><use href="#i-wallet"/></svg><div>Billetera<small>25 créditos de prueba</small></div><svg class="ic s"><use href="#i-right"/></svg></div></div><div class="btn line">Cerrar sesión</div><div class="danger">Eliminar mi cuenta</div></div></div></div><figcaption><code class=sid>jug-13-cuenta</code><h3>Mi cuenta</h3><p>Datos de la cuenta, métodos de inicio de sesión vinculados, acceso a la billetera y las acciones de cuenta (borrarla es obligatorio en las tiendas).</p><span class=fix>Nuevo: cuenta</span></figcaption></figure>
+</div>
+<div class="group-h"><span class="role o">HOST</span><h2>Bing Bing Host</h2><p>Organizador · tema oscuro</p></div>
+<div class="screens"><figure id=org-10-nueva-partida-v2 data-screen=org-10-nueva-partida-v2><div class="phone"><div class="app  dark"><div class="sb"><span>20:43</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:9px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Nueva partida</h2><small>Puedes cambiarlo antes de abrir la sala</small></div></div><div class="sec"><span class="h">NOMBRE</span><div class="field" style="color:var(--a-ink);font-weight:700">Bingo de los sábados</div></div><div class="sec"><span class="h">VISIBILIDAD</span><div class="seg"><span class="on">Pública</span><span>Privada</span></div><small style="font-size:12px;color:var(--a-muted);font-weight:600">Pública: la ve cualquiera en Play. Privada: solo con código, enlace o QR.</small></div><div class="sec"><span class="h">PRECIO Y PREMIO</span><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13.5px;font-weight:700">Precio por fila</span><span class="stepper"><i><svg class="ic s"><use href="#i-minus"/></svg></i><b>5</b><i><svg class="ic s"><use href="#i-plus"/></svg></i></span></div><div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--a-line);padding-top:9px"><span style="font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:8px"><svg class="ic s"><use href="#i-trophy"/></svg>Premio <small style="font-size:12px;color:var(--a-muted);font-weight:700">20 × 5</small></span><span style="font-family:var(--display);font-size:17px">100 créditos</span></div></div><div class="sec"><span class="h">COLUMNAS POR FILA</span><div class="seg"><span class="on">5 · 75 bolillas</span><span>6 · 90 bolillas</span></div></div></div><div class="foot"><div class="btn dau">Abrir sala</div></div></div></div><figcaption><code class=sid>org-10-nueva-partida-v2</code><h3>Nueva partida: visibilidad y precio</h3><p>Se agregan quién puede ver la sala y cuánto cuesta cada fila. El premio es lo que se recauda de las 20 filas.</p><span class=fix>Reemplaza el bloque "Partida con premio · Pronto"</span></figcaption></figure>
+<figure id=org-11-compartir data-screen=org-11-compartir><div class="phone"><div class="app  dark"><div class="sb"><span>20:44</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><span class=icb><svg class="ic "><use href="#i-left"/></svg></span><div><h2>Comparte tu sala</h2><small>Bingo de los sábados</small></div><span class="chip sp" style="margin-left:auto"><svg class="ic xs"><use href="#i-globe"/></svg>Pública</span></div><div class="qrcard"><span class="qrw"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="qr"><path class="qrline" stroke="#181c33" d="M0 0.5h7m2 0h1m1 0h1m1 0h1m1 0h1m2 0h7m-25 1h1m5 0h1m2 0h1m1 0h2m3 0h1m1 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m3 0h4m4 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m1 0h2m2 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m1 0h1m5 0h1m1 0h1m1 0h1m5 0h1m-25 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-17 1h2m1 0h2m2 0h1m-15 1h2m3 0h1m3 0h5m1 0h1m1 0h2m1 0h1m-22 1h2m2 0h1m4 0h1m1 0h1m4 0h1m1 0h1m2 0h2m1 0h1m-25 1h2m4 0h5m2 0h3m5 0h2m1 0h1m-25 1h2m1 0h2m2 0h1m1 0h1m1 0h1m3 0h7m1 0h2m-24 1h3m1 0h6m1 0h3m1 0h1m1 0h2m1 0h1m-21 1h2m1 0h2m3 0h1m2 0h1m2 0h1m1 0h2m3 0h1m1 0h1m-25 1h3m1 0h1m1 0h2m2 0h1m3 0h2m1 0h3m2 0h1m1 0h1m-22 1h3m1 0h2m1 0h5m2 0h2m1 0h2m2 0h1m-25 1h2m4 0h1m2 0h2m3 0h8m1 0h2m-17 1h1m1 0h3m1 0h1m1 0h1m3 0h3m1 0h1m-25 1h7m2 0h2m1 0h3m1 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m4 0h1m3 0h2m3 0h2m1 0h2m-25 1h1m1 0h3m1 0h1m2 0h2m2 0h9m1 0h2m-25 1h1m1 0h3m1 0h1m2 0h3m2 0h1m2 0h1m1 0h5m-24 1h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h6m-25 1h1m5 0h1m1 0h1m2 0h2m3 0h1m2 0h1m1 0h1m-22 1h7m3 0h3m3 0h1m1 0h4m2 0h1"/></svg></span><b>K7Q4</b><small>Escanéalo con Bing Bing Play</small></div><div class="linkf"><svg class="ic s"><use href="#i-link"/></svg><span>bingbing-f1491.web.app/sala/K7Q4</span><svg class="ic s"><use href="#i-copy"/></svg></div></div><div class="foot"><div class="btn dau"><svg class="ic "><use href="#i-share"/></svg>Compartir</div><div class="btn line"><svg class="ic "><use href="#i-qr"/></svg>Mostrar QR a pantalla completa</div></div></div></div><figcaption><code class=sid>org-11-compartir</code><h3>Compartir la sala</h3><p>Al abrir la sala: QR, código y enlace para pasarlos por WhatsApp o donde sea. El botón de compartir abre el menú del sistema.</p><span class=fix>Nuevo: hoja de compartir</span></figcaption></figure>
+<figure id=org-12-qr-pantalla data-screen=org-12-qr-pantalla><div class="phone"><div class="app  dark"><div class="sb"><span>20:44</span><span class="dots"><i></i><i></i></span></div><div class="body" style="gap:12px"><div class="top"><div><h2>Escanea para entrar</h2><small></small></div><span class="icb sp" style="margin-left:auto"><svg class="ic "><use href="#i-close"/></svg></span></div><div class="full"><div class="qrcard"><span class="qrw"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="qr"><path class="qrline" stroke="#181c33" d="M0 0.5h7m2 0h1m1 0h1m1 0h1m1 0h1m2 0h7m-25 1h1m5 0h1m2 0h1m1 0h2m3 0h1m1 0h1m5 0h1m-25 1h1m1 0h3m1 0h1m3 0h4m4 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m1 0h3m1 0h2m2 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m1 0h3m1 0h1m2 0h1m3 0h1m2 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m1 0h1m5 0h1m1 0h1m1 0h1m5 0h1m-25 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-17 1h2m1 0h2m2 0h1m-15 1h2m3 0h1m3 0h5m1 0h1m1 0h2m1 0h1m-22 1h2m2 0h1m4 0h1m1 0h1m4 0h1m1 0h1m2 0h2m1 0h1m-25 1h2m4 0h5m2 0h3m5 0h2m1 0h1m-25 1h2m1 0h2m2 0h1m1 0h1m1 0h1m3 0h7m1 0h2m-24 1h3m1 0h6m1 0h3m1 0h1m1 0h2m1 0h1m-21 1h2m1 0h2m3 0h1m2 0h1m2 0h1m1 0h2m3 0h1m1 0h1m-25 1h3m1 0h1m1 0h2m2 0h1m3 0h2m1 0h3m2 0h1m1 0h1m-22 1h3m1 0h2m1 0h5m2 0h2m1 0h2m2 0h1m-25 1h2m4 0h1m2 0h2m3 0h8m1 0h2m-17 1h1m1 0h3m1 0h1m1 0h1m3 0h3m1 0h1m-25 1h7m2 0h2m1 0h3m1 0h1m1 0h1m1 0h3m1 0h1m-25 1h1m5 0h1m4 0h1m3 0h2m3 0h2m1 0h2m-25 1h1m1 0h3m1 0h1m2 0h2m2 0h9m1 0h2m-25 1h1m1 0h3m1 0h1m2 0h3m2 0h1m2 0h1m1 0h5m-24 1h1m1 0h3m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h6m-25 1h1m5 0h1m1 0h1m2 0h2m3 0h1m2 0h1m1 0h1m-22 1h7m3 0h3m3 0h1m1 0h4m2 0h1"/></svg></span><b>K7Q4</b></div><h2>Abre Bing Bing Play y escanea,<br>o escribe el código</h2></div></div></div></div><figcaption><code class=sid>org-12-qr-pantalla</code><h3>QR a pantalla completa</h3><p>Para proyectarlo o mostrarlo en la reunión: QR lo más grande posible, el código en letras grandes y la pantalla siempre encendida.</p><span class=fix>Nuevo: QR grande</span></figcaption></figure>
+</div>
+</main></body></html>
