@@ -23,6 +23,7 @@ class BingBolilla extends StatelessWidget {
     required this.numero,
     this.letra,
     this.tamano = BingBolillaTamano.normal,
+    this.diametro,
   });
 
   /// Índice de columna (0 = B).
@@ -35,9 +36,12 @@ class BingBolilla extends StatelessWidget {
   final String? letra;
   final BingBolillaTamano tamano;
 
+  /// Diámetro propio (`--s` del diseño), si no basta con un [tamano].
+  final double? diametro;
+
   @override
   Widget build(BuildContext context) {
-    final s = tamano.diametro;
+    final s = diametro ?? tamano.diametro;
     final color = BingBolillaColor.deColumna(columna);
     final xl = tamano == BingBolillaTamano.xl;
     final grande = tamano != BingBolillaTamano.normal;

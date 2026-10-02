@@ -31,13 +31,25 @@ Future<void> main() async {
 }
 
 class BingPlayApp extends StatelessWidget {
-  const BingPlayApp({super.key, this.inicio, this.repositorio});
+  const BingPlayApp({
+    super.key,
+    this.inicio,
+    this.repositorio,
+    this.camaraEscaner,
+    this.enlaces,
+  });
 
   /// Pantalla con la que arranca; por defecto, la del código de sala.
   final Widget? inicio;
 
   /// Sala real (Firebase o en memoria); sin ella corre la demostración.
   final RepositorioSala? repositorio;
+
+  /// Sustituye a la cámara del escáner (pruebas).
+  final Widget Function(BuildContext, ValueChanged<String>)? camaraEscaner;
+
+  /// Enlaces que abren la app; sin ellos se usan los del sistema (pruebas).
+  final Stream<Uri>? enlaces;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +70,11 @@ class BingPlayApp extends StatelessWidget {
             pantallaDemo(_pantallaElegida) ??
             (repositorio == null
                 ? const _FlujoDemo()
-                : FlujoReal(repositorio: repositorio!)),
+                : FlujoReal(
+                  repositorio: repositorio!,
+                  camaraEscaner: camaraEscaner,
+                  enlaces: enlaces,
+                )),
       ),
     );
   }

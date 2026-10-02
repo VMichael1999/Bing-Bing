@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'paginas/codigo_page.dart';
 import 'paginas/elegir_fila_page.dart';
 import 'paginas/en_vivo_page.dart';
+import 'paginas/escaner_page.dart';
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
@@ -63,6 +64,8 @@ Widget? pantallaDemo(String id) => switch (id) {
     resultado: SizedBox(height: 40),
     bajoElQr: _sinSalas,
   ),
+  'jug-08-escanear' => const EscanerPage(),
+  'jug-08b-camara-denegada' => const CamaraDenegadaPage(),
   'jug-01-codigo' => const CodigoPage(
     codigo: salaDemoCodigo,
     salaNombre: salaDemoNombre,
