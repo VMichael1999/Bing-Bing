@@ -2,10 +2,15 @@ import 'package:bing_core/bing_core.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
+import 'src/demo.dart';
 import 'src/paginas/codigo_page.dart';
 import 'src/paginas/elegir_fila_page.dart';
 import 'src/paginas/esperando_page.dart';
 import 'src/paginas/reservar_page.dart';
+
+/// Abre una pantalla del diseño directamente:
+/// `--dart-define=BING_PANTALLA=jug-05-en-vivo`.
+const _pantallaElegida = String.fromEnvironment('BING_PANTALLA');
 
 void main() => runApp(const BingPlayApp());
 
@@ -28,7 +33,7 @@ class BingPlayApp extends StatelessWidget {
               settings: settings,
               pageBuilder: (context, _, __) => builder(context),
             ),
-        home: inicio ?? const _FlujoDemo(),
+        home: inicio ?? pantallaDemo(_pantallaElegida) ?? const _FlujoDemo(),
       ),
     );
   }
