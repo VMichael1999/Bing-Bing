@@ -7,10 +7,39 @@ import 'paginas/en_vivo_page.dart';
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
+import 'paginas/salas_page.dart';
+
+/// Las salas públicas del diseño (`jug-07`).
+List<SalaEnVivo> salasDemo() {
+  SalaEnVivo sala(
+    String codigo,
+    String nombre,
+    String organizador,
+    int ocupadas,
+  ) => SalaEnVivo(
+    codigo: codigo,
+    nombre: nombre,
+    organizador: organizador,
+    estado: ocupadas == 20 ? EstadoSala.llena : EstadoSala.abierta,
+    columnas: 5,
+    filasTotal: 20,
+    bolillas: const [],
+    ganadoras: const [],
+    publica: true,
+    ocupadas: ocupadas,
+  );
+  return [
+    sala('K7Q4', 'Bingo de los sábados', 'Carmen', 4),
+    sala('PL23', 'Cumpleaños de Pilar', 'Renzo', 11),
+    sala('FAM8', 'Bingo familiar', 'Don Luis', 19),
+    sala('CLUB', 'Bingo del club', 'Marta', 20),
+  ];
+}
 
 /// Pantalla del diseño por su identificador (`jug-01-codigo`, …), con los datos
 /// del modo demo. Sirve para revisar una pantalla sin recorrer el flujo.
 Widget? pantallaDemo(String id) => switch (id) {
+  'jug-07-salas' => SalasPage(salas: salasDemo(), alEscanear: () {}),
   'jug-01-codigo' => const CodigoPage(
     codigo: salaDemoCodigo,
     salaNombre: salaDemoNombre,
