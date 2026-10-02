@@ -118,15 +118,20 @@ quien organiza decide no seguir.
 - Quien organiza también puede **borrar** una partida en borrador (sin jugadores) desde
   "Tus partidas".
 
+Decidido:
+
+- **No se puede cancelar con la partida ya empezada.** Solo antes de la primera bolilla;
+  después se juega hasta terminar.
+- **Pasado el plazo, la persona que organiza decide** si cierra la sala o sigue. No se
+  cierra sola.
+- **Devolución completa.** Ni quien organiza ni la plataforma se quedan con nada, porque
+  la partida no se jugó.
+
 Por decidir:
 
-- ¿Se puede cancelar con la partida ya empezada? Propuesta: no; solo antes de la primera
-  bolilla. Después se juega hasta terminar.
-- Si pasa el plazo y hay jugadores, ¿se cierra sola o la persona decide? Propuesta:
-  avisar a quien organiza y dejar elegir entre **cancelar y devolver** o **jugar con las
-  filas que hay** (con el premio recalculado, ver comisión).
-- ¿Quien organiza o la plataforma se queda con alguna parte si cancela? Propuesta: no,
-  devolución completa.
+- Si pasa el plazo y hay jugadores, ¿qué opciones se le ofrecen a quien organiza?
+  Propuesta: **cancelar y devolver** o **jugar con las filas que hay** (con el premio
+  recalculado, ver comisión).
 - Pantallas nuevas del HTML: confirmar cierre de sala, aviso de sala cancelada para el
   jugador y el movimiento "Devolución" en el historial.
 
