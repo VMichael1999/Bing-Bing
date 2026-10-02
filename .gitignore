@@ -22,3 +22,6 @@ node_modules/
 **/serviceAccount*.json
 .firebase/
 firebase-debug.log
+
+# Cobertura generada por flutter test --coverage
+coverage/
