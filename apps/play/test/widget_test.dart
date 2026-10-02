@@ -26,4 +26,20 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('el recorrido demo llega de la pantalla de código a esperando', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const BingPlayApp());
+    await tester.tap(find.text('Ver filas libres'));
+    await tester.pumpAndSettle();
+    expect(find.text('Elige tu fila'), findsOneWidget);
+    await tester.tap(find.text('Seguir con la fila 5'));
+    await tester.pumpAndSettle();
+    expect(find.text('Reserva tu fila'), findsOneWidget);
+    await tester.tap(find.text('Reservar fila 5'));
+    await tester.pumpAndSettle();
+    expect(find.text('Tu fila está reservada'), findsOneWidget);
+    expect(find.text('Lucía · fila 5 · Bingo de los sábados'), findsOneWidget);
+  });
 }
