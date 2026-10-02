@@ -27,7 +27,7 @@ class JuegoPage extends StatefulWidget {
     this.pestanaInicial = 0,
     this.alTerminar,
     this.conAutomatico = false,
-    this.filasGanando = 20,
+    this.filasGanando = 5,
     this.cadaAutomatico = const Duration(milliseconds: 2800),
   });
 
@@ -44,7 +44,8 @@ class JuegoPage extends StatefulWidget {
   final bool conAutomatico;
 
   /// Cuántas filas se muestran en "Van ganando" (el diseño dibuja 3; la app
-  /// muestra todas las de la sala).
+  /// muestra las 5 más adelantadas y la lista completa está en la pestaña
+  /// Cartilla).
   final int filasGanando;
   final Duration cadaAutomatico;
 
