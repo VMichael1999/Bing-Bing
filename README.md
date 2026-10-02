@@ -72,6 +72,31 @@ las reservas se resuelven en el servidor y las reglas de Firestore
 cd backend/functions && npm install && npm test
 ```
 
+## Configurar Firebase
+
+Las claves y archivos de tu proyecto **no se suben a git**:
+
+| Archivo | Para qué | En git |
+| --- | --- | --- |
+| `.env` | Valores del proyecto (ver `.env.example`) | No |
+| `apps/*/android/app/google-services.json` | Configuración de Android | No |
+| `apps/*/ios/Runner/GoogleService-Info.plist` | Configuración de iOS | No |
+| `.env.example` | Plantilla sin valores reales | Sí |
+
+```bash
+cp .env.example .env     # rellénalo con los datos de la consola de Firebase
+cd apps/host && flutter run --dart-define-from-file=../../.env
+```
+
+Registra las apps en Firebase con estos identificadores:
+
+- Android: `pe.bingbing.bing_host` y `pe.bingbing.bing_play`
+- iOS: el *bundle id* de cada app en Xcode (revísalo en `ios/Runner.xcodeproj`)
+
+Para el inicio de sesión con Google en Android, Firebase pide el SHA-1 de tu llave de
+depuración: `cd apps/host/android && ./gradlew signingReport`. Las Cloud Functions
+necesitan el plan Blaze de Firebase.
+
 ## Contribuir
 
 Lee [CONTRIBUTING.md](CONTRIBUTING.md). Las ideas y los errores se reportan en los issues.
