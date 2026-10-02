@@ -8,13 +8,14 @@ import 'sala_en_vivo.dart';
 /// persona solo puede tener una. Los métodos de "servidor" ([ocupar],
 /// [empezar], [sacar]) permiten simular lo que hacen otros jugadores y quien
 /// organiza.
-class RepositorioMemoria implements RepositorioSala {
+class RepositorioMemoria implements RepositorioOrganizador {
   RepositorioMemoria({
     required this.cartillas,
     this.codigo = 'K7Q4',
     this.nombreSala = 'Bingo de los sábados',
     this.organizador = 'Carmen',
     this.miUid = 'yo',
+    this.ordenBolillas = const [],
   }) : _filas = [for (final n in cartillas) FilaEnVivo(numeros: n)];
 
   final List<List<int>> cartillas;
@@ -23,10 +24,14 @@ class RepositorioMemoria implements RepositorioSala {
   final String organizador;
   final String miUid;
 
+  /// Orden en que salen las bolillas cuando se sortea como organizador.
+  final List<int> ordenBolillas;
+
   final List<FilaEnVivo> _filas;
   final List<int> _bolillas = [];
   final List<GanadoraEnVivo> _ganadoras = [];
   EstadoSala _estado = EstadoSala.abierta;
+  int _llegadas = 0;
 
   final _salaCambios = StreamController<void>.broadcast();
 
@@ -42,6 +47,7 @@ class RepositorioMemoria implements RepositorioSala {
     filasTotal: cartillas.length,
     bolillas: List.of(_bolillas),
     ganadoras: List.of(_ganadoras),
+    organizadorUid: miUid,
   );
 
   @override
@@ -97,13 +103,20 @@ class RepositorioMemoria implements RepositorioSala {
       numeros: cartillas[fila - 1],
       nombre: nombre,
       jugadorUid: uid,
+      reservadaEn: DateTime(
+        2026,
+        10,
+        2,
+        20,
+        44,
+      ).add(Duration(minutes: _llegadas++)),
     );
     if (_filas.every((f) => !f.libre)) _estado = EstadoSala.llena;
     _salaCambios.add(null);
   }
 
-  /// Quien organiza empieza la partida.
-  void empezar() {
+  /// Quien organiza empieza la partida (sin validar que esté llena).
+  void empezarPartida() {
     _estado = EstadoSala.enJuego;
     _salaCambios.add(null);
   }
@@ -118,6 +131,59 @@ class RepositorioMemoria implements RepositorioSala {
         _ganadoras.add((fila: i, bolillaIndice: _bolillas.length));
       }
     }
+    _salaCambios.add(null);
+  }
+
+  // --- Quien organiza -------------------------------------------------------
+
+  @override
+  Stream<List<SalaEnVivo>> misSalas() async* {
+    yield [_foto];
+    yield* _salaCambios.stream.map((_) => [_foto]);
+  }
+
+  @override
+  Future<String> crearSala({
+    required String nombre,
+    required int columnas,
+  }) async => codigo;
+
+  @override
+  Future<void> empezar(String codigo) async {
+    if (_estado != EstadoSala.llena) {
+      throw const ErrorSalaBing(
+        'sala_no_llena',
+        'La cartilla aún no está llena',
+      );
+    }
+    empezarPartida();
+  }
+
+  /// Saca la siguiente bolilla en el orden fijo de [ordenBolillas].
+  @override
+  Future<int> sacarBolilla(String codigo) async {
+    if (_estado != EstadoSala.enJuego) {
+      throw const ErrorSalaBing('sala_no_en_juego', 'La partida no empezó');
+    }
+    if (_bolillas.length >= ordenBolillas.length) {
+      throw const ErrorSalaBing('tombola_vacia', 'No quedan bolillas');
+    }
+    final numero = ordenBolillas[_bolillas.length];
+    sacar(numero);
+    return numero;
+  }
+
+  @override
+  Future<void> deshacerBolilla(String codigo) async {
+    if (_bolillas.isEmpty) return;
+    _bolillas.removeLast();
+    _ganadoras.removeWhere((g) => g.bolillaIndice > _bolillas.length);
+    _salaCambios.add(null);
+  }
+
+  @override
+  Future<void> terminar(String codigo) async {
+    _estado = EstadoSala.terminada;
     _salaCambios.add(null);
   }
 

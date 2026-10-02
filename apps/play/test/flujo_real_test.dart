@@ -77,7 +77,7 @@ void main() {
       expect(find.text('20 de 20'), findsOneWidget);
 
       // Carmen empieza, pero hasta la primera bolilla se sigue esperando.
-      repo.empezar();
+      repo.empezarPartida();
       await tester.pumpAndSettle();
       expect(find.text('En vivo'), findsNothing);
       repo.sacar(bolillasDemo.first);

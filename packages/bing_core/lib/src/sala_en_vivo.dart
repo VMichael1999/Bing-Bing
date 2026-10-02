@@ -27,6 +27,8 @@ class SalaEnVivo {
     required this.filasTotal,
     required this.bolillas,
     required this.ganadoras,
+    this.organizadorUid,
+    this.creadaEn,
   });
 
   final String codigo;
@@ -39,6 +41,8 @@ class SalaEnVivo {
   /// En orden de salida.
   final List<int> bolillas;
   final List<GanadoraEnVivo> ganadoras;
+  final String? organizadorUid;
+  final DateTime? creadaEn;
 
   /// Ganó [fila] (base 0).
   bool ganoLaFila(int fila) => ganadoras.any((g) => g.fila == fila);
@@ -46,11 +50,19 @@ class SalaEnVivo {
 
 /// Una fila de la sala: sus números y, si está tomada, quién la tiene.
 class FilaEnVivo {
-  const FilaEnVivo({required this.numeros, this.nombre, this.jugadorUid});
+  const FilaEnVivo({
+    required this.numeros,
+    this.nombre,
+    this.jugadorUid,
+    this.reservadaEn,
+  });
 
   final List<int> numeros;
   final String? nombre;
   final String? jugadorUid;
+
+  /// Cuándo se reservó, para ordenar las llegadas y mostrar la hora.
+  final DateTime? reservadaEn;
 
   bool get libre => jugadorUid == null;
 }
@@ -86,4 +98,22 @@ abstract class RepositorioSala {
 
   /// Uid de quien usa la app, para saber cuál es su fila.
   String? get uid;
+}
+
+/// Lo que quien organiza puede hacer con sus salas. El servidor decide el azar
+/// del sorteo y quién puede organizar; la app solo pide y muestra.
+abstract class RepositorioOrganizador implements RepositorioSala {
+  /// Las salas creadas por quien usa la app, de la más nueva a la más antigua.
+  Stream<List<SalaEnVivo>> misSalas();
+
+  /// Crea una sala nueva y devuelve su código.
+  Future<String> crearSala({required String nombre, required int columnas});
+
+  Future<void> empezar(String codigo);
+
+  /// Saca una bolilla al azar y devuelve su número.
+  Future<int> sacarBolilla(String codigo);
+
+  Future<void> deshacerBolilla(String codigo);
+  Future<void> terminar(String codigo);
 }
