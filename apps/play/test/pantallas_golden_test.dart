@@ -64,6 +64,8 @@ void main() {
     'jug-09-iniciar-sesion',
     'jug-13-cuenta',
     'jug-14-sala-cerrada',
+    'jug-11-billetera',
+    'jug-12-recargar',
   ]) {
     testWidgets(id, (tester) async {
       await _capturar(tester, id, pantallaDemo(id)!);

@@ -15,6 +15,7 @@ class BingHoja extends StatelessWidget {
     required this.texto,
     required this.children,
     this.alIzquierda = false,
+    this.alCerrar,
   });
 
   /// Pantalla que queda detrás.
@@ -29,6 +30,9 @@ class BingHoja extends StatelessWidget {
   /// izquierda, sin ancho máximo.
   final bool alIzquierda;
 
+  /// Se llama al tocar el velo de atrás.
+  final VoidCallback? alCerrar;
+
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
@@ -40,7 +44,13 @@ class BingHoja extends StatelessWidget {
             child: fondo,
           ),
         ),
-        const Positioned.fill(child: ColoredBox(color: Color(0xA804050E))),
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: alCerrar,
+            child: const ColoredBox(color: Color(0xA804050E)),
+          ),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -80,20 +90,23 @@ class BingHoja extends StatelessWidget {
                           : BingTexto.tituloHoja)
                       .copyWith(color: paleta.dauber),
                 ),
-                const SizedBox(height: 14),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: alIzquierda ? double.infinity : 260,
+                if (texto.isNotEmpty) ...[
+                  const SizedBox(height: 14),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: alIzquierda ? double.infinity : 260,
+                    ),
+                    child: Text(
+                      texto,
+                      textAlign:
+                          alIzquierda ? TextAlign.left : TextAlign.center,
+                      style: BingTexto.figtree(
+                        14,
+                        400,
+                      ).copyWith(color: paleta.apagado),
+                    ),
                   ),
-                  child: Text(
-                    texto,
-                    textAlign: alIzquierda ? TextAlign.left : TextAlign.center,
-                    style: BingTexto.figtree(
-                      14,
-                      400,
-                    ).copyWith(color: paleta.apagado),
-                  ),
-                ),
+                ],
                 for (final c in children) ...[const SizedBox(height: 14), c],
               ],
             ),

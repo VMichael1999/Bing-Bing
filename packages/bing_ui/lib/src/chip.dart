@@ -62,10 +62,18 @@ class BingChip extends StatelessWidget {
 
 /// Aviso amarillo con candado u otro ícono (`.warn`).
 class BingAviso extends StatelessWidget {
-  const BingAviso({super.key, required this.icono, required this.texto});
+  const BingAviso({
+    super.key,
+    required this.icono,
+    required this.texto,
+    this.destacado,
+  });
 
   final String icono;
   final String texto;
+
+  /// Frase en negrita al empezar el aviso ("Tu saldo es 0 créditos.").
+  final String? destacado;
 
   @override
   Widget build(BuildContext context) {
@@ -82,8 +90,17 @@ class BingAviso extends StatelessWidget {
           BingIcono(icono, color: paleta.cerca),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
-              texto,
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  if (destacado != null)
+                    TextSpan(
+                      text: '$destacado ',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  TextSpan(text: texto),
+                ],
+              ),
               style: BingTexto.figtree(13, 600).copyWith(color: paleta.tinta),
             ),
           ),
