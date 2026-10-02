@@ -33,6 +33,10 @@ class BingAnchoCelda extends InheritedWidget {
     );
   }
 
+  /// En pantallas más anchas que el diseño el nombre se centra en su columna.
+  static bool centrado(BuildContext context) =>
+      de(context) > BingMedidas.filaCelda;
+
   static double de(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BingAnchoCelda>()?.ancho ??
       BingMedidas.filaCelda;

@@ -45,6 +45,7 @@ class BingFilaCompacta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
+    final centrar = BingAnchoCelda.centrado(context);
     final faltan = _faltan;
     final colorAvance = switch (estado) {
       BingEstadoFila.ganadora => paleta.victoria,
@@ -108,18 +109,23 @@ class BingFilaCompacta extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(left: 3),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    centrar
+                        ? CrossAxisAlignment.center
+                        : CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     nombre,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                    textAlign: centrar ? TextAlign.center : TextAlign.start,
                     style: BingTexto.nombreFila.copyWith(color: paleta.tinta),
                   ),
                   Text(
                     textoAvance,
                     maxLines: 1,
+                    textAlign: centrar ? TextAlign.center : TextAlign.start,
                     style: BingTexto.avanceFila.copyWith(color: colorAvance),
                   ),
                 ],

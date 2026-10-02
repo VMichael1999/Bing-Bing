@@ -74,6 +74,32 @@ void main() {
     expect((punto.dx - celda.dx).abs(), lessThan(1));
   });
 
+  testWidgets('en pantalla ancha el nombre se centra en su columna', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(450, 400));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(_cartilla(420));
+    final ultimaCelda = tester.getTopRight(find.byType(BingCelda).last);
+    final nombre = tester.getCenter(find.text('Rosa'));
+    final avance = tester.getCenter(find.text('1 de 5'));
+    // El nombre y el avance comparten el centro y no están pegados a la celda.
+    expect((nombre.dx - avance.dx).abs(), lessThan(1));
+    expect(nombre.dx - ultimaCelda.dx, greaterThan(25));
+  });
+
+  testWidgets(
+    'a 320 dp el nombre sigue pegado a la izquierda como en el diseño',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(320, 400));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(_cartilla(292));
+      final ultimaCelda = tester.getTopRight(find.byType(BingCelda).last);
+      final nombre = tester.getTopLeft(find.text('Rosa'));
+      expect(nombre.dx - ultimaCelda.dx, lessThan(12));
+    },
+  );
+
   test('paraContenido no encoge por debajo del diseño', () {
     expect(BingAnchoCelda.paraContenido(200), 33);
     expect(BingAnchoCelda.paraContenido(BingMedidas.filaContenidoDiseno), 33);

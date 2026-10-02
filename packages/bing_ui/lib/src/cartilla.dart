@@ -74,6 +74,10 @@ class BingCartilla extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 3),
                     child: Text(
                       'Jugador',
+                      textAlign:
+                          BingAnchoCelda.centrado(context)
+                              ? TextAlign.center
+                              : TextAlign.start,
                       style: BingTexto.figtree(
                         11,
                         800,
