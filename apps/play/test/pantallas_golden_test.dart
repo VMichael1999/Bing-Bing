@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bing_core/bing_core.dart';
 import 'package:bing_play/main.dart';
+import 'package:bing_play/src/demo.dart';
 import 'package:bing_play/src/paginas/en_vivo_page.dart';
 import 'package:bing_play/src/paginas/esperando_page.dart';
 import 'package:bing_play/src/paginas/ganaste_page.dart';
@@ -52,6 +53,12 @@ Future<void> _capturar(
 void main() {
   final skip = !Platform.isMacOS; // El render de texto cambia entre sistemas.
   final lucia = cartillasDemo[4];
+
+  for (final id in ['jug-07-inicio-salas', 'jug-07b-inicio-sin-salas']) {
+    testWidgets(id, (tester) async {
+      await _capturar(tester, id, pantallaDemo(id)!);
+    }, skip: skip);
+  }
 
   testWidgets('jug-03-reservar', (tester) async {
     await _capturar(

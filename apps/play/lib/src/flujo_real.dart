@@ -12,6 +12,7 @@ import 'paginas/en_vivo_simulada_page.dart' show textoHace;
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
+import 'paginas/salas_abiertas.dart';
 
 /// Mensaje en español para un error del servidor.
 String mensajeDeError(Object error) {
@@ -35,8 +36,11 @@ void _ir(BuildContext context, Widget pantalla, {bool reemplazar = false}) {
   reemplazar ? navegador.pushReplacement(ruta) : navegador.push(ruta);
 }
 
+enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
+
 /// Recorrido con la sala de verdad: la sala y las filas llegan en vivo y la
-/// reserva la decide el servidor.
+/// reserva la decide el servidor. Arranca en el código y el QR, con las salas
+/// públicas abiertas debajo.
 class FlujoReal extends StatefulWidget {
   const FlujoReal({super.key, required this.repositorio});
 
@@ -46,9 +50,14 @@ class FlujoReal extends StatefulWidget {
   State<FlujoReal> createState() => _FlujoRealState();
 }
 
-enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
+class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
+  // Una sola suscripción: el diseño cambia con el teclado y no debe abrir otra.
+  StreamSubscription<List<SalaEnVivo>>? _suscripcion;
+  List<SalaEnVivo>? _salas;
+  bool _errorSalas = false;
+  bool _tecladoVisible = false;
+  final _editor = GlobalKey<EditableTextState>();
 
-class _FlujoRealState extends State<FlujoReal> {
   final _texto = TextEditingController();
   final _foco = FocusNode();
   _Busqueda _busqueda = _Busqueda.vacio;
@@ -59,13 +68,29 @@ class _FlujoRealState extends State<FlujoReal> {
   void initState() {
     super.initState();
     _texto.addListener(_alEscribir);
+    WidgetsBinding.instance.addObserver(this);
+    _suscripcion = widget.repositorio.salasAbiertas().listen(
+      (salas) => setState(() {
+        _salas = salas;
+        _errorSalas = false;
+      }),
+      onError: (_) => setState(() => _errorSalas = true),
+    );
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _suscripcion?.cancel();
     _texto.dispose();
     _foco.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    final visible = View.of(context).viewInsets.bottom > 0;
+    if (visible != _tecladoVisible) setState(() => _tecladoVisible = visible);
   }
 
   Future<void> _alEscribir() async {
@@ -147,9 +172,32 @@ class _FlujoRealState extends State<FlujoReal> {
       organizador: sala?.organizador ?? '',
       filasLibres: _libres,
       verFilasHabilitado: puede,
+      // Quien escribe un código no necesita ver las salas.
+      bajoElQr:
+          (desplazable) =>
+              _tecladoVisible
+                  ? const SizedBox.shrink()
+                  : SalasAbiertas(
+                    salas: _salas == null ? null : salasConSitio(_salas!),
+                    error: _errorSalas,
+                    atenuada: _texto.text.isNotEmpty,
+                    desplazable: desplazable,
+                    alElegirSala:
+                        (sala) => _ir(
+                          context,
+                          _ElegirFilaReal(
+                            repositorio: widget.repositorio,
+                            sala: sala,
+                          ),
+                        ),
+                  ),
       casillas: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _foco.requestFocus,
+        onTap: () {
+          _foco.requestFocus();
+          // Si el teclado se cerró con "atrás", el foco sigue y hay que pedirlo.
+          _editor.currentState?.requestKeyboard();
+        },
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -166,9 +214,10 @@ class _FlujoRealState extends State<FlujoReal> {
               child: Opacity(
                 opacity: 0,
                 child: EditableText(
+                  key: _editor,
                   controller: _texto,
                   focusNode: _foco,
-                  autofocus: true,
+                  autofocus: false,
                   style: BingTexto.figtree(14, 700),
                   cursorColor: paleta.tinta,
                   backgroundCursorColor: paleta.linea,

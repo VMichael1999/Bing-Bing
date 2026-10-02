@@ -16,11 +16,124 @@ void main() {
     return repo;
   }
 
+  /// Abre la app en un teléfono alto, donde las salas quedan a la vista.
+  Future<void> abrir(WidgetTester tester, RepositorioMemoria repo) async {
+    tester.view
+      ..devicePixelRatio = 2
+      ..physicalSize = const Size(360 * 2, 800 * 2);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(BingPlayApp(repositorio: repo));
+  }
+
   Future<void> escribirCodigo(WidgetTester tester, String codigo) async {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, codigo);
     await tester.pumpAndSettle();
   }
+
+  group('salas abiertas', () {
+    testWidgets('el inicio lista las públicas con sus filas libres', (
+      tester,
+    ) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+      expect(find.text('Bingo de los sábados'), findsOneWidget);
+      expect(find.text('Organiza Carmen'), findsOneWidget);
+      expect(find.text('Quedan 16'), findsOneWidget);
+    });
+
+    testWidgets('tocar una sala lleva directo a elegir fila, sin código', (
+      tester,
+    ) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bingo de los sábados'));
+      await tester.pumpAndSettle();
+      expect(find.text('Elige tu fila'), findsOneWidget);
+      expect(find.text('Seguir con la fila 5'), findsOneWidget);
+    });
+
+    testWidgets('una sala privada no se lista y avisa que no hay salas', (
+      tester,
+    ) async {
+      final privada = RepositorioMemoria(
+        cartillas: cartillasDemo,
+        publica: false,
+      );
+      await abrir(tester, privada);
+      await tester.pumpAndSettle();
+      expect(find.text('Bingo de los sábados'), findsNothing);
+      expect(
+        find.textContaining('Ahora no hay salas abiertas'),
+        findsOneWidget,
+      );
+      // Con su código sí se entra.
+      await escribirCodigo(tester, 'K7Q4');
+      expect(find.text('Bingo de los sábados'), findsOneWidget);
+    });
+
+    testWidgets('una sala llena no se muestra en el inicio', (tester) async {
+      final repo = sala(ocupadas: 20);
+      await abrir(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('Bingo de los sábados'), findsNothing);
+      expect(
+        find.textContaining('Ahora no hay salas abiertas'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('el inicio es el código y el QR, con las salas debajo', (
+      tester,
+    ) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Escribe el código que te dio quien organiza'),
+        findsOneWidget,
+      );
+      expect(find.text('Escanear el QR'), findsOneWidget);
+      expect(find.text('Ver filas libres'), findsOneWidget);
+    });
+
+    testWidgets('con el teclado arriba se esconden las salas', (tester) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300 * 2);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsNothing);
+      // Al cerrar el teclado vuelven.
+      tester.view.resetViewInsets();
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+    });
+
+    testWidgets('al volver de elegir fila se regresa al inicio', (
+      tester,
+    ) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bingo de los sábados'));
+      await tester.pumpAndSettle();
+      expect(find.text('Elige tu fila'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Volver'));
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+    });
+
+    testWidgets('una sala nueva aparece sola en la lista', (tester) async {
+      final repo = sala(ocupadas: 0);
+      await abrir(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('Quedan 20'), findsOneWidget);
+      repo.ocupar(1, 'Ana', 'u1');
+      await tester.pumpAndSettle();
+      expect(find.text('Quedan 19'), findsOneWidget);
+    });
+  });
 
   testWidgets('un código que no existe avisa y no deja avanzar', (
     tester,
@@ -41,7 +154,6 @@ void main() {
 
       // El código se escribe en minúsculas y se muestra en mayúsculas.
       await escribirCodigo(tester, 'k7q4');
-      expect(find.text('Bingo de los sábados'), findsOneWidget);
       expect(
         find.text('Organiza Carmen · quedan 16 filas libres'),
         findsOneWidget,
