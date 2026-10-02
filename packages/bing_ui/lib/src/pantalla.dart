@@ -62,9 +62,12 @@ class BingEncabezado extends StatelessWidget {
 
 /// Pie fijo de pantalla (`.foot`): botón principal y una nota debajo.
 class BingPie extends StatelessWidget {
-  const BingPie({super.key, this.boton, this.nota});
+  const BingPie({super.key, this.boton, this.botonSecundario, this.nota});
 
   final Widget? boton;
+
+  /// Segundo botón, 8 dp bajo el principal.
+  final Widget? botonSecundario;
   final String? nota;
 
   @override
@@ -83,6 +86,10 @@ class BingPie extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (boton != null) boton!,
+          if (botonSecundario != null) ...[
+            const SizedBox(height: 8),
+            botonSecundario!,
+          ],
           if (nota != null) ...[
             if (boton != null) const SizedBox(height: 8),
             Text(

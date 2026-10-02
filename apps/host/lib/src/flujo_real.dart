@@ -3,6 +3,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'compartir.dart';
 import 'paginas/cartilla_llena_sheet.dart';
 import 'paginas/entrar_page.dart';
 import 'paginas/juego_page.dart';
@@ -412,7 +413,17 @@ class _SalaAbiertaRealState extends State<_SalaAbiertaReal> {
           total: filas.length,
           jugadores: jugadoresDeLaSala(filas),
           alVolver: () => Navigator.of(context).pop(),
-          alCopiar: () => Clipboard.setData(ClipboardData(text: widget.codigo)),
+          datosQr: enlaceSala(widget.codigo),
+          alCompartir:
+              () => abrirCompartirSala(
+                context,
+                nombre: sala.nombre,
+                codigo: widget.codigo,
+              ),
+          alCopiar: () {
+            Clipboard.setData(ClipboardData(text: widget.codigo));
+            mostrarAvisoBing(context, 'Código copiado');
+          },
           alEmpezar: llena && !_empezando ? () => _empezar(sala, filas) : null,
           error: _error,
         );

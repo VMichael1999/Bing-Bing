@@ -1,6 +1,7 @@
 /// Tokens visuales, fuentes, íconos y componentes de Bing Bing.
 library;
 
+export 'src/aviso.dart';
 export 'src/bolilla.dart';
 export 'src/boton.dart';
 export 'src/campo.dart';
@@ -21,6 +22,7 @@ export 'src/mifila.dart';
 export 'src/pantalla.dart';
 export 'src/progreso.dart';
 export 'src/punto.dart';
+export 'src/qr.dart';
 export 'src/sala.dart';
 export 'src/sistema.dart';
 export 'src/tablero.dart';
