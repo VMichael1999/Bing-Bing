@@ -1,0 +1,20 @@
+{
+  "name": "bing-bing-functions",
+  "private": true,
+  "description": "Cloud Functions de Bing Bing: reservar fila, sacar bolilla y reglas de la sala",
+  "main": "lib/src/index.js",
+  "engines": { "node": "20" },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test \"lib/test/*.test.js\"",
+    "deploy": "npm run build && firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.6.0"
+  }
+}
