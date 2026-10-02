@@ -3,12 +3,14 @@ enum EstadoSala {
   abierta,
   llena,
   enJuego,
-  terminada;
+  terminada,
+  cancelada;
 
   static EstadoSala desde(String? texto) => switch (texto) {
     'llena' => EstadoSala.llena,
     'en_juego' => EstadoSala.enJuego,
     'terminada' => EstadoSala.terminada,
+    'cancelada' => EstadoSala.cancelada,
     _ => EstadoSala.abierta,
   };
 }
@@ -34,6 +36,7 @@ class SalaEnVivo {
     this.creadaEn,
     this.publica = false,
     this.ocupadas = 0,
+    this.motivoCierre,
   });
 
   final String codigo;
@@ -54,6 +57,9 @@ class SalaEnVivo {
 
   /// Filas con jugador.
   final int ocupadas;
+
+  /// Por qué quien organiza cerró la sala (si lo dijo); solo en las canceladas.
+  final String? motivoCierre;
 
   int get libres => filasTotal - ocupadas;
 
@@ -137,4 +143,8 @@ abstract class RepositorioOrganizador implements RepositorioSala {
 
   Future<void> deshacerBolilla(String codigo);
   Future<void> terminar(String codigo);
+
+  /// Cierra una sala que no se jugó. Solo antes de empezar (si no, lanza
+  /// [ErrorSalaBing] `sala_ya_empezada`). [motivo] se muestra a los jugadores.
+  Future<void> cancelarSala(String codigo, {String? motivo});
 }

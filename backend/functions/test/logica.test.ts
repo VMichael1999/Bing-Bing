@@ -6,6 +6,7 @@ import {
   Fila,
   Sala,
   aplicarReserva,
+  cancelar,
   empezar,
   generarCartillas,
   generarCodigo,
@@ -188,5 +189,35 @@ describe("sinUltima", () => {
       codigoDe(() => sinUltima(sala({ estado: "en_juego", bolillas: [1] }), "otra")),
       "no_es_organizador",
     );
+  });
+});
+
+describe("cancelar", () => {
+  it("el organizador puede cerrar una sala abierta o llena", () => {
+    assert.equal(cancelar(sala({ estado: "abierta" }), "carmen", undefined), null);
+    assert.equal(cancelar(sala({ estado: "llena" }), "carmen", null), null);
+  });
+
+  it("devuelve el motivo limpio y vacío cuenta como sin motivo", () => {
+    assert.equal(cancelar(sala(), "carmen", "  No llegó   gente  "), "No llegó gente");
+    assert.equal(cancelar(sala(), "carmen", "   "), null);
+  });
+
+  it("solo quien organiza puede cerrarla", () => {
+    assert.equal(codigoDe(() => cancelar(sala(), "otra", undefined)), "no_es_organizador");
+  });
+
+  it("no se puede cerrar una partida que ya empezó o terminó", () => {
+    assert.equal(codigoDe(() => cancelar(sala({ estado: "en_juego" }), "carmen", undefined)), "sala_ya_empezada");
+    assert.equal(codigoDe(() => cancelar(sala({ estado: "terminada" }), "carmen", undefined)), "sala_ya_empezada");
+  });
+
+  it("cerrar dos veces no falla", () => {
+    assert.equal(cancelar(sala({ estado: "cancelada" }), "carmen", undefined), null);
+  });
+
+  it("rechaza un motivo que no es texto o es muy largo", () => {
+    assert.equal(codigoDe(() => cancelar(sala(), "carmen", 5)), "motivo_invalido");
+    assert.equal(codigoDe(() => cancelar(sala(), "carmen", "x".repeat(121))), "motivo_invalido");
   });
 });

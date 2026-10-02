@@ -39,6 +39,8 @@ void main() {
     'org-09-ganador',
     'org-11-compartir',
     'org-12-qr-pantalla',
+    'org-13-ajustes',
+    'org-14-cerrar-sala',
   ];
   for (final id in ids) {
     testWidgets(id, (tester) async {

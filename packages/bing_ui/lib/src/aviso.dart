@@ -16,6 +16,17 @@ void mostrarAvisoBing(
 }) {
   final overlay = Overlay.maybeOf(context);
   if (overlay == null) return;
+  mostrarAvisoBingEn(overlay, texto, duracion: duracion);
+}
+
+/// Igual que [mostrarAvisoBing] pero sobre un `Overlay` ya conocido; sirve para
+/// avisar sobre la pantalla a la que se vuelve tras cerrar la actual
+/// (`Navigator.of(context).overlay`).
+void mostrarAvisoBingEn(
+  OverlayState overlay,
+  String texto, {
+  Duration duracion = const Duration(milliseconds: 1800),
+}) {
   late final OverlayEntry entrada;
   entrada = OverlayEntry(
     builder: (context) => _Aviso(texto: texto, alTerminar: entrada.remove),

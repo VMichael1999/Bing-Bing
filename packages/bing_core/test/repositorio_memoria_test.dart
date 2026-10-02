@@ -97,6 +97,53 @@ void pruebasVisibilidad() {
       expect(await repo.salasAbiertas().first, isEmpty);
     });
 
+    test('una sala cerrada deja de listarse y no recibe jugadores', () async {
+      final repo = nueva()..ocupar(1, 'Ana', 'u1');
+      await repo.cancelarSala('K7Q4', motivo: '  No se llenó ');
+      expect(await repo.salasAbiertas().first, isEmpty);
+      final sala = await repo.buscar('K7Q4');
+      expect(sala?.estado, EstadoSala.cancelada);
+      expect(sala?.motivoCierre, 'No se llenó');
+      await expectLater(
+        repo.reservarFila(codigo: 'K7Q4', fila: 5, nombre: 'Yo'),
+        throwsA(
+          isA<ErrorSalaBing>().having(
+            (e) => e.codigo,
+            'codigo',
+            'sala_no_abierta',
+          ),
+        ),
+      );
+    });
+
+    test(
+      'cerrar sin motivo lo deja vacío y cerrar dos veces no falla',
+      () async {
+        final repo = nueva();
+        await repo.cancelarSala('K7Q4', motivo: '   ');
+        await repo.cancelarSala('K7Q4');
+        expect((await repo.buscar('K7Q4'))?.motivoCierre, isNull);
+      },
+    );
+
+    test('una partida empezada no se puede cerrar', () async {
+      final repo = nueva();
+      for (var i = 1; i <= 20; i++) {
+        repo.ocupar(i, 'J$i', 'u$i');
+      }
+      repo.empezarPartida();
+      await expectLater(
+        repo.cancelarSala('K7Q4'),
+        throwsA(
+          isA<ErrorSalaBing>().having(
+            (e) => e.codigo,
+            'codigo',
+            'sala_ya_empezada',
+          ),
+        ),
+      );
+    });
+
     test('al empezar la partida deja de listarse', () async {
       final repo = nueva();
       for (var i = 1; i <= 20; i++) {

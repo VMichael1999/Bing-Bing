@@ -151,6 +151,14 @@ class RepositorioFirestore implements RepositorioOrganizador {
   Future<void> terminar(String codigo) async {
     await _llamar('terminarPartida', {'codigo': codigo});
   }
+
+  @override
+  Future<void> cancelarSala(String codigo, {String? motivo}) async {
+    await _llamar('cancelarSala', {
+      'codigo': codigo,
+      if (motivo != null && motivo.trim().isNotEmpty) 'motivo': motivo.trim(),
+    });
+  }
 }
 
 /// Fecha de un campo de Firestore (`Timestamp`) o ya convertida.
@@ -189,6 +197,7 @@ SalaEnVivo salaDesdeMapa(String codigo, Map<String, dynamic> datos) {
     creadaEn: fechaDe(datos['creadaEn']),
     publica: datos['publica'] == true,
     ocupadas: (datos['ocupadas'] as num?)?.toInt() ?? 0,
+    motivoCierre: datos['motivoCierre'] as String?,
     ganadoras: [
       for (final g in datos['ganadores'] as List? ?? [])
         (

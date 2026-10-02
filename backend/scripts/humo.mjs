@@ -97,6 +97,18 @@ const abierta = await fetch(`${DOCS}/salas/${privada.codigo}`, { headers: { auth
 assert.equal(abierta.status, 200);
 console.log("✔ visibilidad: públicas listables, privadas solo con código, contador de filas");
 
+// Cerrar una sala que no se jugó: solo su organizador, solo antes de empezar.
+const cerrable = await ok("crearSala", organizador, { nombre: "Se cierra", columnas: 5, publica: true });
+await ok("reservarFila", jugadores[1], { codigo: cerrable.codigo, fila: 1, nombre: "Ana" });
+await rechazada("cancelarSala", jugadores[1], { codigo: cerrable.codigo }, "PERMISSION_DENIED");
+await ok("cancelarSala", organizador, { codigo: cerrable.codigo, motivo: "No se llenó" });
+await ok("cancelarSala", organizador, { codigo: cerrable.codigo }); // cerrar dos veces no falla
+const cerrada = await (await fetch(`${DOCS}/salas/${cerrable.codigo}`, { headers: { authorization: `Bearer ${jugadores[1]}` } })).json();
+assert.equal(cerrada.fields.estado.stringValue, "cancelada");
+assert.equal(cerrada.fields.motivoCierre.stringValue, "No se llenó");
+await rechazada("reservarFila", jugadores[2], { codigo: cerrable.codigo, fila: 2, nombre: "Beto" }, "FAILED_PRECONDITION");
+console.log("✔ cerrar una sala: solo quien organiza, avisa el motivo y ya no recibe jugadores");
+
 // Doble reserva: la fila ya tiene dueño y el jugador ya tiene fila.
 await rechazada("reservarFila", await registrar(), { codigo, fila: 1, nombre: "Intruso" }, "FAILED_PRECONDITION");
 
@@ -114,6 +126,7 @@ console.log("✔ lectura permitida y escritura directa bloqueada");
 // Solo el organizador de esa sala sortea.
 await rechazada("sacarBolilla", jugadores[0], { codigo }, "PERMISSION_DENIED");
 await ok("empezarPartida", organizador, { codigo });
+await rechazada("cancelarSala", organizador, { codigo }, "FAILED_PRECONDITION"); // empezada: se juega hasta el final
 
 const salidas = new Set();
 let ganadoras = [];

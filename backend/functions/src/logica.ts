@@ -3,7 +3,7 @@
 export const RANGO_COLUMNA = 15;
 const ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin 0/O ni 1/I
 
-export type EstadoSala = "abierta" | "llena" | "en_juego" | "terminada";
+export type EstadoSala = "abierta" | "llena" | "en_juego" | "terminada" | "cancelada";
 
 export interface Sala {
   nombre: string;
@@ -38,6 +38,8 @@ export class ErrorSala extends Error {
       | "nombre_invalido"
       | "no_es_organizador"
       | "sala_no_en_juego"
+      | "sala_ya_empezada"
+      | "motivo_invalido"
       | "tombola_vacia"
       | "sala_no_llena",
     mensaje: string,
@@ -143,6 +145,30 @@ export function empezar(sala: Sala, uid: string): EstadoSala {
     throw new ErrorSala("sala_no_llena", "Faltan jugadores para empezar");
   }
   return "en_juego";
+}
+
+/** Largo máximo del motivo con el que se cierra una sala. */
+export const MOTIVO_MAXIMO = 120;
+
+/**
+ * Quien organiza cierra una sala que no se jugó. Solo antes de la primera
+ * bolilla: una partida empezada se juega hasta terminar. Devuelve el motivo
+ * limpio (o `null` si no se dio). Cerrar dos veces no falla.
+ */
+export function cancelar(sala: Sala, uid: string, motivo: unknown): string | null {
+  exigirOrganizador(sala, uid);
+  if (sala.estado === "en_juego" || sala.estado === "terminada") {
+    throw new ErrorSala("sala_ya_empezada", "La partida ya empezó y no se puede cerrar");
+  }
+  if (motivo === undefined || motivo === null) return null;
+  if (typeof motivo !== "string") {
+    throw new ErrorSala("motivo_invalido", "El motivo debe ser texto");
+  }
+  const limpio = motivo.trim().replace(/\s+/g, " ");
+  if (limpio.length > MOTIVO_MAXIMO) {
+    throw new ErrorSala("motivo_invalido", `El motivo admite hasta ${MOTIVO_MAXIMO} caracteres`);
+  }
+  return limpio === "" ? null : limpio;
 }
 
 /** Elige en el servidor una bolilla que aún no salió. */

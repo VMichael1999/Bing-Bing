@@ -60,7 +60,11 @@ void main() {
     }, skip: skip);
   }
 
-  for (final id in ['jug-09-iniciar-sesion', 'jug-13-cuenta']) {
+  for (final id in [
+    'jug-09-iniciar-sesion',
+    'jug-13-cuenta',
+    'jug-14-sala-cerrada',
+  ]) {
     testWidgets(id, (tester) async {
       await _capturar(tester, id, pantallaDemo(id)!);
     }, skip: skip);

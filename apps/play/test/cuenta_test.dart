@@ -181,8 +181,11 @@ void main() {
       await tester.tap(find.text('Eliminar mi cuenta'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Sí, eliminar mi cuenta'));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       expect(sesion.borrados, 1);
+      expect(find.text('Tu cuenta se eliminó'), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 3));
       expect(find.text('Iniciar sesión'), findsOneWidget);
     });
   });

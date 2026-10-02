@@ -3,6 +3,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
 import 'paginas/cartilla_llena_sheet.dart';
+import 'paginas/cerrar_sala_hoja.dart';
 import 'paginas/compartir_page.dart';
 import 'paginas/entrar_page.dart';
 import 'paginas/ganador_page.dart';
@@ -101,5 +102,21 @@ Widget? pantallaDemo(String id) => switch (id) {
     publica: true,
   ),
   'org-12-qr-pantalla' => const QrPantallaPage(codigo: salaDemoCodigo),
+  'org-14-cerrar-sala' => CerrarSalaHoja(
+    ocupadas: 5,
+    fondo: SalaAbiertaPage(
+      salaNombre: salaDemoNombre,
+      codigo: salaDemoCodigo,
+      ocupadas: 5,
+      total: 20,
+      jugadores: jugadoresSalaAbiertaDemo(),
+      alCerrarSala: () {},
+    ),
+  ),
+  'org-13-ajustes' => const BingCuenta(
+    titulo: 'Ajustes',
+    nombre: 'Carmen Ruiz',
+    correo: 'carmen@correo.com',
+  ),
   _ => null,
 };

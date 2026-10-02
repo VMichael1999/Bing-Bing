@@ -35,6 +35,7 @@ class RepositorioMemoria implements RepositorioOrganizador {
   final List<int> _bolillas = [];
   final List<GanadoraEnVivo> _ganadoras = [];
   EstadoSala _estado = EstadoSala.abierta;
+  String? _motivoCierre;
   int _llegadas = 0;
 
   final _salaCambios = StreamController<void>.broadcast();
@@ -54,6 +55,7 @@ class RepositorioMemoria implements RepositorioOrganizador {
     organizadorUid: miUid,
     publica: publica,
     ocupadas: _filas.where((f) => !f.libre).length,
+    motivoCierre: _motivoCierre,
   );
 
   @override
@@ -205,6 +207,20 @@ class RepositorioMemoria implements RepositorioOrganizador {
   @override
   Future<void> terminar(String codigo) async {
     _estado = EstadoSala.terminada;
+    _salaCambios.add(null);
+  }
+
+  @override
+  Future<void> cancelarSala(String codigo, {String? motivo}) async {
+    if (_estado == EstadoSala.enJuego || _estado == EstadoSala.terminada) {
+      throw const ErrorSalaBing(
+        'sala_ya_empezada',
+        'La partida ya empezó y no se puede cerrar',
+      );
+    }
+    final limpio = motivo?.trim();
+    _motivoCierre = limpio == null || limpio.isEmpty ? null : limpio;
+    _estado = EstadoSala.cancelada;
     _salaCambios.add(null);
   }
 

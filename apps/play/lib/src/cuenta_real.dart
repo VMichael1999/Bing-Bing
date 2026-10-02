@@ -90,6 +90,16 @@ class _HojaSesionRealState extends State<_HojaSesionReal> {
   }
 }
 
+class _HojaEliminar extends StatelessWidget {
+  const _HojaEliminar();
+
+  @override
+  Widget build(BuildContext context) => BingConfirmarEliminar(
+    alConfirmar: () => Navigator.of(context).pop(true),
+    alCancelar: () => Navigator.of(context).pop(false),
+  );
+}
+
 /// Mi cuenta: quién eres, cerrar sesión y borrar la cuenta.
 class CuentaReal extends StatefulWidget {
   const CuentaReal({super.key, required this.sesion});
@@ -122,7 +132,7 @@ class _CuentaRealState extends State<CuentaReal> {
   Future<void> _eliminar() async {
     final confirmado = await Navigator.of(
       context,
-    ).push<bool>(_rutaSobrePantalla(const _ConfirmarEliminar()));
+    ).push<bool>(_rutaSobrePantalla(const _HojaEliminar()));
     if (confirmado != true || !mounted) return;
     setState(() => _ocupado = true);
     try {
@@ -131,12 +141,8 @@ class _CuentaRealState extends State<CuentaReal> {
       final navegador = Navigator.of(context);
       navegador.pop();
       // El aviso se muestra sobre la pantalla a la que se vuelve.
-      Future<void>.delayed(const Duration(milliseconds: 300), () {
-        final contexto = navegador.context;
-        if (contexto.mounted) {
-          mostrarAvisoBing(contexto, 'Tu cuenta se eliminó');
-        }
-      });
+      final overlay = navegador.overlay;
+      if (overlay != null) mostrarAvisoBingEn(overlay, 'Tu cuenta se eliminó');
     } catch (_) {
       if (!mounted) return;
       setState(() => _ocupado = false);
@@ -163,39 +169,6 @@ class _CuentaRealState extends State<CuentaReal> {
           alEliminar: _eliminar,
         );
       },
-    );
-  }
-}
-
-class _ConfirmarEliminar extends StatelessWidget {
-  const _ConfirmarEliminar();
-
-  @override
-  Widget build(BuildContext context) {
-    return BingHoja(
-      fondo: const SizedBox.shrink(),
-      alIzquierda: true,
-      titulo: '¿Eliminar tu cuenta?',
-      texto:
-          'Se borran tu cuenta y tus datos. Esto no se puede deshacer. Las '
-          'filas que ya reservaste dejarán de estar a tu nombre.',
-      children: [
-        Column(
-          children: [
-            BingBoton(
-              texto: 'Sí, eliminar mi cuenta',
-              tipo: BingBotonTipo.dauber,
-              alPresionar: () => Navigator.of(context).pop(true),
-            ),
-            const SizedBox(height: 8),
-            BingBoton(
-              texto: 'Cancelar',
-              tipo: BingBotonTipo.linea,
-              alPresionar: () => Navigator.of(context).pop(false),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
