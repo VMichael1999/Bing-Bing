@@ -5,7 +5,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /salas/{codigo} {
-      allow read: if request.auth != null;
+      // Entrar con el código o el enlace: quien tenga sesión (aunque sea anónima)
+      // puede leer esa sala.
+      allow get: if request.auth != null;
+
+      // Listar: solo las salas públicas y las propias. Las privadas no se pueden
+      // enumerar; las consultas deben filtrar por `publica == true` o por el
+      // `organizadorUid` de quien pregunta.
+      allow list: if request.auth != null
+        && (resource.data.publica == true
+            || resource.data.organizadorUid == request.auth.uid);
+
       allow write: if false;
 
       match /filas/{fila} {

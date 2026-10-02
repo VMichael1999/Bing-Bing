@@ -9,6 +9,10 @@ export interface Sala {
   nombre: string;
   organizadorUid: string;
   organizadorNombre: string;
+  /** Visible en la lista de salas abiertas de Play; si no, solo con el código o el enlace. */
+  publica: boolean;
+  /** Filas con jugador. Se mantiene al reservar para listar sin leer las 20 filas. */
+  ocupadas: number;
   columnas: 5 | 6;
   filasTotal: number;
   filasPorJugador: number;

@@ -36,6 +36,8 @@ const sala = (extra: Partial<Sala> = {}): Sala => ({
   nombre: "Bingo de los sábados",
   organizadorUid: "carmen",
   organizadorNombre: "Carmen",
+  publica: true,
+  ocupadas: 0,
   columnas: 5,
   filasTotal: 20,
   filasPorJugador: 1,
