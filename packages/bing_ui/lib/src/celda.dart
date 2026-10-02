@@ -92,13 +92,15 @@ class _BingCeldaState extends State<BingCelda>
                         boxShadow:
                             widget.reciente
                                 ? [
-                                  BoxShadow(
-                                    color: paleta.tarjeta,
-                                    spreadRadius: 2,
-                                  ),
+                                  // CSS pinta la primera sombra encima: el aro
+                                  // exterior va primero en Flutter.
                                   BoxShadow(
                                     color: paleta.dauber,
                                     spreadRadius: 4,
+                                  ),
+                                  BoxShadow(
+                                    color: paleta.tarjeta,
+                                    spreadRadius: 2,
                                   ),
                                 ]
                                 : null,
