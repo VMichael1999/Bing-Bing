@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'celda.dart';
+import 'colores.dart';
 import 'medidas.dart';
 import 'punto.dart';
 import 'tema.dart';
@@ -17,6 +19,17 @@ class BingCartilla extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
+    return LayoutBuilder(
+      builder:
+          (context, restricciones) => BingAnchoCelda(
+            // Descuenta el relleno de la tarjeta (4 + 4) y el de la fila (4 + 4).
+            ancho: BingAnchoCelda.paraContenido(restricciones.maxWidth - 16),
+            child: Builder(builder: (c) => _tarjeta(c, paleta)),
+          ),
+    );
+  }
+
+  Widget _tarjeta(BuildContext context, BingPaleta paleta) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
@@ -49,7 +62,7 @@ class BingCartilla extends StatelessWidget {
                 for (var i = 0; i < letras.length; i++) ...[
                   const SizedBox(width: BingMedidas.filaGap),
                   SizedBox(
-                    width: BingMedidas.filaCelda,
+                    width: BingAnchoCelda.de(context),
                     child: Center(
                       child: BingPunto(columna: i, texto: letras[i]),
                     ),
@@ -61,6 +74,10 @@ class BingCartilla extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 3),
                     child: Text(
                       'Jugador',
+                      textAlign:
+                          BingAnchoCelda.centrado(context)
+                              ? TextAlign.center
+                              : TextAlign.start,
                       style: BingTexto.figtree(
                         11,
                         800,

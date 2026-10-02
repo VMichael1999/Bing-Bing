@@ -14,6 +14,37 @@ const Curve bingCurvaMarcar = Cubic(0.3, 1.6, 0.5, 1);
 /// Marcada: círculo `dauber` al 92 % con 3 dp de margen y el número encima.
 /// [reciente] agrega los dos anillos (2 dp `tarjeta` y 4 dp `dauber`).
 /// Al marcarse anima 420 ms (escala 0→1 y giro −20°→0°); al desmarcarse, 180 ms.
+/// Ancho de las celdas de la cartilla según el ancho disponible.
+///
+/// El diseño se calculó para 320 dp (celdas de 33). En pantallas más anchas
+/// las celdas crecen con la mayor parte del espacio que sobra, hasta un tope,
+/// y el resto es para el nombre. Sin ancestro vale el del diseño.
+class BingAnchoCelda extends InheritedWidget {
+  const BingAnchoCelda({super.key, required this.ancho, required super.child});
+
+  final double ancho;
+
+  /// Calcula el ancho de celda para un contenido de fila de [contenido] dp.
+  static double paraContenido(double contenido) {
+    final sobra = math.max(0, contenido - BingMedidas.filaContenidoDiseno);
+    return math.min(
+      BingMedidas.filaCelda + sobra * 0.55 / 5,
+      BingMedidas.filaCeldaMax,
+    );
+  }
+
+  /// En pantallas más anchas que el diseño el nombre se centra en su columna.
+  static bool centrado(BuildContext context) =>
+      de(context) > BingMedidas.filaCelda;
+
+  static double de(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BingAnchoCelda>()?.ancho ??
+      BingMedidas.filaCelda;
+
+  @override
+  bool updateShouldNotify(BingAnchoCelda old) => ancho != old.ancho;
+}
+
 class BingCelda extends StatefulWidget {
   const BingCelda({
     super.key,
@@ -62,7 +93,7 @@ class _BingCeldaState extends State<BingCelda>
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
     return SizedBox(
-      width: BingMedidas.filaCelda,
+      width: BingAnchoCelda.de(context),
       height: BingMedidas.filaCelda,
       child: DecoratedBox(
         decoration: BoxDecoration(
