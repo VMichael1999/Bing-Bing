@@ -47,8 +47,11 @@ Salas abiertas, QR, cuenta y billetera. Prototipos en
 - **Billetera en dos etapas.** Primero **créditos de prueba** (sin valor en dinero, no
   se retiran): saldo, precio por fila, premio e historial. Los pagos reales solo
   después de validar lo legal (ver arriba).
-- **Precio y premio.** Quien organiza fija el precio por fila; el premio propuesto es
-  lo recaudado de las 20 filas (por confirmar).
+- **Precio, comisión y premio.** Quien organiza fija el precio por fila y el **premio es
+  editable**. Bing Bing retiene un **porcentaje** de lo recaudado (en los prototipos,
+  10 % como ejemplo: **por definir**) y el premio no puede pasar de lo que queda. Lo que
+  sobra es para quien organiza (por confirmar). Si no se llenan las 20 filas, el premio
+  se mantiene y se paga con lo recaudado.
 - **Enlaces y QR.** Dominio gratis de Firebase Hosting
   (`bingbing-f1491.web.app/sala/CÓDIGO`); el QR contiene ese enlace. Sin la app
   instalada, el enlace muestra una página con las tiendas.
