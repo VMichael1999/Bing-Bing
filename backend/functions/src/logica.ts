@@ -70,15 +70,25 @@ export function generarCartillas(
   );
 }
 
-export function validarNombre(nombre: unknown): string {
+function limpiarNombre(nombre: unknown, maximo: number): string {
   if (typeof nombre !== "string") {
     throw new ErrorSala("nombre_invalido", "El nombre debe ser texto");
   }
   const limpio = nombre.trim().replace(/\s+/g, " ");
-  if (limpio.length < 1 || limpio.length > 18) {
-    throw new ErrorSala("nombre_invalido", "El nombre debe tener entre 1 y 18 caracteres");
+  if (limpio.length < 1 || limpio.length > maximo) {
+    throw new ErrorSala("nombre_invalido", `El nombre debe tener entre 1 y ${maximo} caracteres`);
   }
   return limpio;
+}
+
+/** Nombre de quien juega: hasta 18 caracteres (el campo de la fila). */
+export function validarNombre(nombre: unknown): string {
+  return limpiarNombre(nombre, 18);
+}
+
+/** Nombre de la sala: hasta 40 caracteres (el campo de "Nueva partida"). */
+export function validarNombreSala(nombre: unknown): string {
+  return limpiarNombre(nombre, 40);
 }
 
 /**
