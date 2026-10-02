@@ -2,6 +2,9 @@ import 'package:flutter/painting.dart';
 
 /// Estilos de texto del diseño. El color lo pone quien los usa.
 abstract final class BingTexto {
+  /// `line-height` que `.app` hereda a todo el texto.
+  static const double alturaBase = 1.38;
+
   static const _cifras = [FontFeature.tabularFigures()];
 
   static TextStyle figtree(
@@ -16,7 +19,8 @@ abstract final class BingTexto {
     fontSize: tamano,
     fontWeight: FontWeight.values[(peso ~/ 100) - 1],
     fontVariations: [FontVariation('wght', peso.toDouble())],
-    height: altura,
+    height: altura ?? alturaBase,
+    leadingDistribution: TextLeadingDistribution.even,
     letterSpacing: espaciado,
     fontFeatures: tabular ? _cifras : null,
   );
@@ -31,7 +35,8 @@ abstract final class BingTexto {
     package: 'bing_ui',
     fontSize: tamano,
     fontWeight: FontWeight.w400,
-    height: altura,
+    height: altura ?? alturaBase,
+    leadingDistribution: TextLeadingDistribution.even,
     letterSpacing: espaciado,
     fontFeatures: tabular ? _cifras : null,
   );
