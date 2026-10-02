@@ -14,6 +14,7 @@ class CodigoPage extends StatelessWidget {
     this.casillas,
     this.resultado,
     this.verFilasHabilitado = true,
+    this.alVolver,
   });
 
   final String codigo;
@@ -30,6 +31,10 @@ class CodigoPage extends StatelessWidget {
   final Widget? resultado;
   final bool verFilasHabilitado;
 
+  /// Con él aparece un botón de volver arriba a la izquierda (cuando la pantalla
+  /// se abre desde otra); sin él queda idéntica al diseño.
+  final VoidCallback? alVolver;
+
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
@@ -39,40 +44,54 @@ class CodigoPage extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
-                child: Column(
-                  children: [
-                    const BingHero(
-                      arriba: 14,
-                      bolillas: [
-                        (columna: 0, numero: 9, letra: 'B'),
-                        (columna: 1, numero: 30, letra: 'I'),
-                        (columna: 2, numero: 38, letra: 'N'),
-                      ],
-                      texto: 'Escribe el código que te dio quien organiza',
-                    ),
-                    const SizedBox(height: 14),
-                    casillas ?? BingCasillasCodigo(codigo: codigo),
-                    const SizedBox(height: 14),
-                    resultado ??
-                        BingEncontrada(
-                          titulo: salaNombre,
-                          detalle:
-                              'Organiza $organizador · quedan $filasLibres '
-                              'filas libres',
+              child: Stack(
+                children: [
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
+                    child: Column(
+                      children: [
+                        const BingHero(
+                          arriba: 14,
+                          bolillas: [
+                            (columna: 0, numero: 9, letra: 'B'),
+                            (columna: 1, numero: 30, letra: 'I'),
+                            (columna: 2, numero: 38, letra: 'N'),
+                          ],
+                          texto: 'Escribe el código que te dio quien organiza',
                         ),
-                    const SizedBox(height: 14),
-                    const BingSeparadorO(),
-                    const SizedBox(height: 14),
-                    BingBoton(
-                      texto: 'Escanear el QR',
-                      tipo: BingBotonTipo.linea,
-                      icono: 'qr',
-                      alPresionar: alEscanear,
+                        const SizedBox(height: 14),
+                        casillas ?? BingCasillasCodigo(codigo: codigo),
+                        const SizedBox(height: 14),
+                        resultado ??
+                            BingEncontrada(
+                              titulo: salaNombre,
+                              detalle:
+                                  'Organiza $organizador · quedan $filasLibres '
+                                  'filas libres',
+                            ),
+                        const SizedBox(height: 14),
+                        const BingSeparadorO(),
+                        const SizedBox(height: 14),
+                        BingBoton(
+                          texto: 'Escanear el QR',
+                          tipo: BingBotonTipo.linea,
+                          icono: 'qr',
+                          alPresionar: alEscanear,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  if (alVolver != null)
+                    Positioned(
+                      left: 14,
+                      top: 4,
+                      child: BingBotonIcono(
+                        icono: 'left',
+                        etiqueta: 'Volver',
+                        alPresionar: alVolver,
+                      ),
+                    ),
+                ],
               ),
             ),
             BingPie(

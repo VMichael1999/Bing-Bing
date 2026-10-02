@@ -12,6 +12,7 @@ import 'paginas/en_vivo_simulada_page.dart' show textoHace;
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
+import 'paginas/salas_page.dart';
 
 /// Mensaje en español para un error del servidor.
 String mensajeDeError(Object error) {
@@ -36,7 +37,7 @@ void _ir(BuildContext context, Widget pantalla, {bool reemplazar = false}) {
 }
 
 /// Recorrido con la sala de verdad: la sala y las filas llegan en vivo y la
-/// reserva la decide el servidor.
+/// reserva la decide el servidor. Arranca en la lista de salas abiertas.
 class FlujoReal extends StatefulWidget {
   const FlujoReal({super.key, required this.repositorio});
 
@@ -46,9 +47,45 @@ class FlujoReal extends StatefulWidget {
   State<FlujoReal> createState() => _FlujoRealState();
 }
 
+class _FlujoRealState extends State<FlujoReal> {
+  // Se crea una sola vez: cada reconstrucción no debe abrir otra suscripción.
+  late final Stream<List<SalaEnVivo>> _salas =
+      widget.repositorio.salasAbiertas();
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<SalaEnVivo>>(
+      stream: _salas,
+      builder:
+          (context, foto) => SalasPage(
+            salas: foto.data,
+            error: foto.hasError,
+            alEscribirCodigo:
+                () =>
+                    _ir(context, _CodigoReal(repositorio: widget.repositorio)),
+            alElegirSala:
+                (sala) => _ir(
+                  context,
+                  _ElegirFilaReal(repositorio: widget.repositorio, sala: sala),
+                ),
+          ),
+    );
+  }
+}
+
 enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
 
-class _FlujoRealState extends State<FlujoReal> {
+/// Escribir el código de una sala (las privadas se entran así).
+class _CodigoReal extends StatefulWidget {
+  const _CodigoReal({required this.repositorio});
+
+  final RepositorioSala repositorio;
+
+  @override
+  State<_CodigoReal> createState() => _CodigoRealState();
+}
+
+class _CodigoRealState extends State<_CodigoReal> {
   final _texto = TextEditingController();
   final _foco = FocusNode();
   _Busqueda _busqueda = _Busqueda.vacio;
@@ -147,6 +184,7 @@ class _FlujoRealState extends State<FlujoReal> {
       organizador: sala?.organizador ?? '',
       filasLibres: _libres,
       verFilasHabilitado: puede,
+      alVolver: () => Navigator.of(context).pop(),
       casillas: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _foco.requestFocus,
