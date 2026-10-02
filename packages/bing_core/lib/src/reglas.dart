@@ -77,3 +77,17 @@ int? sacarBolilla({
   if (quedan.isEmpty) return null;
   return quedan[(random ?? Random()).nextInt(quedan.length)];
 }
+
+/// Índices (base 0) de las filas ordenadas por avance: primero las que menos
+/// números les faltan y, a igual avance, por número de fila.
+List<int> ordenarPorAvance(List<List<int>> cartillas, Set<int> salidas) {
+  final indices = List<int>.generate(cartillas.length, (i) => i);
+  indices.sort((a, b) {
+    final porAvance = faltan(
+      cartillas[a],
+      salidas,
+    ).compareTo(faltan(cartillas[b], salidas));
+    return porAvance != 0 ? porAvance : a.compareTo(b);
+  });
+  return indices;
+}

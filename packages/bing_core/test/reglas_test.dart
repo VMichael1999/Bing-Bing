@@ -73,6 +73,19 @@ void main() {
     });
   });
 
+  group('ordenarPorAvance', () {
+    test(
+      'con 17 bolillas la fila 19 va primera y luego 2, 5, 8, 4, 6 y 16',
+      () {
+        final orden = ordenarPorAvance(
+          cartillasDemo,
+          bolillasDemo.take(17).toSet(),
+        );
+        expect(orden.take(7).map((i) => i + 1), [19, 2, 5, 8, 4, 6, 16]);
+      },
+    );
+  });
+
   group('sacarBolilla', () {
     test('nunca repite y se vacía al agotarse', () {
       final azar = Random(7);
