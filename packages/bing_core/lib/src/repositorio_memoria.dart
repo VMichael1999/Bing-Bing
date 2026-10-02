@@ -16,6 +16,7 @@ class RepositorioMemoria implements RepositorioOrganizador {
     this.organizador = 'Carmen',
     this.miUid = 'yo',
     this.ordenBolillas = const [],
+    this.publica = true,
   }) : _filas = [for (final n in cartillas) FilaEnVivo(numeros: n)];
 
   final List<List<int>> cartillas;
@@ -26,6 +27,9 @@ class RepositorioMemoria implements RepositorioOrganizador {
 
   /// Orden en que salen las bolillas cuando se sortea como organizador.
   final List<int> ordenBolillas;
+
+  /// Visibilidad de la sala; cambia al crearla con `crearSala`.
+  bool publica;
 
   final List<FilaEnVivo> _filas;
   final List<int> _bolillas = [];
@@ -48,6 +52,8 @@ class RepositorioMemoria implements RepositorioOrganizador {
     bolillas: List.of(_bolillas),
     ganadoras: List.of(_ganadoras),
     organizadorUid: miUid,
+    publica: publica,
+    ocupadas: _filas.where((f) => !f.libre).length,
   );
 
   @override
@@ -62,6 +68,17 @@ class RepositorioMemoria implements RepositorioOrganizador {
     }
     yield _foto;
     yield* _salaCambios.stream.map((_) => _foto);
+  }
+
+  @override
+  Stream<List<SalaEnVivo>> salasAbiertas() async* {
+    List<SalaEnVivo> visibles() => [
+      if (publica &&
+          (_estado == EstadoSala.abierta || _estado == EstadoSala.llena))
+        _foto,
+    ];
+    yield visibles();
+    yield* _salaCambios.stream.map((_) => visibles());
   }
 
   @override
@@ -146,7 +163,11 @@ class RepositorioMemoria implements RepositorioOrganizador {
   Future<String> crearSala({
     required String nombre,
     required int columnas,
-  }) async => codigo;
+    bool publica = true,
+  }) async {
+    this.publica = publica;
+    return codigo;
+  }
 
   @override
   Future<void> empezar(String codigo) async {

@@ -32,6 +32,8 @@ class SalaEnVivo {
     required this.ganadoras,
     this.organizadorUid,
     this.creadaEn,
+    this.publica = false,
+    this.ocupadas = 0,
   });
 
   final String codigo;
@@ -46,6 +48,14 @@ class SalaEnVivo {
   final List<GanadoraEnVivo> ganadoras;
   final String? organizadorUid;
   final DateTime? creadaEn;
+
+  /// Aparece en la lista de salas abiertas; si no, solo con el código o el enlace.
+  final bool publica;
+
+  /// Filas con jugador.
+  final int ocupadas;
+
+  int get libres => filasTotal - ocupadas;
 
   /// Ganó la fila en la posición [indice] de la lista de filas (base 0).
   bool ganoLaFila(int indice) => ganadoras.any((g) => g.fila == indice + 1);
@@ -90,6 +100,10 @@ abstract class RepositorioSala {
   Future<SalaEnVivo?> buscar(String codigo);
 
   Stream<SalaEnVivo?> sala(String codigo);
+
+  /// Salas públicas que aún reciben jugadores o están llenas, de la más nueva a
+  /// la más antigua. Es lo que ve cualquiera en la pantalla de inicio de Play.
+  Stream<List<SalaEnVivo>> salasAbiertas();
   Stream<List<FilaEnVivo>> filas(String codigo);
 
   /// Reserva [fila] (base 1) a nombre de [nombre]. Lanza [ErrorSalaBing].
@@ -110,7 +124,11 @@ abstract class RepositorioOrganizador implements RepositorioSala {
   Stream<List<SalaEnVivo>> misSalas();
 
   /// Crea una sala nueva y devuelve su código.
-  Future<String> crearSala({required String nombre, required int columnas});
+  Future<String> crearSala({
+    required String nombre,
+    required int columnas,
+    bool publica = true,
+  });
 
   Future<void> empezar(String codigo);
 

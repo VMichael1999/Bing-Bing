@@ -14,11 +14,15 @@ Future<void> _sala(
   String organizador = 'carmen',
   DateTime? creada,
   String estado = 'abierta',
+  bool publica = true,
+  int ocupadas = 0,
 }) => db.collection('salas').doc(codigo).set({
   'nombre': 'Sala $codigo',
   'organizadorUid': organizador,
   'organizadorNombre': 'Carmen',
   'estado': estado,
+  'publica': publica,
+  'ocupadas': ocupadas,
   'columnas': 5,
   'filasTotal': 20,
   'bolillas': [9, 30],
@@ -112,6 +116,39 @@ void main() {
       },
     );
 
+    test(
+      'salasAbiertas solo trae las públicas que reciben jugadores',
+      () async {
+        await _sala(db, 'ABRT', creada: DateTime(2026, 10, 1), ocupadas: 4);
+        await _sala(
+          db,
+          'LLEN',
+          creada: DateTime(2026, 10, 2),
+          estado: 'llena',
+          ocupadas: 20,
+        );
+        await _sala(db, 'PRIV', creada: DateTime(2026, 10, 3), publica: false);
+        await _sala(
+          db,
+          'JUGA',
+          creada: DateTime(2026, 10, 4),
+          estado: 'en_juego',
+        );
+        await _sala(
+          db,
+          'TERM',
+          creada: DateTime(2026, 10, 5),
+          estado: 'terminada',
+        );
+        final salas = await repo().salasAbiertas().first;
+        // La más nueva primero; ni la privada ni las que ya empezaron.
+        expect(salas.map((s) => s.codigo), ['LLEN', 'ABRT']);
+        expect(salas.first.ocupadas, 20);
+        expect(salas.last.libres, 16);
+        expect(salas.every((s) => s.publica), isTrue);
+      },
+    );
+
     test('uid es el de la sesión', () {
       expect(repo(uid: 'lucia').uid, 'lucia');
     });
@@ -132,7 +169,17 @@ void main() {
       respuesta = {'codigo': 'AB23'};
       final codigo = await repo().crearSala(nombre: 'Bingo', columnas: 5);
       expect(codigo, 'AB23');
-      expect(llamadas.single.$2, {'nombre': 'Bingo', 'columnas': 5});
+      expect(llamadas.single.$2, {
+        'nombre': 'Bingo',
+        'columnas': 5,
+        'publica': true,
+      });
+    });
+
+    test('crearSala envía que es privada cuando se pide', () async {
+      respuesta = {'codigo': 'AB23'};
+      await repo().crearSala(nombre: 'Familia', columnas: 5, publica: false);
+      expect(llamadas.single.$2['publica'], isFalse);
     });
 
     test('sacarBolilla devuelve el número del servidor', () async {

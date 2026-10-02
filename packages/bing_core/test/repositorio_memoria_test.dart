@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   pruebasOrganizador();
+  pruebasVisibilidad();
   RepositorioMemoria nueva() => RepositorioMemoria(cartillas: cartillasDemo);
 
   test('buscar solo encuentra el código de la sala', () async {
@@ -64,6 +65,50 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     await suscripcion.cancel();
     expect(estados, [EstadoSala.abierta, EstadoSala.enJuego]);
+  });
+}
+
+void pruebasVisibilidad() {
+  group('visibilidad', () {
+    RepositorioMemoria nueva({bool publica = true}) =>
+        RepositorioMemoria(cartillas: cartillasDemo, publica: publica);
+
+    test(
+      'una sala pública aparece en salasAbiertas con sus filas ocupadas',
+      () async {
+        final repo = nueva()..ocupar(1, 'Ana', 'u1');
+        final salas = await repo.salasAbiertas().first;
+        expect(salas.single.codigo, 'K7Q4');
+        expect(salas.single.publica, isTrue);
+        expect(salas.single.ocupadas, 1);
+        expect(salas.single.libres, 19);
+      },
+    );
+
+    test('una privada no se lista, pero se abre con su código', () async {
+      final repo = nueva(publica: false);
+      expect(await repo.salasAbiertas().first, isEmpty);
+      expect((await repo.buscar('K7Q4'))?.publica, isFalse);
+    });
+
+    test('crearSala fija la visibilidad', () async {
+      final repo = nueva();
+      await repo.crearSala(nombre: 'X', columnas: 5, publica: false);
+      expect(await repo.salasAbiertas().first, isEmpty);
+    });
+
+    test('al empezar la partida deja de listarse', () async {
+      final repo = nueva();
+      for (var i = 1; i <= 20; i++) {
+        repo.ocupar(i, 'J$i', 'u$i');
+      }
+      expect(
+        await repo.salasAbiertas().first,
+        hasLength(1),
+      ); // llena, aún se ve
+      repo.empezarPartida();
+      expect(await repo.salasAbiertas().first, isEmpty);
+    });
   });
 }
 
