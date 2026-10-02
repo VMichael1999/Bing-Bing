@@ -43,6 +43,29 @@ class SesionBing {
     return (await _auth.signInWithCredential(credencial)).user;
   }
 
+  /// Solo con el emulador de Firebase: entra con una cuenta de prueba, porque
+  /// el inicio de sesión con Google necesita una cuenta real y la huella SHA-1.
+  Future<User> entrarDePrueba({String nombre = 'Carmen'}) async {
+    assert(
+      _config.usarEmulador,
+      'La cuenta de prueba es solo para el emulador',
+    );
+    const correo = 'organizadora@prueba.bingbing.pe';
+    const clave = 'clave-de-prueba';
+    try {
+      await _auth.signInWithEmailAndPassword(email: correo, password: clave);
+    } on FirebaseAuthException {
+      final nueva = await _auth.createUserWithEmailAndPassword(
+        email: correo,
+        password: clave,
+      );
+      await nueva.user!.updateDisplayName(nombre);
+    }
+    // Renueva el token para que lleve el nombre.
+    await _auth.currentUser!.getIdToken(true);
+    return _auth.currentUser!;
+  }
+
   Future<void> salir() async {
     await GoogleSignIn().signOut();
     await _auth.signOut();

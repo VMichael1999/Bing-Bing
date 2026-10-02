@@ -9,6 +9,8 @@ class NuevaPartidaPage extends StatefulWidget {
     this.nombreInicial = '',
     this.alVolver,
     this.alAbrirSala,
+    this.error,
+    this.creando = false,
   });
 
   final String nombreInicial;
@@ -16,6 +18,10 @@ class NuevaPartidaPage extends StatefulWidget {
 
   /// Recibe el nombre y las columnas elegidas (5 o 6).
   final void Function(String nombre, int columnas)? alAbrirSala;
+
+  /// Por qué falló crear la sala, si falló.
+  final String? error;
+  final bool creando;
 
   @override
   State<NuevaPartidaPage> createState() => _NuevaPartidaPageState();
@@ -128,6 +134,10 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                         ),
                       ],
                     ),
+                    if (widget.error != null) ...[
+                      const SizedBox(height: 10),
+                      BingAviso(icono: 'bell', texto: widget.error!),
+                    ],
                   ],
                 ),
               ),
@@ -136,6 +146,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
               boton: BingBoton(
                 texto: 'Abrir sala',
                 tipo: BingBotonTipo.dauber,
+                deshabilitado: widget.creando,
                 alPresionar:
                     () => widget.alAbrirSala?.call(
                       _nombre.text.trim(),

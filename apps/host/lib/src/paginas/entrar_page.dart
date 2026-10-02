@@ -3,9 +3,18 @@ import 'package:flutter/widgets.dart';
 
 /// `org-01-entrar`: Google o celular. No hay opción de invitado.
 class EntrarPage extends StatefulWidget {
-  const EntrarPage({super.key, this.alContinuarConGoogle});
+  const EntrarPage({
+    super.key,
+    this.alContinuarConGoogle,
+    this.error,
+    this.entrando = false,
+  });
 
   final VoidCallback? alContinuarConGoogle;
+
+  /// Por qué falló el inicio de sesión, si falló.
+  final String? error;
+  final bool entrando;
 
   @override
   State<EntrarPage> createState() => _EntrarPageState();
@@ -48,8 +57,13 @@ class _EntrarPageState extends State<EntrarPage> {
                       texto: 'Continuar con Google',
                       tipo: BingBotonTipo.tinta,
                       icono: 'mail',
+                      deshabilitado: widget.entrando,
                       alPresionar: widget.alContinuarConGoogle,
                     ),
+                    if (widget.error != null) ...[
+                      const SizedBox(height: 10),
+                      BingAviso(icono: 'bell', texto: widget.error!),
+                    ],
                     const SizedBox(height: 14),
                     BingCampo(
                       controlador: _celular,

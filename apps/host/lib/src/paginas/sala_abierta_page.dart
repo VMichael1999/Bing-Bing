@@ -17,6 +17,7 @@ class SalaAbiertaPage extends StatelessWidget {
     this.alCompartir,
     this.alCopiar,
     this.alEmpezar,
+    this.error,
   });
 
   final String salaNombre;
@@ -31,6 +32,9 @@ class SalaAbiertaPage extends StatelessWidget {
   /// Con la cartilla llena el botón pasa a "Empezar partida" (estado que el
   /// diseño no muestra: solo enseña la hoja `org-05`).
   final VoidCallback? alEmpezar;
+
+  /// Por qué falló empezar la partida, si falló.
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +71,10 @@ class SalaAbiertaPage extends StatelessWidget {
                               : 'faltan $faltan jugadores',
                     ),
                     const SizedBox(height: 10),
+                    if (error != null) ...[
+                      BingAviso(icono: 'bell', texto: error!),
+                      const SizedBox(height: 10),
+                    ],
                     BingListaJugadores(jugadores: jugadores),
                   ],
                 ),

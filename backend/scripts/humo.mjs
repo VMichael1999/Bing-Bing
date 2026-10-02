@@ -93,7 +93,7 @@ while (ganadoras.length === 0 && salidas.size < 75) {
   ganadoras = r.ganadoras;
 }
 assert.ok(ganadoras.length > 0, "nadie ganó con las 75 bolillas");
-console.log(`✔ gana la fila ${ganadoras.map((f) => f + 1)} con ${salidas.size} bolillas`);
+console.log(`✔ gana la fila ${ganadoras} con ${salidas.size} bolillas`);
 
 const deshecha = await ok("deshacerBolilla", organizador, { codigo });
 assert.equal(deshecha.bolillas, salidas.size - 1);

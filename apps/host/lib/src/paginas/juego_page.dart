@@ -9,9 +9,10 @@ import 'ganador_page.dart';
 
 const _letras = ['B', 'I', 'N', 'G', 'O'];
 
-/// Decide qué bolilla sale. En producción lo resuelve el servidor; el modo demo
-/// devuelve la siguiente de la partida del diseño.
-typedef Sorteo = int? Function(List<int> salidas);
+/// Decide qué bolilla sale. En producción lo resuelve el servidor (por eso
+/// puede ser asíncrono); el modo demo devuelve la siguiente de la partida del
+/// diseño.
+typedef Sorteo = FutureOr<int?> Function(List<int> salidas);
 
 /// `JuegoPage`: pestañas Bolilla (`org-06`), Cartilla (`org-07`) y Tablero
 /// (`org-08`). Al tocar la bolilla grande se saca la siguiente.
@@ -26,6 +27,7 @@ class JuegoPage extends StatefulWidget {
     required this.sorteo,
     this.pestanaInicial = 0,
     this.alTerminar,
+    this.alDeshacer,
     this.conAutomatico = false,
     this.filasGanando = 5,
     this.cadaAutomatico = const Duration(milliseconds: 2800),
@@ -39,6 +41,10 @@ class JuegoPage extends StatefulWidget {
   final Sorteo sorteo;
   final int pestanaInicial;
   final VoidCallback? alTerminar;
+
+  /// Avisa al servidor de que se deshizo la última bolilla. Si falla, la
+  /// bolilla se queda donde estaba.
+  final Future<void> Function()? alDeshacer;
 
   /// Muestra el interruptor "Automático" (solo para la simulación).
   final bool conAutomatico;
@@ -114,16 +120,40 @@ class _JuegoPageState extends State<JuegoPage>
     return 'Salió la ${etiqueta(n, 5)} · ${filas == 0 ? 'ninguna fila la tiene' : 'se marcó en $filas ${filas == 1 ? 'fila' : 'filas'}'}';
   }
 
-  void _sacar() {
+  Future<void> _sacar() async {
     if (_ocupado) return;
-    final n = widget.sorteo(_salidas);
-    if (n == null) return;
+    final pedido = widget.sorteo(_salidas);
+    if (pedido == null) return;
     setState(() => _ocupado = true);
+    // El servidor responde mientras gira la bolilla; si tarda más, se espera.
+    // El error se atiende de inmediato para que no quede sin dueño durante
+    // la animación.
+    final respuesta = Future<int?>.value(pedido).then(
+      (n) => (n: n, fallo: false),
+      onError: (Object _) => (n: null, fallo: true),
+    );
     final reducir = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
-    if (reducir) {
-      _terminarSorteo(n);
+    if (!reducir) await _girar();
+    final (:n, :fallo) = await respuesta;
+    if (!mounted) return;
+    if (fallo) {
+      setState(() {
+        _ocupado = false;
+        _mostrada = _salidas.isEmpty ? null : _salidas.last;
+        _mensaje = 'No se pudo sacar la bolilla. Revisa tu conexión.';
+      });
       return;
     }
+    if (n == null) {
+      setState(() => _ocupado = false);
+      return;
+    }
+    _terminarSorteo(n);
+  }
+
+  /// La bolilla gira y muestra números al azar durante ~660 ms.
+  Future<void> _girar() {
+    final fin = Completer<void>();
     _balanceo.repeat(reverse: true);
     final azar = math.Random();
     final pool = [
@@ -132,18 +162,23 @@ class _JuegoPageState extends State<JuegoPage>
     ];
     var cambios = 0;
     _reloj = Timer.periodic(const Duration(milliseconds: _msCambio), (t) {
-      if (!mounted) return;
+      if (!mounted) {
+        t.cancel();
+        if (!fin.isCompleted) fin.complete();
+        return;
+      }
       cambios++;
       if (cambios >= _cambiosAlSortear) {
         t.cancel();
         _balanceo
           ..stop()
           ..value = 0;
-        _terminarSorteo(n);
+        fin.complete();
       } else {
         setState(() => _mostrada = pool[azar.nextInt(pool.length)]);
       }
     });
+    return fin.future;
   }
 
   void _terminarSorteo(int n) {
@@ -185,8 +220,24 @@ class _JuegoPageState extends State<JuegoPage>
     );
   }
 
-  void _deshacer() {
+  Future<void> _deshacer() async {
     if (_ocupado || _salidas.isEmpty) return;
+    final aviso = widget.alDeshacer;
+    if (aviso != null) {
+      setState(() => _ocupado = true);
+      try {
+        await aviso();
+      } catch (_) {
+        if (!mounted) return;
+        setState(() {
+          _ocupado = false;
+          _mensaje = 'No se pudo deshacer. Revisa tu conexión.';
+        });
+        return;
+      }
+      if (!mounted) return;
+      setState(() => _ocupado = false);
+    }
     setState(() {
       _salidas.removeLast();
       _mostrada = _salidas.isEmpty ? null : _salidas.last;

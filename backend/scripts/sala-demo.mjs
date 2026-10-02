@@ -2,9 +2,10 @@
 // probar las apps a mano desde un celular o un emulador de Android.
 //
 //   node backend/scripts/sala-demo.mjs crear            sala nueva con 4 filas tomadas
-//   node backend/scripts/sala-demo.mjs llenar CODIGO    toma las filas libres que falten
+//   node backend/scripts/sala-demo.mjs llenar CODIGO [n] toma n filas libres (por defecto todas)
 //   node backend/scripts/sala-demo.mjs empezar CODIGO   cierra la sala y empieza la partida
 //   node backend/scripts/sala-demo.mjs sacar CODIGO [n] saca n bolillas (por defecto 1)
+//   node backend/scripts/sala-demo.mjs ganar CODIGO FILA saca bolillas hasta que gane esa fila
 //
 // La cuenta de la organizadora se guarda en un archivo temporal para repetir.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -64,6 +65,24 @@ async function tomar(codigo, cantidad) {
   return libres.length;
 }
 
+// Saca bolillas hasta que a FILA le falte una y, entonces, saca y deshace hasta
+// que justo salga la que le falta. El azar sigue siendo del servidor.
+async function ganar(codigo, fila, token) {
+  const leer = async (ruta) =>
+    (await (await fetch(`${DOCS}/salas/${codigo}${ruta}`, { headers: { authorization: `Bearer ${token}` } })).json());
+  const numeros = (doc) => doc.fields.numeros.arrayValue.values.map((v) => Number(v.integerValue));
+  const propios = numeros(await leer(`/filas/${fila}`));
+  for (let vuelta = 0; vuelta < 500; vuelta++) {
+    const sala = await leer("");
+    const salidas = new Set((sala.fields.bolillas.arrayValue.values ?? []).map((v) => Number(v.integerValue)));
+    const faltan = propios.filter((n) => !salidas.has(n));
+    if (faltan.length === 0) return salidas.size;
+    const r = await llamar("sacarBolilla", token, { codigo });
+    if (faltan.length === 1 && r.numero !== faltan[0]) await llamar("deshacerBolilla", token, { codigo });
+  }
+  throw new Error("No se logró en 500 vueltas");
+}
+
 const [orden, codigo, cuantas] = process.argv.slice(2);
 const token = await organizador();
 switch (orden) {
@@ -74,7 +93,7 @@ switch (orden) {
     break;
   }
   case "llenar":
-    console.log(`${await tomar(codigo)} filas tomadas`);
+    console.log(`${await tomar(codigo, cuantas ? Number(cuantas) : undefined)} filas tomadas`);
     break;
   case "empezar":
     await llamar("empezarPartida", token, { codigo });
@@ -83,10 +102,13 @@ switch (orden) {
   case "sacar":
     for (let i = 0; i < Number(cuantas ?? 1); i++) {
       const r = await llamar("sacarBolilla", token, { codigo });
-      console.log(`Bolilla ${r.numero} (#${r.indice})${r.ganadoras.length ? ` · gana la fila ${r.ganadoras.map((f) => f + 1)}` : ""}`);
+      console.log(`Bolilla ${r.numero} (#${r.indice})${r.ganadoras.length ? ` · gana la fila ${r.ganadoras}` : ""}`);
       if (r.ganadoras.length) break;
     }
     break;
+  case "ganar":
+    console.log(`Gana la fila ${cuantas} con ${await ganar(codigo, Number(cuantas), token)} bolillas`);
+    break;
   default:
-    console.log("Uso: crear | llenar CODIGO | empezar CODIGO | sacar CODIGO [n]");
+    console.log("Uso: crear | llenar CODIGO [n] | empezar CODIGO | sacar CODIGO [n] | ganar CODIGO FILA");
 }
