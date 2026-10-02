@@ -1,5 +1,7 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Tokens visuales, fuentes, íconos y componentes de Bing Bing.
+library;
+
+export 'src/colores.dart';
+export 'src/medidas.dart';
+export 'src/tema.dart';
+export 'src/tipografia.dart';
