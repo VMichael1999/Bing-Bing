@@ -21,13 +21,14 @@ class NuevaPartidaPage extends StatefulWidget {
   final VoidCallback? alVolver;
 
   /// Recibe el nombre, las columnas elegidas (5 o 6), si la sala es pública, el
-  /// precio por fila y el premio.
+  /// precio por fila, el premio y cuántas filas puede tener cada persona.
   final void Function(
     String nombre,
     int columnas,
     bool publica,
     int precioFila,
     int premio,
+    int filasPorJugador,
   )?
   alAbrirSala;
 
@@ -45,6 +46,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
   );
   int _columnas = 0; // índice: 0 = 5 columnas, 1 = 6 columnas.
   int _visibilidad = 0; // índice: 0 = pública, 1 = privada.
+  int _filasPorJugador = 0; // índice: 0 = las que quiera, 1 = solo 1.
   int _precio = 5;
   int _premio = premioSugerido(5, 20);
 
@@ -54,6 +56,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
     _visibilidad == 0,
     _precio,
     _premio,
+    _filasPorJugador == 0 ? 20 : 1,
   );
 
   /// Abre la parte 2 (precio y premio); al "Abrir sala" de allí se crea la sala.
@@ -144,14 +147,24 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const BingSeccion(
+                    BingSeccion(
                       cabecera: 'FILAS POR JUGADOR',
                       children: [
-                        // Por ahora solo se permite 1 fila por jugador.
                         BingSegmento(
-                          opciones: ['1 fila', 'Hasta 3'],
-                          seleccion: 0,
-                          bloqueadas: {1},
+                          opciones: const ['Las que quiera', 'Solo 1'],
+                          seleccion: _filasPorJugador,
+                          alCambiar:
+                              (i) => setState(() => _filasPorJugador = i),
+                        ),
+                        Text(
+                          _filasPorJugador == 0
+                              ? 'Cada persona elige las filas que quiera, '
+                                  'mientras le alcance el saldo.'
+                              : 'Cada persona puede tener una sola fila.',
+                          style: BingTexto.figtree(
+                            12,
+                            600,
+                          ).copyWith(color: paleta.apagado),
                         ),
                       ],
                     ),

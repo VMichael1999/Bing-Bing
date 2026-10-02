@@ -76,7 +76,9 @@ class _ElegirFilaPageState extends State<ElegirFilaPage> {
       mostrarAvisoBing(
         context,
         _tope >= widget.limite
-            ? 'Esta sala permite hasta ${widget.limite} filas por persona'
+            ? (widget.limite == 1
+                ? 'Esta sala permite una sola fila por persona'
+                : 'Esta sala permite hasta ${widget.limite} filas por persona')
             : 'Con tu saldo alcanzas para $_tope ${_tope == 1 ? 'fila' : 'filas'}',
       );
       return;

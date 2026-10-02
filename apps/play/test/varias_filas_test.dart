@@ -106,6 +106,19 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 3));
     });
 
+    testWidgets('una sala de una sola fila lo dice en singular', (
+      tester,
+    ) async {
+      await abrir(tester, limite: 1, inicial: {1});
+      await tester.tap(fila(2));
+      await tester.pump();
+      expect(
+        find.text('Esta sala permite una sola fila por persona'),
+        findsOneWidget,
+      );
+      await tester.pumpAndSettle(const Duration(seconds: 3));
+    });
+
     testWidgets('el límite de la sala también cuenta', (tester) async {
       await abrir(tester, limite: 2, saldo: 100, precio: 5);
       await tester.tap(fila(1));

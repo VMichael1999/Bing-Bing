@@ -155,6 +155,33 @@ Por decidir:
 Por definir con el negocio: el porcentaje de comisión, si se cobra al cerrar una sala
 sin jugar (decidido: no) y qué pasa con lo que sobra tras el premio.
 
+## Billetera con créditos de prueba: lo que ya está hecho
+
+- Cada cuenta (no los invitados) tiene una **billetera en el servidor** (`billeteras/{uid}`)
+  con **25 créditos de prueba** de bienvenida, sin valor en dinero y que no se retiran.
+  El saldo y los movimientos solo los modifica el servidor; el cliente los lee.
+- **Recargar** agrega 10, 20, 50 o 100 créditos al instante, sin cobro.
+- **Elegir filas:** cada persona puede elegir **las filas que quiera** mientras le alcance el
+  saldo; cada fila cuesta lo que fijó quien organiza. Quien organiza puede limitarlo a una
+  fila por persona ("Solo 1"). La reserva es **todo o nada** y se cobra en la misma
+  transacción: sin saldo no se reserva nada.
+- **Sin saldo:** las filas se ven pero no se pueden elegir, y se ofrece recargar. La
+  comprobación se repite en el servidor.
+- **Cerrar una sala devuelve todo** lo pagado, fila por fila, una sola vez (aparece como
+  "Devolución" en el historial).
+- Una sala **gratis** (sin precio) no toca la billetera.
+
+Pendiente de la billetera:
+
+- **Pagar el premio** a quien gana: hoy la fila ganadora se muestra pero **no se acredita** el
+  premio. Falta decidir qué pasa si ganan varias filas a la vez (empate): propuesta, dividir
+  el premio en partes iguales (el resto, a quien organiza).
+- **Lo de quien organiza:** lo que queda tras el premio y la comisión (en el prototipo,
+  "Te quedan 10 créditos") aún no se acredita a su billetera.
+- Recargas con dinero real, solo tras validar lo legal.
+- Con el emulador, Play entra con una cuenta de prueba en vez de Google (no hay Google real
+  contra el emulador).
+
 ## Pendientes menores
 
 - Estados que el diseño no define: vacío, error, sin conexión y permiso de cámara

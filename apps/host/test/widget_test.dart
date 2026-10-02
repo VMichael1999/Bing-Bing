@@ -25,16 +25,18 @@ void main() {
     expect(find.text('5 por fila · premio 80'), findsOneWidget);
   });
 
-  testWidgets('la opción "Hasta 3" está bloqueada y no se puede elegir', (
-    tester,
-  ) async {
+  testWidgets('las filas por jugador se pueden limitar a una', (tester) async {
     await tester.pumpWidget(const BingHostApp());
     await tester.tap(find.text('Continuar con Google'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Nueva partida'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Hasta 3'));
+    expect(find.textContaining('elige las filas que quiera'), findsOneWidget);
+    await tester.tap(find.text('Solo 1'));
     await tester.pump();
-    expect(find.text('1 fila'), findsOneWidget);
+    expect(
+      find.text('Cada persona puede tener una sola fila.'),
+      findsOneWidget,
+    );
   });
 }

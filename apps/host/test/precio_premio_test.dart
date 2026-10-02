@@ -172,4 +172,56 @@ void main() {
     expect(sala?.precioFila, 5);
     expect(sala?.premio, 80);
   });
+
+  testWidgets('"Solo 1" fila por jugador llega a la sala', (tester) async {
+    tester.view
+      ..devicePixelRatio = 2
+      ..physicalSize = const Size(360 * 2, 800 * 2);
+    addTearDown(tester.view.reset);
+    final repo = RepositorioMemoria(
+      cartillas: cartillasDemo,
+      ordenBolillas: bolillasDemo,
+    );
+    await tester.pumpWidget(
+      BingHostApp(
+        repositorio: repo,
+        entrar: () async => 'Carmen',
+        organizadorActual: 'Carmen',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nueva partida'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Solo 1'));
+    await tester.pump();
+    await tester.tap(find.text('Abrir sala'));
+    await tester.pumpAndSettle();
+    expect((await repo.buscar('K7Q4'))?.filasPorJugador, 1);
+  });
+
+  testWidgets('por defecto cada persona elige las filas que quiera', (
+    tester,
+  ) async {
+    tester.view
+      ..devicePixelRatio = 2
+      ..physicalSize = const Size(360 * 2, 800 * 2);
+    addTearDown(tester.view.reset);
+    final repo = RepositorioMemoria(
+      cartillas: cartillasDemo,
+      ordenBolillas: bolillasDemo,
+    );
+    await tester.pumpWidget(
+      BingHostApp(
+        repositorio: repo,
+        entrar: () async => 'Carmen',
+        organizadorActual: 'Carmen',
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nueva partida'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Abrir sala'));
+    await tester.pumpAndSettle();
+    expect((await repo.buscar('K7Q4'))?.filasPorJugador, 20);
+  });
 }
