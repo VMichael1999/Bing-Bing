@@ -1,0 +1,17 @@
+rules_version = '2';
+
+// Los clientes solo leen. Reservas, sorteo y cambios de estado pasan por las
+// Cloud Functions (`functions/src/index.ts`), que validan todo en el servidor.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /salas/{codigo} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /filas/{fila} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+  }
+}
