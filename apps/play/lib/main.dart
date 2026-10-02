@@ -33,6 +33,7 @@ class BingPlayApp extends StatelessWidget {
               settings: settings,
               pageBuilder: (context, _, __) => builder(context),
             ),
+        builder: (context, child) => BingSistema(child: child!),
         home: inicio ?? pantallaDemo(_pantallaElegida) ?? const _FlujoDemo(),
       ),
     );
