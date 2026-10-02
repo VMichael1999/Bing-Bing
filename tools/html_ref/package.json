@@ -1,0 +1,12 @@
+{
+  "name": "html-ref",
+  "private": true,
+  "type": "module",
+  "description": "Capturas de referencia del diseño HTML de Bing Bing",
+  "scripts": {
+    "capturar": "node capturar.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}
