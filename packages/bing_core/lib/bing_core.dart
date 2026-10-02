@@ -3,5 +3,6 @@ library;
 
 export 'src/demo.dart';
 export 'src/reglas.dart';
+export 'src/repositorio_memoria.dart';
 export 'src/sala_en_vivo.dart';
 export 'src/simulacion.dart';
