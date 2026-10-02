@@ -24,7 +24,8 @@ Future<void> main() async {
   try {
     await SesionBing().entrarAnonimo();
     runApp(BingPlayApp(repositorio: RepositorioFirestore()));
-  } catch (_) {
+  } catch (e) {
+    debugPrint('Play: no se pudo iniciar sesión: $e');
     runApp(const BingPlayApp(inicio: _SinConexion()));
   }
 }
