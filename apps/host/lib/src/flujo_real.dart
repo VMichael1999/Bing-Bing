@@ -3,6 +3,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'ajustes_real.dart';
 import 'compartir.dart';
 import 'paginas/cartilla_llena_sheet.dart';
 import 'paginas/entrar_page.dart';
@@ -146,9 +147,13 @@ class FlujoHostReal extends StatefulWidget {
     required this.repositorio,
     required this.entrar,
     this.organizadorActual,
+    this.sesion,
   });
 
   final RepositorioOrganizador repositorio;
+
+  /// La cuenta de quien organiza; sin ella la tuerca de ajustes no hace nada.
+  final SesionJugador? sesion;
 
   /// Inicia sesión y devuelve el nombre de quien organiza; `null` si cancela.
   final Future<String?> Function() entrar;
@@ -163,6 +168,7 @@ class FlujoHostReal extends StatefulWidget {
 class _FlujoHostRealState extends State<FlujoHostReal> {
   String? _error;
   bool _entrando = false;
+  late String? _organizador = widget.organizadorActual;
 
   Future<void> _entrar() async {
     setState(() {
@@ -172,17 +178,10 @@ class _FlujoHostRealState extends State<FlujoHostReal> {
     try {
       final nombre = await widget.entrar();
       if (!mounted) return;
-      setState(() => _entrando = false);
-      if (nombre != null) {
-        _ir(
-          context,
-          _MisPartidasReal(
-            repositorio: widget.repositorio,
-            organizador: nombre,
-          ),
-          nombre: 'mis_partidas',
-        );
-      }
+      setState(() {
+        _entrando = false;
+        _organizador = nombre;
+      });
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -192,13 +191,26 @@ class _FlujoHostRealState extends State<FlujoHostReal> {
     }
   }
 
+  /// Tras cerrar sesión o borrar la cuenta: se cierran las pantallas abiertas y
+  /// se vuelve a pedir que entre.
+  void _salir() {
+    Navigator.of(context).popUntil((ruta) => ruta.isFirst);
+    setState(() => _organizador = null);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final actual = widget.organizadorActual;
+    final actual = _organizador;
     if (actual != null) {
+      final sesion = widget.sesion;
       return _MisPartidasReal(
         repositorio: widget.repositorio,
         organizador: actual,
+        alAjustes:
+            sesion == null
+                ? null
+                : () =>
+                    _ir(context, AjustesReal(sesion: sesion, alSalir: _salir)),
       );
     }
     return EntrarPage(
@@ -213,10 +225,12 @@ class _MisPartidasReal extends StatelessWidget {
   const _MisPartidasReal({
     required this.repositorio,
     required this.organizador,
+    this.alAjustes,
   });
 
   final RepositorioOrganizador repositorio;
   final String organizador;
+  final VoidCallback? alAjustes;
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +240,7 @@ class _MisPartidasReal extends StatelessWidget {
         final salas = foto.data ?? const <SalaEnVivo>[];
         return MisPartidasPage(
           organizador: organizador,
+          alAjustes: alAjustes,
           partidas: [
             for (final s in salas)
               (

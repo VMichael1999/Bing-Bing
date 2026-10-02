@@ -27,6 +27,7 @@ Future<void> main() async {
   runApp(
     BingHostApp(
       repositorio: RepositorioFirestore(),
+      sesion: SesionJugadorFirebase(),
       organizadorActual:
           sesion.esOrganizador
               ? sesion.usuario!.displayName ?? 'Organizador'
@@ -50,6 +51,7 @@ class BingHostApp extends StatelessWidget {
     this.repositorio,
     this.entrar,
     this.organizadorActual,
+    this.sesion,
   });
 
   /// Pantalla con la que arranca; por defecto, el recorrido demo.
@@ -63,6 +65,9 @@ class BingHostApp extends StatelessWidget {
 
   /// Si ya hay una sesión de organizadora, se salta la pantalla de entrar.
   final String? organizadorActual;
+
+  /// La cuenta de quien organiza: habilita Ajustes con cerrar sesión.
+  final SesionJugador? sesion;
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +92,7 @@ class BingHostApp extends StatelessWidget {
                   repositorio: repositorio!,
                   entrar: entrar ?? () async => 'Organizador',
                   organizadorActual: organizadorActual,
+                  sesion: sesion,
                 )),
       ),
     );

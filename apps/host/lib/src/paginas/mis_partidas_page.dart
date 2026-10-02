@@ -12,6 +12,7 @@ class MisPartidasPage extends StatelessWidget {
     required this.partidas,
     this.alNuevaPartida,
     this.alAbrirPartida,
+    this.alAjustes,
   });
 
   final String organizador;
@@ -20,6 +21,9 @@ class MisPartidasPage extends StatelessWidget {
 
   /// Recibe la posición de la partida tocada en [partidas].
   final ValueChanged<int>? alAbrirPartida;
+
+  /// La tuerca de arriba: ajustes de la cuenta.
+  final VoidCallback? alAjustes;
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +39,10 @@ class MisPartidasPage extends StatelessWidget {
                 conVolver: false,
                 titulo: 'Tus partidas',
                 subtitulo: '$organizador · organizadora',
-                accion: const BingBotonIcono(
+                accion: BingBotonIcono(
                   icono: 'gear',
                   etiqueta: 'Ajustes',
+                  alPresionar: alAjustes,
                 ),
               ),
               const SizedBox(height: 12),

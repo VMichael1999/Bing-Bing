@@ -101,5 +101,10 @@ Widget? pantallaDemo(String id) => switch (id) {
     publica: true,
   ),
   'org-12-qr-pantalla' => const QrPantallaPage(codigo: salaDemoCodigo),
+  'org-13-ajustes' => const BingCuenta(
+    titulo: 'Ajustes',
+    nombre: 'Carmen Ruiz',
+    correo: 'carmen@correo.com',
+  ),
   _ => null,
 };
