@@ -8,22 +8,25 @@ import 'tipografia.dart';
 
 /// Campo de texto de 50 dp (`.field`), con ícono a la izquierda.
 ///
-/// Con foco o con texto el borde pasa a `tinta` y el texto a peso 700.
+/// Con foco el borde pasa a `tinta`; con foco o con texto, el texto va en
+/// `tinta` y peso 700.
 class BingCampo extends StatefulWidget {
   const BingCampo({
     super.key,
     required this.controlador,
-    required this.icono,
+    this.icono,
     this.pista,
     this.maxLargo = 18,
     this.alCambiar,
+    this.autofoco = false,
   });
 
   final TextEditingController controlador;
-  final String icono;
+  final String? icono;
   final String? pista;
   final int maxLargo;
   final ValueChanged<String>? alCambiar;
+  final bool autofoco;
 
   @override
   State<BingCampo> createState() => _BingCampoState();
@@ -51,7 +54,8 @@ class _BingCampoState extends State<BingCampo> {
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
-    final activo = _foco.hasFocus || widget.controlador.text.isNotEmpty;
+    final conTexto = widget.controlador.text.isNotEmpty;
+    final activo = _foco.hasFocus || conTexto;
     final estilo = BingTexto.figtree(
       14.5,
       activo ? 700 : 400,
@@ -66,17 +70,19 @@ class _BingCampoState extends State<BingCampo> {
           color: paleta.tarjeta,
           borderRadius: BorderRadius.circular(BingMedidas.radioCampo),
           border: Border.all(
-            color: activo ? paleta.tinta : paleta.linea,
+            color: _foco.hasFocus ? paleta.tinta : paleta.linea,
             width: BingMedidas.bordeCampo,
           ),
         ),
         child: Row(
           children: [
-            BingIcono(
-              widget.icono,
-              color: activo ? paleta.tinta : paleta.apagado,
-            ),
-            const SizedBox(width: 10),
+            if (widget.icono != null) ...[
+              BingIcono(
+                widget.icono!,
+                color: activo ? paleta.tinta : paleta.apagado,
+              ),
+              const SizedBox(width: 10),
+            ],
             Expanded(
               child: Stack(
                 alignment: Alignment.centerLeft,
@@ -86,6 +92,7 @@ class _BingCampoState extends State<BingCampo> {
                   EditableText(
                     controller: widget.controlador,
                     focusNode: _foco,
+                    autofocus: widget.autofoco,
                     style: estilo,
                     cursorColor: paleta.tinta,
                     cursorWidth: 1.5,
