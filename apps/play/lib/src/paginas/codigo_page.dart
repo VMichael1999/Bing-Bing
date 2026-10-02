@@ -15,6 +15,7 @@ class CodigoPage extends StatelessWidget {
     this.resultado,
     this.verFilasHabilitado = true,
     this.alVolver,
+    this.bajoElQr,
   });
 
   final String codigo;
@@ -34,6 +35,9 @@ class CodigoPage extends StatelessWidget {
   /// Con él aparece un botón de volver arriba a la izquierda (cuando la pantalla
   /// se abre desde otra); sin él queda idéntica al diseño.
   final VoidCallback? alVolver;
+
+  /// Contenido bajo el botón del QR (las salas abiertas); sin él, el diseño.
+  final Widget? bajoElQr;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +82,10 @@ class CodigoPage extends StatelessWidget {
                           icono: 'qr',
                           alPresionar: alEscanear,
                         ),
+                        if (bajoElQr != null) ...[
+                          const SizedBox(height: 22),
+                          bajoElQr!,
+                        ],
                       ],
                     ),
                   ),

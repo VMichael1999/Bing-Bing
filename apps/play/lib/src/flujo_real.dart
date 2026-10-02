@@ -12,7 +12,7 @@ import 'paginas/en_vivo_simulada_page.dart' show textoHace;
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
-import 'paginas/salas_page.dart';
+import 'paginas/salas_abiertas.dart';
 
 /// Mensaje en español para un error del servidor.
 String mensajeDeError(Object error) {
@@ -36,8 +36,11 @@ void _ir(BuildContext context, Widget pantalla, {bool reemplazar = false}) {
   reemplazar ? navegador.pushReplacement(ruta) : navegador.push(ruta);
 }
 
+enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
+
 /// Recorrido con la sala de verdad: la sala y las filas llegan en vivo y la
-/// reserva la decide el servidor. Arranca en la lista de salas abiertas.
+/// reserva la decide el servidor. Arranca en el código y el QR, con las salas
+/// públicas abiertas debajo.
 class FlujoReal extends StatefulWidget {
   const FlujoReal({super.key, required this.repositorio});
 
@@ -52,40 +55,6 @@ class _FlujoRealState extends State<FlujoReal> {
   late final Stream<List<SalaEnVivo>> _salas =
       widget.repositorio.salasAbiertas();
 
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<SalaEnVivo>>(
-      stream: _salas,
-      builder:
-          (context, foto) => SalasPage(
-            salas: foto.data,
-            error: foto.hasError,
-            alEscribirCodigo:
-                () =>
-                    _ir(context, _CodigoReal(repositorio: widget.repositorio)),
-            alElegirSala:
-                (sala) => _ir(
-                  context,
-                  _ElegirFilaReal(repositorio: widget.repositorio, sala: sala),
-                ),
-          ),
-    );
-  }
-}
-
-enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
-
-/// Escribir el código de una sala (las privadas se entran así).
-class _CodigoReal extends StatefulWidget {
-  const _CodigoReal({required this.repositorio});
-
-  final RepositorioSala repositorio;
-
-  @override
-  State<_CodigoReal> createState() => _CodigoRealState();
-}
-
-class _CodigoRealState extends State<_CodigoReal> {
   final _texto = TextEditingController();
   final _foco = FocusNode();
   _Busqueda _busqueda = _Busqueda.vacio;
@@ -184,7 +153,23 @@ class _CodigoRealState extends State<_CodigoReal> {
       organizador: sala?.organizador ?? '',
       filasLibres: _libres,
       verFilasHabilitado: puede,
-      alVolver: () => Navigator.of(context).pop(),
+      bajoElQr: StreamBuilder<List<SalaEnVivo>>(
+        stream: _salas,
+        builder:
+            (context, foto) => SalasAbiertas(
+              salas: foto.data == null ? null : salasConSitio(foto.data!),
+              error: foto.hasError,
+              atenuada: _texto.text.isNotEmpty,
+              alElegirSala:
+                  (sala) => _ir(
+                    context,
+                    _ElegirFilaReal(
+                      repositorio: widget.repositorio,
+                      sala: sala,
+                    ),
+                  ),
+            ),
+      ),
       casillas: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _foco.requestFocus,
@@ -206,7 +191,7 @@ class _CodigoRealState extends State<_CodigoReal> {
                 child: EditableText(
                   controller: _texto,
                   focusNode: _foco,
-                  autofocus: true,
+                  autofocus: false,
                   style: BingTexto.figtree(14, 700),
                   cursorColor: paleta.tinta,
                   backgroundCursorColor: paleta.linea,

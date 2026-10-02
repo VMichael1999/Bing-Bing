@@ -7,9 +7,9 @@ import 'paginas/en_vivo_page.dart';
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
-import 'paginas/salas_page.dart';
+import 'paginas/salas_abiertas.dart';
 
-/// Las salas públicas del diseño (`jug-07`).
+/// Las salas públicas del inicio (`jug-07`).
 List<SalaEnVivo> salasDemo() {
   SalaEnVivo sala(
     String codigo,
@@ -39,7 +39,23 @@ List<SalaEnVivo> salasDemo() {
 /// Pantalla del diseño por su identificador (`jug-01-codigo`, …), con los datos
 /// del modo demo. Sirve para revisar una pantalla sin recorrer el flujo.
 Widget? pantallaDemo(String id) => switch (id) {
-  'jug-07-salas' => SalasPage(salas: salasDemo(), alEscanear: () {}),
+  'jug-07-inicio-salas' => CodigoPage(
+    codigo: '',
+    salaNombre: '',
+    organizador: '',
+    filasLibres: 0,
+    resultado: const SizedBox(height: 40),
+    alEscanear: () {},
+    bajoElQr: SalasAbiertas(salas: salasConSitio(salasDemo())),
+  ),
+  'jug-07b-inicio-sin-salas' => const CodigoPage(
+    codigo: '',
+    salaNombre: '',
+    organizador: '',
+    filasLibres: 0,
+    resultado: SizedBox(height: 40),
+    bajoElQr: SalasAbiertas(salas: []),
+  ),
   'jug-01-codigo' => const CodigoPage(
     codigo: salaDemoCodigo,
     salaNombre: salaDemoNombre,

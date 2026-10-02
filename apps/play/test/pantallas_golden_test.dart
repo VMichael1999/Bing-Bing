@@ -54,9 +54,11 @@ void main() {
   final skip = !Platform.isMacOS; // El render de texto cambia entre sistemas.
   final lucia = cartillasDemo[4];
 
-  testWidgets('jug-07-salas', (tester) async {
-    await _capturar(tester, 'jug-07-salas', pantallaDemo('jug-07-salas')!);
-  }, skip: skip);
+  for (final id in ['jug-07-inicio-salas', 'jug-07b-inicio-sin-salas']) {
+    testWidgets(id, (tester) async {
+      await _capturar(tester, id, pantallaDemo(id)!);
+    }, skip: skip);
+  }
 
   testWidgets('jug-03-reservar', (tester) async {
     await _capturar(
