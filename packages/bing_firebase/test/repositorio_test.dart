@@ -3,6 +3,7 @@ import 'package:bing_firebase/bing_firebase.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  pruebasOrganizador();
   test('salaDesdeMapa lee el documento de la sala', () {
     final sala = salaDesdeMapa('K7Q4', {
       'nombre': 'Bingo de los sábados',
@@ -59,5 +60,40 @@ void main() {
     );
     expect(errorDeFunciones('not-found', null, null).codigo, 'no_existe');
     expect(errorDeFunciones('unavailable', null, null).codigo, 'unavailable');
+  });
+}
+
+void pruebasOrganizador() {
+  test('salaDesdeMapa lee quién organiza y cuándo se creó', () {
+    final sala = salaDesdeMapa('K7Q4', {
+      'nombre': 'X',
+      'organizadorUid': 'carmen',
+      'creadaEn': DateTime(2026, 10, 2, 21),
+    });
+    expect(sala.organizadorUid, 'carmen');
+    expect(sala.creadaEn, DateTime(2026, 10, 2, 21));
+  });
+
+  test('ordenarSalas pone primero la más nueva y al final las sin fecha', () {
+    SalaEnVivo sala(String c, DateTime? f) =>
+        salaDesdeMapa(c, {'nombre': c, if (f != null) 'creadaEn': f});
+    final orden = ordenarSalas([
+      sala('SIN', null),
+      sala('VIEJA', DateTime(2026, 9, 1)),
+      sala('NUEVA', DateTime(2026, 10, 1)),
+    ]);
+    expect(orden.map((s) => s.codigo), ['NUEVA', 'VIEJA', 'SIN']);
+  });
+
+  test('filasDesdeDocumentos lee la hora de reserva', () {
+    final filas = filasDesdeDocumentos({
+      '1': {
+        'numeros': [1, 16, 31, 46, 61],
+        'jugadorUid': 'u',
+        'nombre': 'Ana',
+        'reservadaEn': DateTime(2026, 10, 2, 20, 44),
+      },
+    });
+    expect(filas.single.reservadaEn, DateTime(2026, 10, 2, 20, 44));
   });
 }
