@@ -11,6 +11,9 @@ class CodigoPage extends StatelessWidget {
     required this.filasLibres,
     this.alVerFilas,
     this.alEscanear,
+    this.casillas,
+    this.resultado,
+    this.verFilasHabilitado = true,
   });
 
   final String codigo;
@@ -19,6 +22,13 @@ class CodigoPage extends StatelessWidget {
   final int filasLibres;
   final VoidCallback? alVerFilas;
   final VoidCallback? alEscanear;
+
+  /// Casillas del código; por defecto las del diseño, con [codigo] escrito.
+  final Widget? casillas;
+
+  /// Lo que se muestra bajo las casillas; por defecto la sala encontrada.
+  final Widget? resultado;
+  final bool verFilasHabilitado;
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +53,15 @@ class CodigoPage extends StatelessWidget {
                       texto: 'Escribe el código que te dio quien organiza',
                     ),
                     const SizedBox(height: 14),
-                    BingCasillasCodigo(codigo: codigo),
+                    casillas ?? BingCasillasCodigo(codigo: codigo),
                     const SizedBox(height: 14),
-                    BingEncontrada(
-                      titulo: salaNombre,
-                      detalle:
-                          'Organiza $organizador · quedan $filasLibres '
-                          'filas libres',
-                    ),
+                    resultado ??
+                        BingEncontrada(
+                          titulo: salaNombre,
+                          detalle:
+                              'Organiza $organizador · quedan $filasLibres '
+                              'filas libres',
+                        ),
                     const SizedBox(height: 14),
                     const BingSeparadorO(),
                     const SizedBox(height: 14),
@@ -68,6 +79,7 @@ class CodigoPage extends StatelessWidget {
               boton: BingBoton(
                 texto: 'Ver filas libres',
                 tipo: BingBotonTipo.tinta,
+                deshabilitado: !verFilasHabilitado,
                 alPresionar: alVerFilas,
               ),
               nota: 'Sin cuenta. Tu nombre lo pones al elegir la fila.',

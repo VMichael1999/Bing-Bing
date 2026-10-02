@@ -8,6 +8,7 @@ export type EstadoSala = "abierta" | "llena" | "en_juego" | "terminada";
 export interface Sala {
   nombre: string;
   organizadorUid: string;
+  organizadorNombre: string;
   columnas: 5 | 6;
   filasTotal: number;
   filasPorJugador: number;

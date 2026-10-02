@@ -47,6 +47,10 @@ const anonimo = await registrar();
 await rechazada("crearSala", anonimo, { nombre: "X" }, "PERMISSION_DENIED");
 const { codigo } = await ok("crearSala", organizador, { nombre: "Bingo de los sábados", columnas: 5 });
 assert.match(codigo, /^[A-Z2-9]{4}$/);
+const datosSala = await (
+  await fetch(`${DOCS}/salas/${codigo}`, { headers: { authorization: `Bearer ${organizador}` } })
+).json();
+assert.equal(datosSala.fields.organizadorNombre.stringValue, "quien organiza");
 console.log(`✔ sala ${codigo} creada`);
 
 // No se puede empezar ni sortear con la cartilla a medias.

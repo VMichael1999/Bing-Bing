@@ -49,6 +49,12 @@ function uidOrganizador(request: CallableRequest): string {
   return uid;
 }
 
+/** Nombre que ven los jugadores: el de la cuenta de Google, si lo tiene. */
+function organizadorNombre(request: CallableRequest): string {
+  const nombre = request.auth?.token.name;
+  return typeof nombre === "string" && nombre.trim() ? nombre.trim().slice(0, 40) : "quien organiza";
+}
+
 function codigoDe(datos: unknown): string {
   const codigo = (datos as { codigo?: unknown } | null)?.codigo;
   if (typeof codigo !== "string" || !/^[A-Z2-9]{4}$/.test(codigo)) {
@@ -94,6 +100,7 @@ export const crearSala = onCall(async (request) => {
       const sala: Sala = {
         nombre,
         organizadorUid: uid,
+        organizadorNombre: organizadorNombre(request),
         columnas,
         filasTotal: FILAS_TOTAL,
         filasPorJugador: 1,

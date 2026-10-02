@@ -1,0 +1,92 @@
+// Simula a quien organiza y a los demás jugadores contra el emulador, para
+// probar las apps a mano desde un celular o un emulador de Android.
+//
+//   node backend/scripts/sala-demo.mjs crear            sala nueva con 4 filas tomadas
+//   node backend/scripts/sala-demo.mjs llenar CODIGO    toma las filas libres que falten
+//   node backend/scripts/sala-demo.mjs empezar CODIGO   cierra la sala y empieza la partida
+//   node backend/scripts/sala-demo.mjs sacar CODIGO [n] saca n bolillas (por defecto 1)
+//
+// La cuenta de la organizadora se guarda en un archivo temporal para repetir.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+const PROYECTO = process.env.PROYECTO ?? "bingbing-f1491";
+const HOST = process.env.EMULADOR ?? "127.0.0.1";
+const AUTH = `http://${HOST}:9099/identitytoolkit.googleapis.com/v1/accounts`;
+const FUNCIONES = `http://${HOST}:5001/${PROYECTO}/us-central1`;
+const DOCS = `http://${HOST}:8080/v1/projects/${PROYECTO}/databases/(default)/documents`;
+const CUENTA = join(tmpdir(), "bing-sala-demo.json");
+
+async function post(url, cuerpo, token) {
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json", ...(token && { authorization: `Bearer ${token}` }) },
+    body: JSON.stringify(cuerpo),
+  });
+  return r.json();
+}
+
+async function organizador() {
+  const cuerpo = { returnSecureToken: true };
+  if (existsSync(CUENTA)) {
+    const r = await post(`${AUTH}:signInWithPassword?key=x`, { ...cuerpo, ...JSON.parse(readFileSync(CUENTA, "utf8")) });
+    if (r.idToken) return r.idToken;
+  }
+  const cuenta = { email: `carmen+${Date.now()}@prueba.pe`, password: "clave-de-prueba" };
+  writeFileSync(CUENTA, JSON.stringify(cuenta));
+  return (await post(`${AUTH}:signUp?key=x`, { ...cuerpo, ...cuenta })).idToken;
+}
+
+const anonimo = async () => (await post(`${AUTH}:signUp?key=x`, { returnSecureToken: true })).idToken;
+
+async function llamar(nombre, token, data) {
+  const r = await post(`${FUNCIONES}/${nombre}`, { data }, token);
+  if (!r.result) throw new Error(`${nombre}: ${JSON.stringify(r.error)}`);
+  return r.result;
+}
+
+async function filasLibres(codigo, token) {
+  const r = await fetch(`${DOCS}/salas/${codigo}/filas`, { headers: { authorization: `Bearer ${token}` } });
+  const { documents = [] } = await r.json();
+  return documents
+    .filter((d) => !d.fields.jugadorUid)
+    .map((d) => Number(d.name.split("/").pop()))
+    .sort((a, b) => a - b);
+}
+
+async function tomar(codigo, cantidad) {
+  const token = await organizador();
+  const libres = (await filasLibres(codigo, token)).slice(0, cantidad ?? Infinity);
+  for (const fila of libres) {
+    await llamar("reservarFila", await anonimo(), { codigo, fila, nombre: `Jugador ${fila}` });
+  }
+  return libres.length;
+}
+
+const [orden, codigo, cuantas] = process.argv.slice(2);
+const token = await organizador();
+switch (orden) {
+  case "crear": {
+    const r = await llamar("crearSala", token, { nombre: "Bingo de los sábados", columnas: 5 });
+    await tomar(r.codigo, 4);
+    console.log(`Sala ${r.codigo} creada con 4 filas tomadas`);
+    break;
+  }
+  case "llenar":
+    console.log(`${await tomar(codigo)} filas tomadas`);
+    break;
+  case "empezar":
+    await llamar("empezarPartida", token, { codigo });
+    console.log("Partida empezada");
+    break;
+  case "sacar":
+    for (let i = 0; i < Number(cuantas ?? 1); i++) {
+      const r = await llamar("sacarBolilla", token, { codigo });
+      console.log(`Bolilla ${r.numero} (#${r.indice})${r.ganadoras.length ? ` · gana la fila ${r.ganadoras.map((f) => f + 1)}` : ""}`);
+      if (r.ganadoras.length) break;
+    }
+    break;
+  default:
+    console.log("Uso: crear | llenar CODIGO | empezar CODIGO | sacar CODIGO [n]");
+}

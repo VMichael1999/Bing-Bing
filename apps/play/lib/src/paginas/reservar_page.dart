@@ -15,6 +15,8 @@ class ReservarPage extends StatefulWidget {
     this.nombreInicial = '',
     this.alVolver,
     this.alReservar,
+    this.error,
+    this.reservando = false,
   });
 
   final String salaNombre;
@@ -26,6 +28,10 @@ class ReservarPage extends StatefulWidget {
   final String nombreInicial;
   final VoidCallback? alVolver;
   final ValueChanged<String>? alReservar;
+
+  /// Por qué falló la reserva, si falló.
+  final String? error;
+  final bool reservando;
 
   @override
   State<ReservarPage> createState() => _ReservarPageState();
@@ -94,6 +100,10 @@ class _ReservarPageState extends State<ReservarPage> {
                           'Al reservar, la fila ${widget.fila} queda a tu '
                           'nombre y ya no podrás cambiarla por otra.',
                     ),
+                    if (widget.error != null) ...[
+                      const SizedBox(height: 12),
+                      BingAviso(icono: 'bell', texto: widget.error!),
+                    ],
                   ],
                 ),
               ),
@@ -102,6 +112,7 @@ class _ReservarPageState extends State<ReservarPage> {
               boton: BingBoton(
                 texto: 'Reservar fila ${widget.fila}',
                 tipo: BingBotonTipo.tinta,
+                deshabilitado: widget.reservando,
                 alPresionar: () => widget.alReservar?.call(_nombre.text.trim()),
               ),
             ),

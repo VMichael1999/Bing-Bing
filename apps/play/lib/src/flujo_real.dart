@@ -1,0 +1,517 @@
+import 'dart:async';
+
+import 'package:bing_core/bing_core.dart';
+import 'package:bing_ui/bing_ui.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+import 'paginas/codigo_page.dart';
+import 'paginas/elegir_fila_page.dart';
+import 'paginas/en_vivo_page.dart';
+import 'paginas/en_vivo_simulada_page.dart' show textoHace;
+import 'paginas/esperando_page.dart';
+import 'paginas/ganaste_page.dart';
+import 'paginas/reservar_page.dart';
+
+/// Mensaje en español para un error del servidor.
+String mensajeDeError(Object error) {
+  if (error is! ErrorSalaBing) {
+    return 'No pudimos conectar. Revisa tu internet e inténtalo de nuevo.';
+  }
+  return switch (error.codigo) {
+    'fila_ocupada' =>
+      'Esa fila ya la tomó otra persona. Vuelve atrás y elige otra.',
+    'limite_de_filas' => 'Ya tienes una fila en esta sala.',
+    'sala_no_abierta' => 'La sala ya no recibe jugadores.',
+    'nombre_invalido' => 'El nombre debe tener entre 1 y 18 caracteres.',
+    'no_existe' => 'Esa sala ya no existe.',
+    _ => 'No pudimos reservar la fila. Inténtalo de nuevo.',
+  };
+}
+
+void _ir(BuildContext context, Widget pantalla, {bool reemplazar = false}) {
+  final ruta = PageRouteBuilder<void>(pageBuilder: (c, _, __) => pantalla);
+  final navegador = Navigator.of(context);
+  reemplazar ? navegador.pushReplacement(ruta) : navegador.push(ruta);
+}
+
+/// Recorrido con la sala de verdad: la sala y las filas llegan en vivo y la
+/// reserva la decide el servidor.
+class FlujoReal extends StatefulWidget {
+  const FlujoReal({super.key, required this.repositorio});
+
+  final RepositorioSala repositorio;
+
+  @override
+  State<FlujoReal> createState() => _FlujoRealState();
+}
+
+enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
+
+class _FlujoRealState extends State<FlujoReal> {
+  final _texto = TextEditingController();
+  final _foco = FocusNode();
+  _Busqueda _busqueda = _Busqueda.vacio;
+  SalaEnVivo? _sala;
+  int _libres = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _texto.addListener(_alEscribir);
+  }
+
+  @override
+  void dispose() {
+    _texto.dispose();
+    _foco.dispose();
+    super.dispose();
+  }
+
+  Future<void> _alEscribir() async {
+    final codigo = _texto.text;
+    if (codigo.length < 4) {
+      setState(() => _busqueda = _Busqueda.vacio);
+      return;
+    }
+    setState(() => _busqueda = _Busqueda.buscando);
+    try {
+      final sala = await widget.repositorio.buscar(codigo);
+      final filas = sala == null ? <FilaEnVivo>[] : await _filas(codigo);
+      if (!mounted || _texto.text != codigo) return;
+      setState(() {
+        _sala = sala;
+        _libres = filas.where((f) => f.libre).length;
+        _busqueda = sala == null ? _Busqueda.noExiste : _Busqueda.encontrada;
+      });
+    } catch (_) {
+      if (mounted && _texto.text == codigo) {
+        setState(() => _busqueda = _Busqueda.fallo);
+      }
+    }
+  }
+
+  Future<List<FilaEnVivo>> _filas(String codigo) =>
+      widget.repositorio.filas(codigo).first;
+
+  Widget _resultado(BuildContext context) {
+    final paleta = BingTema.of(context);
+    final estilo = BingTexto.figtree(13, 600).copyWith(color: paleta.apagado);
+    final sala = _sala;
+    return switch (_busqueda) {
+      _Busqueda.vacio => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Text('Pídele el código a quien organiza', style: estilo),
+      ),
+      _Busqueda.buscando => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Text('Buscando la sala…', style: estilo),
+      ),
+      _Busqueda.encontrada when sala != null =>
+        sala.estado == EstadoSala.abierta
+            ? BingEncontrada(
+              titulo: sala.nombre,
+              detalle:
+                  'Organiza ${sala.organizador} · quedan $_libres '
+                  '${_libres == 1 ? 'fila libre' : 'filas libres'}',
+            )
+            : const BingAviso(
+              icono: 'lock',
+              texto: 'Esta sala ya no recibe jugadores.',
+            ),
+      _Busqueda.fallo => const BingAviso(
+        icono: 'bell',
+        texto: 'No pudimos conectar. Revisa tu internet e inténtalo de nuevo.',
+      ),
+      _ => BingAviso(
+        icono: 'bell',
+        texto:
+            'No encontramos una sala con el código ${_texto.text}. '
+            'Revisa que esté bien escrito.',
+      ),
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final paleta = BingTema.of(context);
+    final sala = _sala;
+    final puede =
+        _busqueda == _Busqueda.encontrada &&
+        sala != null &&
+        sala.estado == EstadoSala.abierta &&
+        _libres > 0;
+    return CodigoPage(
+      codigo: _texto.text,
+      salaNombre: sala?.nombre ?? '',
+      organizador: sala?.organizador ?? '',
+      filasLibres: _libres,
+      verFilasHabilitado: puede,
+      casillas: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _foco.requestFocus,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            ListenableBuilder(
+              listenable: _texto,
+              builder: (_, __) => BingCasillasCodigo(codigo: _texto.text),
+            ),
+            // El teclado escribe aquí; las casillas solo muestran el texto.
+            Positioned(
+              left: 0,
+              top: 0,
+              width: 1,
+              height: 1,
+              child: Opacity(
+                opacity: 0,
+                child: EditableText(
+                  controller: _texto,
+                  focusNode: _foco,
+                  autofocus: true,
+                  style: BingTexto.figtree(14, 700),
+                  cursorColor: paleta.tinta,
+                  backgroundCursorColor: paleta.linea,
+                  textCapitalization: TextCapitalization.characters,
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp('[A-Za-z0-9]')),
+                    TextInputFormatter.withFunction(
+                      (_, nuevo) =>
+                          nuevo.copyWith(text: nuevo.text.toUpperCase()),
+                    ),
+                    LengthLimitingTextInputFormatter(4),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      resultado: _resultado(context),
+      alVerFilas:
+          puede
+              ? () => _ir(
+                context,
+                _ElegirFilaReal(repositorio: widget.repositorio, sala: sala),
+              )
+              : null,
+    );
+  }
+}
+
+class _ElegirFilaReal extends StatelessWidget {
+  const _ElegirFilaReal({required this.repositorio, required this.sala});
+
+  final RepositorioSala repositorio;
+  final SalaEnVivo sala;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<FilaEnVivo>>(
+      stream: repositorio.filas(sala.codigo),
+      builder: (context, foto) {
+        final filas = foto.data;
+        if (filas == null) {
+          return ColoredBox(color: BingTema.of(context).fondo);
+        }
+        final primeraLibre = filas.indexWhere((f) => f.libre);
+        return ElegirFilaPage(
+          salaNombre: sala.nombre,
+          cartillas: [for (final f in filas) f.numeros],
+          duenos: [for (final f in filas) f.libre ? null : (f.nombre ?? '')],
+          seleccionInicial: primeraLibre < 0 ? 1 : primeraLibre + 1,
+          alVolver: () => Navigator.of(context).pop(),
+          alSeguir: (fila) {
+            if (!filas[fila - 1].libre) return;
+            _ir(
+              context,
+              _ReservarReal(
+                repositorio: repositorio,
+                sala: sala,
+                fila: fila,
+                numeros: filas[fila - 1].numeros,
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ReservarReal extends StatefulWidget {
+  const _ReservarReal({
+    required this.repositorio,
+    required this.sala,
+    required this.fila,
+    required this.numeros,
+  });
+
+  final RepositorioSala repositorio;
+  final SalaEnVivo sala;
+  final int fila;
+  final List<int> numeros;
+
+  @override
+  State<_ReservarReal> createState() => _ReservarRealState();
+}
+
+class _ReservarRealState extends State<_ReservarReal> {
+  String? _error;
+  bool _reservando = false;
+
+  Future<void> _reservar(String nombre) async {
+    if (nombre.isEmpty) {
+      setState(() => _error = 'Escribe tu nombre para reservar la fila.');
+      return;
+    }
+    setState(() {
+      _error = null;
+      _reservando = true;
+    });
+    try {
+      await widget.repositorio.reservarFila(
+        codigo: widget.sala.codigo,
+        fila: widget.fila,
+        nombre: nombre,
+      );
+      if (!mounted) return;
+      _ir(
+        context,
+        _EsperandoReal(
+          repositorio: widget.repositorio,
+          sala: widget.sala,
+          fila: widget.fila - 1,
+          nombre: nombre,
+        ),
+        reemplazar: true,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = mensajeDeError(e);
+        _reservando = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ReservarPage(
+      salaNombre: widget.sala.nombre,
+      organizador: widget.sala.organizador,
+      fila: widget.fila,
+      numeros: widget.numeros,
+      alVolver: () => Navigator.of(context).pop(),
+      alReservar: _reservar,
+      error: _error,
+      reservando: _reservando,
+    );
+  }
+}
+
+/// Escucha la sala y sus filas a la vez y dibuja cuando llegan las dos.
+class _SalaEnVivo extends StatefulWidget {
+  const _SalaEnVivo({
+    required this.repositorio,
+    required this.codigo,
+    required this.constructor,
+  });
+
+  final RepositorioSala repositorio;
+  final String codigo;
+  final Widget Function(
+    BuildContext context,
+    SalaEnVivo sala,
+    List<FilaEnVivo> filas,
+  )
+  constructor;
+
+  @override
+  State<_SalaEnVivo> createState() => _SalaEnVivoState();
+}
+
+class _SalaEnVivoState extends State<_SalaEnVivo> {
+  late final _sala = widget.repositorio.sala(widget.codigo);
+  late final _filas = widget.repositorio.filas(widget.codigo);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<SalaEnVivo?>(
+      stream: _sala,
+      builder:
+          (context, sala) => StreamBuilder<List<FilaEnVivo>>(
+            stream: _filas,
+            builder: (context, filas) {
+              final s = sala.data;
+              final f = filas.data;
+              if (s == null || f == null) {
+                return ColoredBox(color: BingTema.of(context).fondo);
+              }
+              return widget.constructor(context, s, f);
+            },
+          ),
+    );
+  }
+}
+
+class _EsperandoReal extends StatefulWidget {
+  const _EsperandoReal({
+    required this.repositorio,
+    required this.sala,
+    required this.fila,
+    required this.nombre,
+  });
+
+  final RepositorioSala repositorio;
+  final SalaEnVivo sala;
+
+  /// Fila reservada (base 0).
+  final int fila;
+  final String nombre;
+
+  @override
+  State<_EsperandoReal> createState() => _EsperandoRealState();
+}
+
+class _EsperandoRealState extends State<_EsperandoReal> {
+  bool _pasando = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SalaEnVivo(
+      repositorio: widget.repositorio,
+      codigo: widget.sala.codigo,
+      constructor: (context, sala, filas) {
+        // La partida empieza cuando sale la primera bolilla.
+        if (sala.estado == EstadoSala.enJuego &&
+            sala.bolillas.isNotEmpty &&
+            !_pasando) {
+          _pasando = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            _ir(
+              context,
+              _EnVivoReal(
+                repositorio: widget.repositorio,
+                sala: widget.sala,
+                fila: widget.fila,
+                nombre: widget.nombre,
+              ),
+              reemplazar: true,
+            );
+          });
+        }
+        return EsperandoPage(
+          nombre: widget.nombre,
+          salaNombre: sala.nombre,
+          organizador: sala.organizador,
+          fila: widget.fila + 1,
+          numeros: filas[widget.fila].numeros,
+          ocupadas: filas.where((f) => !f.libre).length,
+          total: filas.length,
+        );
+      },
+    );
+  }
+}
+
+class _EnVivoReal extends StatefulWidget {
+  const _EnVivoReal({
+    required this.repositorio,
+    required this.sala,
+    required this.fila,
+    required this.nombre,
+  });
+
+  final RepositorioSala repositorio;
+  final SalaEnVivo sala;
+  final int fila;
+  final String nombre;
+
+  @override
+  State<_EnVivoReal> createState() => _EnVivoRealState();
+}
+
+class _EnVivoRealState extends State<_EnVivoReal> {
+  Timer? _segundo;
+  int _vistas = 0;
+  DateTime _ultimaSalida = DateTime.now();
+  bool _celebrado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Reconstruye cada segundo para que el "hace N s" avance.
+    _segundo = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _segundo?.cancel();
+    super.dispose();
+  }
+
+  void _celebrar(SalaEnVivo sala, List<FilaEnVivo> filas) {
+    final g = sala.ganadoras.firstWhere((g) => g.fila == widget.fila);
+    Future<void>.delayed(const Duration(milliseconds: 520), () {
+      if (!mounted) return;
+      _ir(
+        context,
+        GanastePage(
+          nombre: widget.nombre,
+          fila: widget.fila + 1,
+          numeros: filas[widget.fila].numeros,
+          bolillaFinal: sala.bolillas[g.bolillaIndice - 1],
+          cantidadBolillas: g.bolillaIndice,
+          organizador: sala.organizador,
+          alVerCartilla: () => Navigator.of(context).pop(),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SalaEnVivo(
+      repositorio: widget.repositorio,
+      codigo: widget.sala.codigo,
+      constructor: (context, sala, filas) {
+        if (sala.bolillas.length != _vistas) {
+          _vistas = sala.bolillas.length;
+          _ultimaSalida = DateTime.now();
+        }
+        if (sala.ganoLaFila(widget.fila) && !_celebrado) {
+          _celebrado = true;
+          _celebrar(sala, filas);
+        }
+        if (sala.bolillas.isEmpty) {
+          // Se deshizo la única bolilla: se vuelve a esperar la primera.
+          return EsperandoPage(
+            nombre: widget.nombre,
+            salaNombre: sala.nombre,
+            organizador: sala.organizador,
+            fila: widget.fila + 1,
+            numeros: filas[widget.fila].numeros,
+            ocupadas: filas.where((f) => !f.libre).length,
+            total: filas.length,
+          );
+        }
+        return EnVivoPage(
+          salaNombre: sala.nombre,
+          organizador: sala.organizador,
+          cartillas: [for (final f in filas) f.numeros],
+          nombres: [for (final f in filas) f.nombre ?? ''],
+          miFila: widget.fila + 1,
+          bolillas: sala.bolillas,
+          hace: textoHace(_ultimaSalida, DateTime.now()),
+          mostrar: filas.length - 1,
+        );
+      },
+    );
+  }
+}
