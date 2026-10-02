@@ -186,6 +186,11 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
     }
   }
 
+  void _abrirBilletera() {
+    final billetera = AlcanceSesion.billeteraDe(context);
+    if (billetera != null) _ir(context, BilleteraReal(billetera: billetera));
+  }
+
   void _abrirEscaner() {
     _ir(
       context,
@@ -290,11 +295,15 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
       verFilasHabilitado: puede,
       // Quien escribe un código no necesita ver las salas.
       alEscanear: _abrirEscaner,
+      accionAncha:
+          widget.sesion != null && AlcanceSesion.saldoDe(context) != null,
       accion:
           widget.sesion == null
               ? null
               : AccesoCuenta(
                 usuario: _usuario,
+                saldo: AlcanceSesion.saldoDe(context),
+                alAbrirBilletera: _abrirBilletera,
                 alEntrar:
                     () => unawaited(mostrarHojaSesion(context, widget.sesion!)),
                 alAbrirCuenta:

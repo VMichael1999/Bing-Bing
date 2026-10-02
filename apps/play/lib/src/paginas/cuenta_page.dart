@@ -12,6 +12,8 @@ class CuentaPage extends StatelessWidget {
     this.alCerrarSesion,
     this.alEliminar,
     this.ocupado = false,
+    this.saldo,
+    this.alBilletera,
   });
 
   final String nombre;
@@ -21,6 +23,8 @@ class CuentaPage extends StatelessWidget {
   final VoidCallback? alCerrarSesion;
   final VoidCallback? alEliminar;
   final bool ocupado;
+  final int? saldo;
+  final VoidCallback? alBilletera;
 
   @override
   Widget build(BuildContext context) => BingCuenta(
@@ -31,5 +35,7 @@ class CuentaPage extends StatelessWidget {
     alCerrarSesion: alCerrarSesion,
     alEliminar: alEliminar,
     ocupado: ocupado,
+    saldo: saldo,
+    alBilletera: alBilletera,
   );
 }

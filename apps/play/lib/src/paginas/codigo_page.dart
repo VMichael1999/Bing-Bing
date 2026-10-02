@@ -17,6 +17,7 @@ class CodigoPage extends StatelessWidget {
     this.alVolver,
     this.bajoElQr,
     this.accion,
+    this.accionAncha = false,
   });
 
   final String codigo;
@@ -44,6 +45,9 @@ class CodigoPage extends StatelessWidget {
   /// Arriba a la derecha: "Iniciar sesión" o la cuenta abierta; sin él, el diseño.
   final Widget? accion;
 
+  /// La acción de arriba no cabe junto a las bolillas: se le deja su propia fila.
+  final bool accionAncha;
+
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
@@ -65,7 +69,9 @@ class CodigoPage extends StatelessWidget {
                     context,
                     desplazable: !fija,
                     margenSuperior:
-                        accion != null && caja.maxWidth < 350 ? 44 : 14,
+                        accion != null && (accionAncha || caja.maxWidth < 350)
+                            ? 44
+                            : 14,
                   );
                   return Stack(
                     children: [

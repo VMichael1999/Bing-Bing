@@ -28,6 +28,7 @@ Future<void> main() async {
       BingPlayApp(
         repositorio: RepositorioFirestore(),
         sesion: SesionJugadorFirebase(),
+        billetera: BilleteraFirestore(),
       ),
     );
   } catch (e) {
@@ -44,6 +45,7 @@ class BingPlayApp extends StatelessWidget {
     this.camaraEscaner,
     this.enlaces,
     this.sesion,
+    this.billetera,
   });
 
   /// Pantalla con la que arranca; por defecto, la del código de sala.
@@ -61,6 +63,9 @@ class BingPlayApp extends StatelessWidget {
   /// Quién juega (cuentas de Google); sin ella no se pide iniciar sesión.
   final SesionJugador? sesion;
 
+  /// Los créditos de prueba de quien juega; sin ella no hay billetera.
+  final RepositorioBilletera? billetera;
+
   @override
   Widget build(BuildContext context) {
     return BingTema(
@@ -77,6 +82,7 @@ class BingPlayApp extends StatelessWidget {
         builder:
             (context, child) => AlcanceSesion(
               sesion: sesion,
+              billetera: billetera,
               child: BingSistema(child: child!),
             ),
         home:

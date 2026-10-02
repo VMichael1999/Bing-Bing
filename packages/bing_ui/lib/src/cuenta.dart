@@ -21,6 +21,8 @@ class BingCuenta extends StatelessWidget {
     this.alCerrarSesion,
     this.alEliminar,
     this.ocupado = false,
+    this.saldo,
+    this.alBilletera,
   });
 
   final String titulo;
@@ -34,6 +36,10 @@ class BingCuenta extends StatelessWidget {
   /// Hay una operación en curso (cerrar sesión o eliminar): los botones se
   /// apagan para no repetirla.
   final bool ocupado;
+
+  /// Créditos de prueba; con él aparece la fila "Billetera" (solo en Play).
+  final int? saldo;
+  final VoidCallback? alBilletera;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +124,33 @@ class BingCuenta extends StatelessWidget {
                   ),
                 ],
               ),
+              if (saldo != null) ...[
+                const SizedBox(height: 10),
+                Semantics(
+                  button: true,
+                  label: 'Billetera, $saldo créditos de prueba',
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: alBilletera,
+                    child: ExcludeSemantics(
+                      child: _Seccion(
+                        filas: [
+                          _Fila(
+                            icono: 'wallet',
+                            titulo: 'Billetera',
+                            detalle: '$saldo créditos de prueba',
+                            derecha: BingIcono(
+                              'right',
+                              color: paleta.apagado,
+                              tamano: BingIconoTamano.s,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 10),
               Opacity(
                 opacity: ocupado ? 0.5 : 1,
@@ -159,9 +192,9 @@ class BingCuenta extends StatelessWidget {
 
 /// Tarjeta con título y filas separadas por una línea (`.sec`).
 class _Seccion extends StatelessWidget {
-  const _Seccion({required this.titulo, required this.filas});
+  const _Seccion({this.titulo, required this.filas});
 
-  final String titulo;
+  final String? titulo;
   final List<_Fila> filas;
 
   @override
@@ -177,15 +210,17 @@ class _Seccion extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titulo,
-            style: BingTexto.figtree(
-              12.5,
-              800,
-              espaciado: 0.03 * 12.5,
-            ).copyWith(color: paleta.apagado),
-          ),
-          const SizedBox(height: 9),
+          if (titulo != null) ...[
+            Text(
+              titulo!,
+              style: BingTexto.figtree(
+                12.5,
+                800,
+                espaciado: 0.03 * 12.5,
+              ).copyWith(color: paleta.apagado),
+            ),
+            const SizedBox(height: 9),
+          ],
           for (var i = 0; i < filas.length; i++) ...[
             if (i > 0) Container(height: 1, color: paleta.linea),
             filas[i],
