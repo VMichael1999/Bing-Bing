@@ -2,6 +2,7 @@ import 'package:bing_core/bing_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'configuracion.dart';
 import 'sesion.dart';
 
 /// [SesionJugador] sobre Firebase Auth.
@@ -14,13 +15,20 @@ class SesionJugadorFirebase implements SesionJugador {
     FirebaseAuth? auth,
     Future<AuthCredential?> Function()? credencialGoogle,
     Future<void> Function()? cerrarGoogle,
-  }) : _auth = auth ?? FirebaseAuth.instance,
+    bool? usarEmulador,
+    this.nombreDePrueba = 'Lucía',
+  }) : _usarEmulador = usarEmulador ?? ConfigFirebase.entorno.usarEmulador,
+       _auth = auth ?? FirebaseAuth.instance,
        _credencialGoogle = credencialGoogle ?? SesionBing().credencialGoogle,
        _cerrarGoogle = cerrarGoogle ?? (() => GoogleSignIn().signOut());
 
   final FirebaseAuth _auth;
   final Future<AuthCredential?> Function() _credencialGoogle;
   final Future<void> Function() _cerrarGoogle;
+
+  /// Con el emulador de Firebase no hay Google real: entra una cuenta de prueba.
+  final bool _usarEmulador;
+  final String nombreDePrueba;
 
   static UsuarioBing? _usuario(User? u) =>
       u == null
@@ -46,8 +54,27 @@ class SesionJugadorFirebase implements SesionJugador {
   @override
   Stream<UsuarioBing?> get cambios => _auth.userChanges().map(_usuario);
 
+  /// Solo con el emulador: entra (o crea la primera vez) una cuenta de prueba,
+  /// porque el inicio de sesión con Google necesita una cuenta real.
+  Future<UsuarioBing?> _entrarDePrueba() async {
+    const correo = 'jugadora@prueba.bingbing.pe';
+    const clave = 'clave-de-prueba';
+    try {
+      await _auth.signInWithEmailAndPassword(email: correo, password: clave);
+    } on FirebaseAuthException {
+      final nueva = await _auth.createUserWithEmailAndPassword(
+        email: correo,
+        password: clave,
+      );
+      await nueva.user!.updateDisplayName(nombreDePrueba);
+    }
+    await _auth.currentUser!.reload();
+    return actual;
+  }
+
   @override
   Future<UsuarioBing?> entrarConGoogle() async {
+    if (_usarEmulador) return _entrarDePrueba();
     final credencial = await _credencialGoogle();
     if (credencial == null) return null;
     final actual = _auth.currentUser;

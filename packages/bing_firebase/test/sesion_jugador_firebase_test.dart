@@ -93,4 +93,30 @@ void main() {
     final primero = await sesion(auth).cambios.first;
     expect(primero?.uid, 'u1');
   });
+
+  group('con el emulador', () {
+    SesionJugadorFirebase emulada(MockFirebaseAuth auth) =>
+        SesionJugadorFirebase(
+          auth: auth,
+          usarEmulador: true,
+          credencialGoogle:
+              () async => throw StateError('no debe pedir Google'),
+          cerrarGoogle: () async {},
+        );
+
+    test('entra con una cuenta de prueba sin pedir Google', () async {
+      final s = emulada(MockFirebaseAuth());
+      final u = await s.entrarConGoogle();
+      expect(u.tieneCuenta, isTrue);
+      expect(s.actual.tieneCuenta, isTrue);
+    });
+
+    test('con una cuenta de prueba que ya existe, entra en ella', () async {
+      final auth = MockFirebaseAuth(
+        mockUser: MockUser(uid: 'prueba', email: 'jugadora@prueba.bingbing.pe'),
+      );
+      final u = await emulada(auth).entrarConGoogle();
+      expect(u?.uid, 'prueba');
+    });
+  });
 }
