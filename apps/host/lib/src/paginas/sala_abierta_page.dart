@@ -18,6 +18,7 @@ class SalaAbiertaPage extends StatelessWidget {
     this.alCopiar,
     this.alEmpezar,
     this.error,
+    this.datosQr,
   });
 
   final String salaNombre;
@@ -35,6 +36,9 @@ class SalaAbiertaPage extends StatelessWidget {
 
   /// Por qué falló empezar la partida, si falló.
   final String? error;
+
+  /// Lo que codifica el QR de la tarjeta del código (por defecto, el código).
+  final String? datosQr;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +62,7 @@ class SalaAbiertaPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     BingCodigoSala(
                       codigo: codigo,
+                      datosQr: datosQr,
                       alCompartir: alCompartir,
                       alCopiar: alCopiar,
                     ),

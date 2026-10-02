@@ -3,6 +3,7 @@ import 'package:bing_firebase/bing_firebase.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
+import 'src/compartir.dart';
 import 'src/demo.dart';
 import 'src/flujo_real.dart';
 import 'src/paginas/entrar_page.dart';
@@ -114,6 +115,12 @@ class _FlujoDemo extends StatelessWidget {
         sala: sala,
         salaNombre: nombre.isEmpty ? salaDemoNombre : nombre,
         alVolver: () => Navigator.of(context).pop(),
+        alCompartir:
+            () => abrirCompartirSala(
+              context,
+              nombre: nombre.isEmpty ? salaDemoNombre : nombre,
+              codigo: salaDemoCodigo,
+            ),
         alEmpezar:
             () => _ir(
               context,

@@ -40,6 +40,7 @@ class SalaSimuladaPage extends StatefulWidget {
     required this.salaNombre,
     required this.alEmpezar,
     this.alVolver,
+    this.alCompartir,
     this.cadaJugador = const Duration(milliseconds: 2200),
   });
 
@@ -47,6 +48,7 @@ class SalaSimuladaPage extends StatefulWidget {
   final String salaNombre;
   final VoidCallback alEmpezar;
   final VoidCallback? alVolver;
+  final VoidCallback? alCompartir;
   final Duration cadaJugador;
 
   @override
@@ -120,6 +122,7 @@ class _SalaSimuladaPageState extends State<SalaSimuladaPage> {
             total: widget.sala.total,
             jugadores: jugadoresVisibles(widget.sala),
             alVolver: widget.alVolver,
+            alCompartir: widget.alCompartir,
             alEmpezar: widget.sala.estaLlena ? _empezar : null,
           ),
     );

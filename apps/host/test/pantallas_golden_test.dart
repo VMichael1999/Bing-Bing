@@ -37,6 +37,8 @@ void main() {
     'org-07-cartilla',
     'org-08-tablero',
     'org-09-ganador',
+    'org-11-compartir',
+    'org-12-qr-pantalla',
   ];
   for (final id in ids) {
     testWidgets(id, (tester) async {

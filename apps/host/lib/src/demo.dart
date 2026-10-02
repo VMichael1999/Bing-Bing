@@ -3,11 +3,13 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
 import 'paginas/cartilla_llena_sheet.dart';
+import 'paginas/compartir_page.dart';
 import 'paginas/entrar_page.dart';
 import 'paginas/ganador_page.dart';
 import 'paginas/juego_page.dart';
 import 'paginas/mis_partidas_page.dart';
 import 'paginas/nueva_partida_page.dart';
+import 'paginas/qr_pantalla_page.dart';
 import 'paginas/sala_abierta_page.dart';
 
 /// Partidas guardadas del modo demo.
@@ -93,5 +95,10 @@ Widget? pantallaDemo(String id) => switch (id) {
     cantidadBolillas: 32,
     jugadores: 20,
   ),
+  'org-11-compartir' => const CompartirPage(
+    salaNombre: salaDemoNombre,
+    codigo: salaDemoCodigo,
+  ),
+  'org-12-qr-pantalla' => const QrPantallaPage(codigo: salaDemoCodigo),
   _ => null,
 };
