@@ -14,7 +14,7 @@ import {
   ganadoresNuevos,
   siguienteBolilla,
   sinUltima,
-  validarNombre,
+  validarNombreSala,
 } from "./logica";
 
 initializeApp();
@@ -79,7 +79,7 @@ export const crearSala = onCall(async (request) => {
   const uid = uidOrganizador(request);
   const nombre = (() => {
     try {
-      return validarNombre((request.data as { nombre?: unknown }).nombre);
+      return validarNombreSala((request.data as { nombre?: unknown }).nombre);
     } catch (e) {
       return aHttps(e);
     }

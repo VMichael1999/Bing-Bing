@@ -25,3 +25,6 @@ firebase-debug.log
 
 # Cobertura generada por flutter test --coverage
 coverage/
+
+# Registros del emulador de Firebase
+*-debug.log

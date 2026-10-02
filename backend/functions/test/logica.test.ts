@@ -14,6 +14,7 @@ import {
   sinUltima,
   totalBolillas,
   validarNombre,
+  validarNombreSala,
 } from "../src/logica";
 
 // Datos del modo demo: las mismas cartillas y bolillas del diseño.
@@ -72,6 +73,13 @@ describe("generarCartillas", () => {
         fila.forEach((n, c) => assert.ok(n >= c * 15 + 1 && n <= c * 15 + 15));
       }
     }
+  });
+});
+
+describe("validarNombreSala", () => {
+  it("acepta el nombre de ejemplo del diseño y rechaza más de 40", () => {
+    assert.equal(validarNombreSala("Bingo de los sábados"), "Bingo de los sábados");
+    assert.equal(codigoDe(() => validarNombreSala("x".repeat(41))), "nombre_invalido");
   });
 });
 
