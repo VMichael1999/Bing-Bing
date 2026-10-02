@@ -27,8 +27,9 @@ class SesionBing {
     return (await _auth.signInAnonymously()).user!;
   }
 
-  /// Entra con Google (organizadores). `null` si la persona cancela.
-  Future<User?> entrarConGoogle() async {
+  /// Pide la cuenta de Google y devuelve su credencial; `null` si la persona
+  /// cancela.
+  Future<OAuthCredential?> credencialGoogle() async {
     final google = GoogleSignIn(
       serverClientId:
           _config.clienteWebGoogle.isEmpty ? null : _config.clienteWebGoogle,
@@ -36,10 +37,16 @@ class SesionBing {
     final cuenta = await google.signIn();
     if (cuenta == null) return null;
     final datos = await cuenta.authentication;
-    final credencial = GoogleAuthProvider.credential(
+    return GoogleAuthProvider.credential(
       accessToken: datos.accessToken,
       idToken: datos.idToken,
     );
+  }
+
+  /// Entra con Google (organizadores). `null` si la persona cancela.
+  Future<User?> entrarConGoogle() async {
+    final credencial = await credencialGoogle();
+    if (credencial == null) return null;
     return (await _auth.signInWithCredential(credencial)).user;
   }
 
