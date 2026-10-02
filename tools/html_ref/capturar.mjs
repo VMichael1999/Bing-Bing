@@ -1,5 +1,6 @@
 // Captura cada pantalla del diseño (`figure[data-screen]`) como PNG de referencia.
 // Uso: npm install && npx playwright install chromium && npm run capturar
+// Otro archivo: HTML=bolilla-pantallas-nuevas.html npm run capturar
 import { chromium } from 'playwright';
 import { mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -15,7 +16,7 @@ const pagina = await navegador.newPage({
   deviceScaleFactor: 3,
   colorScheme: 'light',
 });
-await pagina.goto(pathToFileURL(join(aqui, 'bolilla-dos-apps.html')).href, {
+await pagina.goto(pathToFileURL(join(aqui, process.env.HTML ?? 'bolilla-dos-apps.html')).href, {
   waitUntil: 'networkidle',
 });
 await pagina.evaluate(() => document.fonts.ready);
