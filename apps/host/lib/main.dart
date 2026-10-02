@@ -16,7 +16,8 @@ class BingApp extends StatelessWidget {
 }
 
 Route<void> _route(RouteSettings settings) => PageRouteBuilder<void>(
-      pageBuilder: (_, __, ___) => const Center(
+  pageBuilder:
+      (_, __, ___) => const Center(
         child: Text('Bing Bing Host', textDirection: TextDirection.ltr),
       ),
-    );
+);
