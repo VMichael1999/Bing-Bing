@@ -1,9 +1,12 @@
+import 'package:bing_core/bing_core.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
+import 'precio_premio_page.dart';
+
 /// `org-03-nueva-partida` y `org-10-nueva-partida-v2`: nombre, visibilidad
-/// (pública o privada), columnas, filas por jugador y la sección de premio,
-/// bloqueada ("Pronto") y sin acción.
+/// (pública o privada), columnas, filas por jugador y una fila de precio y
+/// premio que abre `org-10b-precio-premio`.
 class NuevaPartidaPage extends StatefulWidget {
   const NuevaPartidaPage({
     super.key,
@@ -17,8 +20,16 @@ class NuevaPartidaPage extends StatefulWidget {
   final String nombreInicial;
   final VoidCallback? alVolver;
 
-  /// Recibe el nombre, las columnas elegidas (5 o 6) y si la sala es pública.
-  final void Function(String nombre, int columnas, bool publica)? alAbrirSala;
+  /// Recibe el nombre, las columnas elegidas (5 o 6), si la sala es pública, el
+  /// precio por fila y el premio.
+  final void Function(
+    String nombre,
+    int columnas,
+    bool publica,
+    int precioFila,
+    int premio,
+  )?
+  alAbrirSala;
 
   /// Por qué falló crear la sala, si falló.
   final String? error;
@@ -34,6 +45,37 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
   );
   int _columnas = 0; // índice: 0 = 5 columnas, 1 = 6 columnas.
   int _visibilidad = 0; // índice: 0 = pública, 1 = privada.
+  int _precio = 5;
+  int _premio = premioSugerido(5, 20);
+
+  void _abrir() => widget.alAbrirSala?.call(
+    _nombre.text.trim(),
+    _columnas == 0 ? 5 : 6,
+    _visibilidad == 0,
+    _precio,
+    _premio,
+  );
+
+  /// Abre la parte 2 (precio y premio); al "Abrir sala" de allí se crea la sala.
+  Future<void> _elegirPrecio() async {
+    final r = await Navigator.of(context).push<PrecioPremio>(
+      PageRouteBuilder<PrecioPremio>(
+        pageBuilder:
+            (c, _, __) => PrecioPremioPage(
+              precioInicial: _precio,
+              premioInicial: _premio,
+              alVolver: () => Navigator.of(c).pop(),
+              alAbrirSala: (v) => Navigator.of(c).pop(v),
+            ),
+      ),
+    );
+    if (r == null || !mounted) return;
+    setState(() {
+      _precio = r.precioFila;
+      _premio = r.premio;
+    });
+    _abrir();
+  }
 
   @override
   void dispose() {
@@ -115,42 +157,41 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                     ),
                     const SizedBox(height: 10),
                     BingSeccion(
-                      espacio: 8,
+                      cabecera: 'PRECIO Y PREMIO',
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'PARTIDA CON PREMIO',
-                              style: BingTexto.cabeceraSeccion.copyWith(
-                                color: paleta.apagado,
+                        Semantics(
+                          button: true,
+                          label: 'Precio y premio',
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: _elegirPrecio,
+                            child: ExcludeSemantics(
+                              child: Row(
+                                children: [
+                                  BingIcono(
+                                    'trophy',
+                                    color: paleta.tinta,
+                                    tamano: BingIconoTamano.s,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      _precio == 0
+                                          ? 'Gratis · sin premio'
+                                          : '$_precio por fila · premio $_premio',
+                                      style: filaPremio.copyWith(
+                                        color: paleta.tinta,
+                                      ),
+                                    ),
+                                  ),
+                                  BingIcono(
+                                    'right',
+                                    color: paleta.apagado,
+                                    tamano: BingIconoTamano.s,
+                                  ),
+                                ],
                               ),
                             ),
-                            const BingChip(
-                              'Pronto',
-                              tipo: BingChipTipo.pronto,
-                              icono: 'lock',
-                            ),
-                          ],
-                        ),
-                        Opacity(
-                          opacity: 0.55,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Precio por fila', style: filaPremio),
-                              Text('S/ 5.00', style: filaPremio),
-                            ],
-                          ),
-                        ),
-                        Opacity(
-                          opacity: 0.55,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Premio', style: filaPremio),
-                              Text('S/ 100.00', style: filaPremio),
-                            ],
                           ),
                         ),
                       ],
@@ -168,12 +209,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                 texto: 'Abrir sala',
                 tipo: BingBotonTipo.dauber,
                 deshabilitado: widget.creando,
-                alPresionar:
-                    () => widget.alAbrirSala?.call(
-                      _nombre.text.trim(),
-                      _columnas == 0 ? 5 : 6,
-                      _visibilidad == 0,
-                    ),
+                alPresionar: _abrir,
               ),
             ),
           ],

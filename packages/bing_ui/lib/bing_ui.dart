@@ -22,6 +22,7 @@ export 'src/lista.dart';
 export 'src/medidas.dart';
 export 'src/mifila.dart';
 export 'src/pantalla.dart';
+export 'src/paso.dart';
 export 'src/progreso.dart';
 export 'src/punto.dart';
 export 'src/qr.dart';

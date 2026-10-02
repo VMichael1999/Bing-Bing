@@ -91,6 +91,14 @@ void pruebasVisibilidad() {
       expect((await repo.buscar('K7Q4'))?.publica, isFalse);
     });
 
+    test('crearSala fija el precio y el premio', () async {
+      final repo = nueva();
+      await repo.crearSala(nombre: 'X', columnas: 5, precioFila: 5, premio: 80);
+      final sala = await repo.buscar('K7Q4');
+      expect(sala?.precioFila, 5);
+      expect(sala?.premio, 80);
+    });
+
     test('crearSala fija la visibilidad', () async {
       final repo = nueva();
       await repo.crearSala(nombre: 'X', columnas: 5, publica: false);

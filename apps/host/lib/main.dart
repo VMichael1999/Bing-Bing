@@ -165,7 +165,7 @@ class _FlujoDemo extends StatelessWidget {
                       nombreInicial: salaDemoNombre,
                       alVolver: () => Navigator.of(context).pop(),
                       alAbrirSala:
-                          (nombre, columnas, publica) =>
+                          (nombre, columnas, publica, precio, premio) =>
                               _abrirSala(context, nombre),
                     ),
                   ),

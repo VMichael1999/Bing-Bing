@@ -54,7 +54,7 @@ void main() {
     final qr = tester.getTopLeft(find.text('Escanear el QR'));
     expect(find.text('Sala número 7').hitTestable(), findsNothing);
 
-    await tester.drag(find.text('Sala número 0'), const Offset(0, -500));
+    await tester.drag(find.text('Sala número 0'), const Offset(0, -700));
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('Escanear el QR')), qr);

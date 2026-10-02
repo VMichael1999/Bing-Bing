@@ -45,7 +45,7 @@ const anonimo = await registrar();
 
 // Quien juega no puede organizar.
 await rechazada("crearSala", anonimo, { nombre: "X" }, "PERMISSION_DENIED");
-const { codigo } = await ok("crearSala", organizador, { nombre: "Bingo de los sábados", columnas: 5, publica: true });
+const { codigo } = await ok("crearSala", organizador, { nombre: "Bingo de los sábados", columnas: 5, publica: true, precioFila: 5, premio: 80 });
 const privada = await ok("crearSala", organizador, { nombre: "Solo familia", columnas: 5, publica: false });
 assert.match(codigo, /^[A-Z2-9]{4}$/);
 const datosSala = await (
@@ -53,6 +53,19 @@ const datosSala = await (
 ).json();
 assert.equal(datosSala.fields.organizadorNombre.stringValue, "quien organiza");
 console.log(`✔ sala ${codigo} creada`);
+
+// Precio y premio: el servidor los guarda y no deja un premio mayor a lo disponible.
+assert.equal(Number(datosSala.fields.precioFila.integerValue), 5);
+assert.equal(Number(datosSala.fields.premio.integerValue), 80);
+assert.equal(Number(datosSala.fields.comisionPorcentaje.integerValue ?? datosSala.fields.comisionPorcentaje.doubleValue), 10);
+await rechazada("crearSala", organizador, { nombre: "Premio de más", precioFila: 5, premio: 91 }, "FAILED_PRECONDITION");
+await rechazada("crearSala", organizador, { nombre: "Premio sin precio", precioFila: 0, premio: 10 }, "FAILED_PRECONDITION");
+await rechazada("crearSala", organizador, { nombre: "Precio raro", precioFila: 2.5 }, "FAILED_PRECONDITION");
+const sinPremio = await ok("crearSala", organizador, { nombre: "Entre amigos" });
+const docAmigos = await (await fetch(`${DOCS}/salas/${sinPremio.codigo}`, { headers: { authorization: `Bearer ${organizador}` } })).json();
+assert.equal(Number(docAmigos.fields.precioFila.integerValue), 0);
+assert.equal(Number(docAmigos.fields.premio.integerValue), 0);
+console.log("✔ precio y premio: se guardan y el premio no pasa de lo disponible");
 
 // No se puede empezar ni sortear con la cartilla a medias.
 await rechazada("empezarPartida", organizador, { codigo }, "FAILED_PRECONDITION");

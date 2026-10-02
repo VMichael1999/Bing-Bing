@@ -145,7 +145,8 @@ class _TarjetaSala extends StatelessWidget {
       button: true,
       label:
           '${sala.nombre}. Organiza ${sala.organizador}. '
-          '${libres == 1 ? 'Queda 1 fila' : 'Quedan $libres filas'}',
+          '${libres == 1 ? 'Queda 1 fila' : 'Quedan $libres filas'}. '
+          '${sala.precioFila == 0 ? 'Gratis' : '${sala.precioFila} créditos por fila, premio ${sala.premio}'}',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: alPresionar,
@@ -210,10 +211,48 @@ class _TarjetaSala extends StatelessWidget {
                     ),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${sala.ocupadas} de ${sala.filasTotal} filas',
+                      style: BingTexto.figtree(
+                        12,
+                        700,
+                      ).copyWith(color: paleta.apagado),
+                    ),
+                    _PrecioPremio(sala: sala),
+                  ],
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// "**5** por fila · premio **80**", o "Gratis" si la partida no tiene premio.
+class _PrecioPremio extends StatelessWidget {
+  const _PrecioPremio({required this.sala});
+
+  final SalaEnVivo sala;
+
+  @override
+  Widget build(BuildContext context) {
+    final paleta = BingTema.of(context);
+    final normal = BingTexto.figtree(12, 700).copyWith(color: paleta.apagado);
+    final fuerte = BingTexto.bungee(13).copyWith(color: paleta.tinta);
+    if (sala.precioFila == 0) return Text('Gratis', style: normal);
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: '${sala.precioFila}', style: fuerte),
+          TextSpan(text: ' por fila · premio ', style: normal),
+          TextSpan(text: '${sala.premio}', style: fuerte),
+        ],
       ),
     );
   }

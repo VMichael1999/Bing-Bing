@@ -10,6 +10,7 @@ import 'paginas/ganador_page.dart';
 import 'paginas/juego_page.dart';
 import 'paginas/mis_partidas_page.dart';
 import 'paginas/nueva_partida_page.dart';
+import 'paginas/precio_premio_page.dart';
 import 'paginas/qr_pantalla_page.dart';
 import 'paginas/sala_abierta_page.dart';
 
@@ -113,6 +114,7 @@ Widget? pantallaDemo(String id) => switch (id) {
       alCerrarSala: () {},
     ),
   ),
+  'org-10b-precio-premio' => const PrecioPremioPage(),
   'org-13-ajustes' => const BingCuenta(
     titulo: 'Ajustes',
     nombre: 'Carmen Ruiz',

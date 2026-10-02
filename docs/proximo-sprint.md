@@ -135,6 +135,26 @@ Por decidir:
 - Pantallas nuevas del HTML: confirmar cierre de sala, aviso de sala cancelada para el
   jugador y el movimiento "Devolución" en el historial.
 
+## Precio, premio y comisión: lo que ya está hecho
+
+- Al crear la sala, quien organiza fija el **precio por fila** (créditos) y el **premio**
+  en una segunda pantalla (`org-10b`). Por defecto, 5 por fila y premio 80.
+- El **servidor valida** los números: el precio es un entero de 0 a 1000, sin precio no
+  hay premio y el premio no puede pasar de lo que queda tras la comisión (con 5 por fila,
+  100 recaudados, 10 de comisión, 90 como máximo). Lo que sobra es de quien organiza.
+- La **comisión es 10 %** mientras no se defina, configurable en el servidor con la
+  variable `COMISION_PORCENTAJE` (sin tocar el código). Cada sala guarda la comisión
+  que tenía al crearse. La app muestra el cálculo con una constante propia
+  (`comisionPorcentaje` en `bing_core`): **si se cambia en el servidor, hay que cambiarla
+  también allí** hasta que el servidor la entregue a la app.
+- Las tarjetas de Play muestran "5 por fila · premio 80" (o "Gratis" si no hay precio).
+- Cambia lo que decía el prototipo: ya no se "paga el premio con lo recaudado" si no se
+  llenan las 20 filas. La partida solo empieza con las 20 filas llenas; si no se llenan,
+  quien organiza cierra la sala y se devuelve todo (ver "Cerrar una sala que no se llenó").
+
+Por definir con el negocio: el porcentaje de comisión, si se cobra al cerrar una sala
+sin jugar (decidido: no) y qué pasa con lo que sobra tras el premio.
+
 ## Pendientes menores
 
 - Estados que el diseño no define: vacío, error, sin conexión y permiso de cámara
