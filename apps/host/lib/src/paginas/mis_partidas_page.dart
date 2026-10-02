@@ -11,11 +11,15 @@ class MisPartidasPage extends StatelessWidget {
     required this.organizador,
     required this.partidas,
     this.alNuevaPartida,
+    this.alAbrirPartida,
   });
 
   final String organizador;
   final List<PartidaResumen> partidas;
   final VoidCallback? alNuevaPartida;
+
+  /// Recibe la posición de la partida tocada en [partidas].
+  final ValueChanged<int>? alAbrirPartida;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +54,8 @@ class MisPartidasPage extends StatelessWidget {
                   icono: partidas[i].icono,
                   titulo: partidas[i].titulo,
                   detalle: partidas[i].detalle,
+                  alPresionar:
+                      alAbrirPartida == null ? null : () => alAbrirPartida!(i),
                 ),
               ],
             ],
