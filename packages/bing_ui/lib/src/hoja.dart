@@ -14,6 +14,7 @@ class BingHoja extends StatelessWidget {
     required this.titulo,
     required this.texto,
     required this.children,
+    this.alIzquierda = false,
   });
 
   /// Pantalla que queda detrás.
@@ -23,6 +24,10 @@ class BingHoja extends StatelessWidget {
 
   /// Contenido entre el texto y los botones (por ejemplo, los círculos).
   final List<Widget> children;
+
+  /// Variante `.sheet.left`: agarradera arriba, título de 26 y texto a la
+  /// izquierda, sin ancho máximo.
+  final bool alIzquierda;
 
   @override
   Widget build(BuildContext context) {
@@ -49,18 +54,40 @@ class BingHoja extends StatelessWidget {
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment:
+                  alIzquierda
+                      ? CrossAxisAlignment.stretch
+                      : CrossAxisAlignment.center,
               children: [
+                if (alIzquierda) ...[
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: paleta.linea,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 Text(
                   titulo,
-                  textAlign: TextAlign.center,
-                  style: BingTexto.tituloHoja.copyWith(color: paleta.dauber),
+                  textAlign: alIzquierda ? TextAlign.left : TextAlign.center,
+                  style: (alIzquierda
+                          ? BingTexto.tituloHoja.copyWith(fontSize: 26)
+                          : BingTexto.tituloHoja)
+                      .copyWith(color: paleta.dauber),
                 ),
                 const SizedBox(height: 14),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 260),
+                  constraints: BoxConstraints(
+                    maxWidth: alIzquierda ? double.infinity : 260,
+                  ),
                   child: Text(
                     texto,
-                    textAlign: TextAlign.center,
+                    textAlign: alIzquierda ? TextAlign.left : TextAlign.center,
                     style: BingTexto.figtree(
                       14,
                       400,
