@@ -59,7 +59,14 @@ class CodigoPage extends StatelessWidget {
                   // Con espacio, lo de arriba queda quieto y solo se mueven las
                   // salas; en pantallas muy bajas todo se mueve junto.
                   final fija = lista != null && caja.maxHeight >= _altoMinimo;
-                  final arriba = _arriba(context, desplazable: !fija);
+                  // En pantallas angostas el chip de arriba taparía las bolillas:
+                  // se baja un poco lo de abajo.
+                  final arriba = _arriba(
+                    context,
+                    desplazable: !fija,
+                    margenSuperior:
+                        accion != null && caja.maxWidth < 350 ? 44 : 14,
+                  );
                   return Stack(
                     children: [
                       if (fija)
@@ -130,11 +137,15 @@ class CodigoPage extends StatelessWidget {
   );
 
   /// Bolillas, código y QR. Con [desplazable] falso se ajusta a su alto.
-  Widget _arriba(BuildContext context, {required bool desplazable}) {
+  Widget _arriba(
+    BuildContext context, {
+    required bool desplazable,
+    required double margenSuperior,
+  }) {
     return Column(
       children: [
-        const BingHero(
-          arriba: 14,
+        BingHero(
+          arriba: margenSuperior,
           bolillas: [
             (columna: 0, numero: 9, letra: 'B'),
             (columna: 1, numero: 30, letra: 'I'),

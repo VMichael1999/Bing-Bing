@@ -20,8 +20,10 @@ List<SalaEnVivo> salasDemo() {
     String codigo,
     String nombre,
     String organizador,
-    int ocupadas,
-  ) => SalaEnVivo(
+    int ocupadas, {
+    int precioFila = 5,
+    int premio = 80,
+  }) => SalaEnVivo(
     codigo: codigo,
     nombre: nombre,
     organizador: organizador,
@@ -32,11 +34,13 @@ List<SalaEnVivo> salasDemo() {
     ganadoras: const [],
     publica: true,
     ocupadas: ocupadas,
+    precioFila: precioFila,
+    premio: premio,
   );
   return [
     sala('K7Q4', 'Bingo de los sábados', 'Carmen', 4),
-    sala('PL23', 'Cumpleaños de Pilar', 'Renzo', 11),
-    sala('FAM8', 'Bingo familiar', 'Don Luis', 19),
+    sala('PL23', 'Cumpleaños de Pilar', 'Renzo', 11, precioFila: 3, premio: 50),
+    sala('FAM8', 'Bingo familiar', 'Don Luis', 19, precioFila: 10, premio: 160),
     sala('CLUB', 'Bingo del club', 'Marta', 20),
   ];
 }

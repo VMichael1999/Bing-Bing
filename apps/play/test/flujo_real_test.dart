@@ -43,6 +43,26 @@ void main() {
       expect(find.text('Quedan 16'), findsOneWidget);
     });
 
+    testWidgets('cada sala muestra sus filas, su precio y su premio', (
+      tester,
+    ) async {
+      final repo = RepositorioMemoria(
+        cartillas: cartillasDemo,
+        precioFila: 5,
+        premio: 80,
+      )..ocupar(1, 'Ana', 'u1');
+      await abrir(tester, repo);
+      await tester.pumpAndSettle();
+      expect(find.text('1 de 20 filas'), findsOneWidget);
+      expect(find.text('5 por fila · premio 80'), findsOneWidget);
+    });
+
+    testWidgets('una sala sin precio se anuncia como gratis', (tester) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      expect(find.text('Gratis'), findsOneWidget);
+    });
+
     testWidgets('tocar una sala lleva directo a elegir fila, sin código', (
       tester,
     ) async {
