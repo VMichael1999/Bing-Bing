@@ -1,6 +1,7 @@
 /// Tokens visuales, fuentes, íconos y componentes de Bing Bing.
 library;
 
+export 'src/aviso.dart';
 export 'src/bolilla.dart';
 export 'src/boton.dart';
 export 'src/campo.dart';

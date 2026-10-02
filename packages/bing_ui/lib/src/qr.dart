@@ -58,7 +58,7 @@ class BingTarjetaQr extends StatelessWidget {
               AspectRatio(aspectRatio: 1, child: qr)
             else
               SizedBox(width: 196, height: 196, child: qr),
-            SizedBox(height: grande ? 14 : 6),
+            const SizedBox(height: 6),
             Text(
               codigo,
               style: BingTexto.bungee(
