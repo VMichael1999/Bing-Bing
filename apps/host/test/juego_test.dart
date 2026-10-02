@@ -88,4 +88,16 @@ void main() {
     await tester.pump();
     expect(find.text('17 de 75 · quedan 58 en la tómbola'), findsOneWidget);
   });
+
+  testWidgets('"Van ganando" muestra solo las 5 filas más adelantadas', (
+    tester,
+  ) async {
+    await tester.pumpWidget(BingHostApp(inicio: _juego(17)));
+    expect(find.byType(BingFilaCompacta), findsNWidgets(5));
+    // La primera es la fila 19 (le falta 1) y la lista completa está en Cartilla.
+    expect(find.text('Le falta 1'), findsOneWidget);
+    await tester.tap(find.text('Cartilla'));
+    await tester.pump();
+    expect(find.byType(BingFilaCompacta), findsNWidgets(20));
+  });
 }

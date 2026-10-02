@@ -4,9 +4,10 @@ import 'package:flutter/widgets.dart';
 
 import 'src/demo.dart';
 import 'src/paginas/entrar_page.dart';
+import 'src/paginas/juego_page.dart';
+import 'src/paginas/sala_simulada_page.dart';
 import 'src/paginas/mis_partidas_page.dart';
 import 'src/paginas/nueva_partida_page.dart';
-import 'src/paginas/sala_abierta_page.dart';
 
 /// Abre una pantalla del diseño directamente:
 /// `--dart-define=BING_PANTALLA=org-06-bolilla`.
@@ -40,13 +41,48 @@ class BingHostApp extends StatelessWidget {
   }
 }
 
-/// Recorrido demo: entrar → mis partidas → nueva partida → sala abierta.
+/// Recorrido demo completo con datos falsos:
+/// entrar → mis partidas → nueva partida → sala (se llena sola) →
+/// ¡Cartilla llena! → partida (bolillas a mano o automáticas) → ganador.
 class _FlujoDemo extends StatelessWidget {
   const _FlujoDemo();
 
-  void _ir(BuildContext context, WidgetBuilder pantalla) => Navigator.of(
-    context,
-  ).push(PageRouteBuilder<void>(pageBuilder: (c, _, __) => pantalla(c)));
+  void _ir(BuildContext context, WidgetBuilder pantalla, {String? nombre}) =>
+      Navigator.of(context).push(
+        PageRouteBuilder<void>(
+          settings: RouteSettings(name: nombre),
+          pageBuilder: (c, _, __) => pantalla(c),
+        ),
+      );
+
+  void _abrirSala(BuildContext context, String nombre) {
+    final sala = SalaSimulada(ocupadasIniciales: 16);
+    _ir(
+      context,
+      (context) => SalaSimuladaPage(
+        sala: sala,
+        salaNombre: nombre.isEmpty ? salaDemoNombre : nombre,
+        alVolver: () => Navigator.of(context).pop(),
+        alEmpezar:
+            () => _ir(
+              context,
+              (context) => JuegoPage(
+                salaNombre: nombre.isEmpty ? salaDemoNombre : nombre,
+                codigo: salaDemoCodigo,
+                cartillas: cartillasDemo,
+                nombres: jugadoresDemo,
+                bolillasIniciales: const [],
+                sorteo: sorteoDemo,
+                conAutomatico: true,
+                alTerminar:
+                    () => Navigator.of(
+                      context,
+                    ).popUntil((r) => r.settings.name == 'mis_partidas'),
+              ),
+            ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +90,7 @@ class _FlujoDemo extends StatelessWidget {
       alContinuarConGoogle:
           () => _ir(
             context,
+            nombre: 'mis_partidas',
             (context) => MisPartidasPage(
               organizador: 'Carmen',
               partidas: partidasDemo,
@@ -64,18 +101,7 @@ class _FlujoDemo extends StatelessWidget {
                       nombreInicial: salaDemoNombre,
                       alVolver: () => Navigator.of(context).pop(),
                       alAbrirSala:
-                          (nombre, columnas) => _ir(
-                            context,
-                            (context) => SalaAbiertaPage(
-                              salaNombre:
-                                  nombre.isEmpty ? salaDemoNombre : nombre,
-                              codigo: salaDemoCodigo,
-                              ocupadas: 17,
-                              total: 20,
-                              jugadores: jugadoresSalaAbiertaDemo(),
-                              alVolver: () => Navigator.of(context).pop(),
-                            ),
-                          ),
+                          (nombre, columnas) => _abrirSala(context, nombre),
                     ),
                   ),
             ),

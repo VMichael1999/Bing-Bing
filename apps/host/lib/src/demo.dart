@@ -45,6 +45,8 @@ List<BingJugador> jugadoresSalaAbiertaDemo() => [
 ];
 
 JuegoPage juegoDemo({int pestana = 0}) => JuegoPage(
+  // El diseño solo dibuja 3 filas en "Van ganando".
+  filasGanando: 3,
   salaNombre: salaDemoNombre,
   codigo: salaDemoCodigo,
   cartillas: cartillasDemo,

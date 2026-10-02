@@ -35,4 +35,36 @@ void main() {
     );
     expect(_estilo(tester)!.statusBarIconBrightness, Brightness.light);
   });
+
+  testWidgets('con el teclado abierto el contenido sube y no queda tapado', (
+    tester,
+  ) async {
+    tester.view
+      ..devicePixelRatio = 1
+      ..physicalSize = const Size(400, 800)
+      ..viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.reset);
+    final pie = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: BingTema(
+          paleta: BingPaleta.claro,
+          child: MediaQuery(
+            data: MediaQueryData.fromView(tester.view),
+            child: BingSistema(
+              child: Column(
+                children: [
+                  const Expanded(child: SizedBox()),
+                  SizedBox(key: pie, height: 50),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // El pie termina justo encima del teclado (800 - 300).
+    expect(tester.getBottomLeft(find.byKey(pie)).dy, 500);
+  });
 }
