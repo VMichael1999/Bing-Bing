@@ -53,6 +53,9 @@ export class ErrorSala extends Error {
       | "motivo_invalido"
       | "precio_invalido"
       | "premio_invalido"
+      | "saldo_insuficiente"
+      | "monto_invalido"
+      | "filas_invalidas"
       | "tombola_vacia"
       | "sala_no_llena",
     mensaje: string,
@@ -111,10 +114,65 @@ export function validarNombreSala(nombre: unknown): string {
   return limpiarNombre(nombre, 40);
 }
 
+/** Créditos de prueba con los que empieza cada cuenta. */
+export const CREDITOS_INICIALES = 25;
+/** Montos que se pueden recargar (créditos de prueba, sin cobro). */
+export const MONTOS_RECARGA = [10, 20, 50, 100];
+
+/** Cuántas filas puede tener una persona: por defecto, las que quiera. */
+export function validarFilasPorJugador(valor: unknown, total: number): number {
+  if (valor === undefined || valor === null) return total;
+  if (!Number.isInteger(valor) || (valor as number) < 1 || (valor as number) > total) {
+    throw new ErrorSala("filas_invalidas", `Las filas por jugador deben ser de 1 a ${total}`);
+  }
+  return valor as number;
+}
+
 /**
- * Valida una reserva y devuelve el estado de sala que resulta. No escribe nada.
- * `filas` son todas las filas de la sala (índice 0 = fila 1).
+ * Valida la reserva de una o varias filas y devuelve el estado de sala que
+ * resulta y cuánto cuesta. No escribe nada. `filas` son todas las filas de la
+ * sala (índice 0 = fila 1). Es todo o nada: si una fila falla, ninguna se reserva.
  */
+export function aplicarReservas(
+  sala: Sala,
+  filas: Fila[],
+  numeros: unknown,
+  uid: string,
+  nombre: unknown,
+): { numeros: number[]; estado: EstadoSala; nombre: string; costo: number } {
+  if (sala.estado !== "abierta") {
+    throw new ErrorSala("sala_no_abierta", "La sala ya no está abierta");
+  }
+  if (!Array.isArray(numeros) || numeros.length === 0) {
+    throw new ErrorSala("filas_invalidas", "Elige al menos una fila");
+  }
+  const elegidas = numeros as unknown[];
+  if (new Set(elegidas).size !== elegidas.length) {
+    throw new ErrorSala("filas_invalidas", "No repitas filas");
+  }
+  for (const n of elegidas) {
+    if (!Number.isInteger(n) || filas[(n as number) - 1] === undefined) {
+      throw new ErrorSala("fila_inexistente", "Esa fila no existe");
+    }
+    if (filas[(n as number) - 1].jugadorUid !== undefined) {
+      throw new ErrorSala("fila_ocupada", "Esa fila ya tiene dueño");
+    }
+  }
+  const propias = filas.filter((f) => f.jugadorUid === uid).length;
+  if (propias + elegidas.length > sala.filasPorJugador) {
+    throw new ErrorSala("limite_de_filas", "Superas el límite de filas por jugador");
+  }
+  const limpio = validarNombre(nombre);
+  const ocupadas = filas.filter((f) => f.jugadorUid !== undefined).length + elegidas.length;
+  return {
+    numeros: (elegidas as number[]).slice().sort((x, y) => x - y),
+    estado: ocupadas === sala.filasTotal ? "llena" : "abierta",
+    nombre: limpio,
+    costo: sala.precioFila * elegidas.length,
+  };
+}
+
+/** Valida la reserva de una fila (caso de una sola). */
 export function aplicarReserva(
   sala: Sala,
   filas: Fila[],
@@ -122,27 +180,28 @@ export function aplicarReserva(
   uid: string,
   nombre: unknown,
 ): { fila: Fila; estado: EstadoSala; nombre: string } {
-  if (sala.estado !== "abierta") {
-    throw new ErrorSala("sala_no_abierta", "La sala ya no está abierta");
-  }
-  const fila = filas[numeroFila - 1];
-  if (!Number.isInteger(numeroFila) || fila === undefined) {
-    throw new ErrorSala("fila_inexistente", "Esa fila no existe");
-  }
-  if (fila.jugadorUid !== undefined) {
-    throw new ErrorSala("fila_ocupada", "Esa fila ya tiene dueño");
-  }
-  const propias = filas.filter((f) => f.jugadorUid === uid).length;
-  if (propias >= sala.filasPorJugador) {
-    throw new ErrorSala("limite_de_filas", "Ya reservaste tu fila");
-  }
-  const limpio = validarNombre(nombre);
-  const ocupadas = filas.filter((f) => f.jugadorUid !== undefined).length + 1;
+  const r = aplicarReservas(sala, filas, [numeroFila], uid, nombre);
   return {
-    fila: { ...fila, jugadorUid: uid, nombre: limpio },
-    estado: ocupadas === sala.filasTotal ? "llena" : "abierta",
-    nombre: limpio,
+    fila: { ...filas[numeroFila - 1], jugadorUid: uid, nombre: r.nombre },
+    estado: r.estado,
+    nombre: r.nombre,
   };
+}
+
+/** Lo que queda en la billetera tras pagar [costo]; falla si no alcanza. */
+export function cobrar(saldo: number, costo: number): number {
+  if (costo > saldo) {
+    throw new ErrorSala("saldo_insuficiente", `Te faltan ${costo - saldo} créditos`);
+  }
+  return saldo - costo;
+}
+
+/** Monto de una recarga: solo los montos fijos. */
+export function validarRecarga(monto: unknown): number {
+  if (typeof monto !== "number" || !MONTOS_RECARGA.includes(monto)) {
+    throw new ErrorSala("monto_invalido", `Los montos son ${MONTOS_RECARGA.join(", ")}`);
+  }
+  return monto;
 }
 
 export function exigirOrganizador(sala: Sala, uid: string): void {

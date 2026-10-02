@@ -71,12 +71,14 @@ console.log("✔ precio y premio: se guardan y el premio no pasa de lo disponibl
 await rechazada("empezarPartida", organizador, { codigo }, "FAILED_PRECONDITION");
 
 const nombres = Array.from({ length: 20 }, (_, i) => `Jugador ${i + 1}`);
+const cuenta = (nombre) => registrar({ email: `${nombre}+${Date.now()}${Math.floor(Math.random() * 1e6)}@prueba.pe`, password: "clave-de-prueba" });
 const jugadores = [];
 for (let i = 0; i < 20; i++) {
-  const token = await registrar();
+  // Con precio hace falta una cuenta: el cobro sale de su billetera.
+  const token = await cuenta(`jugador${i}`);
   jugadores.push(token);
   const r = await ok("reservarFila", token, { codigo, fila: i + 1, nombre: nombres[i] });
-  assert.equal(r.fila, i + 1);
+  assert.deepEqual(r.filas, [i + 1]);
 }
 console.log("✔ 20 filas reservadas, una por jugador");
 
@@ -113,7 +115,7 @@ console.log("✔ visibilidad: públicas listables, privadas solo con código, co
 // Cerrar una sala que no se jugó: solo su organizador, solo antes de empezar.
 const cerrable = await ok("crearSala", organizador, { nombre: "Se cierra", columnas: 5, publica: true });
 await ok("reservarFila", jugadores[1], { codigo: cerrable.codigo, fila: 1, nombre: "Ana" });
-await rechazada("cancelarSala", jugadores[1], { codigo: cerrable.codigo }, "PERMISSION_DENIED");
+await rechazada("cancelarSala", jugadores[1], { codigo: cerrable.codigo }, "FAILED_PRECONDITION"); // no es su sala
 await ok("cancelarSala", organizador, { codigo: cerrable.codigo, motivo: "No se llenó" });
 await ok("cancelarSala", organizador, { codigo: cerrable.codigo }); // cerrar dos veces no falla
 const cerrada = await (await fetch(`${DOCS}/salas/${cerrable.codigo}`, { headers: { authorization: `Bearer ${jugadores[1]}` } })).json();
@@ -122,8 +124,63 @@ assert.equal(cerrada.fields.motivoCierre.stringValue, "No se llenó");
 await rechazada("reservarFila", jugadores[2], { codigo: cerrable.codigo, fila: 2, nombre: "Beto" }, "FAILED_PRECONDITION");
 console.log("✔ cerrar una sala: solo quien organiza, avisa el motivo y ya no recibe jugadores");
 
+// Billetera: créditos de prueba, varias filas por jugador, saldo en el servidor y devolución.
+const saldoDe = async (token) => (await ok("obtenerBilletera", token, {})).saldo;
+const leerDoc = (ruta, token) => fetch(`${DOCS}/${ruta}`, { headers: { authorization: `Bearer ${token}` } });
+const uidDe = (token) => JSON.parse(Buffer.from(token.split(".")[1], "base64url")).user_id;
+
+await rechazada("obtenerBilletera", anonimo, {}, "PERMISSION_DENIED");
+await rechazada("recargar", anonimo, { monto: 10 }, "PERMISSION_DENIED");
+await rechazada("reservarFila", anonimo, { codigo: (await ok("crearSala", organizador, { nombre: "De pago", precioFila: 5, premio: 80 })).codigo, fila: 1, nombre: "Anónimo" }, "PERMISSION_DENIED");
+assert.equal(await saldoDe(jugadores[0]), 20, "25 de bienvenida menos los 5 de su fila");
+
+const varias = await ok("crearSala", organizador, { nombre: "Varias filas", precioFila: 5, premio: 80 });
+const lucia = await cuenta("lucia");
+assert.equal(await saldoDe(lucia), 25, "una cuenta nueva empieza con 25 créditos de prueba");
+const r3 = await ok("reservarFilas", lucia, { codigo: varias.codigo, filas: [1, 2, 3], nombre: "Lucía" });
+assert.deepEqual(r3.filas, [1, 2, 3]);
+assert.equal(r3.costo, 15);
+assert.equal(await saldoDe(lucia), 10);
+// Sin saldo suficiente no se reserva nada, ni siquiera las filas que sí alcanzaban.
+await rechazada("reservarFilas", lucia, { codigo: varias.codigo, filas: [4, 5, 6], nombre: "Lucía" }, "FAILED_PRECONDITION");
+assert.equal(await saldoDe(lucia), 10, "el saldo no cambia si la reserva falla");
+const filaLibre = await (await leerDoc(`salas/${varias.codigo}/filas/4`, lucia)).json();
+assert.equal(filaLibre.fields.jugadorUid, undefined, "la fila 4 sigue libre");
+// Recargar: solo montos fijos y solo cuentas.
+await rechazada("recargar", lucia, { monto: 15 }, "FAILED_PRECONDITION");
+assert.equal((await ok("recargar", lucia, { monto: 10 })).saldo, 20);
+await ok("reservarFilas", lucia, { codigo: varias.codigo, filas: [4, 5, 6], nombre: "Lucía" });
+assert.equal(await saldoDe(lucia), 5);
+// Una fila ocupada por otra persona tampoco cobra.
+const beto = await cuenta("beto");
+await rechazada("reservarFilas", beto, { codigo: varias.codigo, filas: [7, 1], nombre: "Beto" }, "FAILED_PRECONDITION");
+assert.equal(await saldoDe(beto), 25);
+// La billetera es privada y no se escribe desde el cliente.
+assert.equal((await leerDoc(`billeteras/${uidDe(lucia)}`, lucia)).status, 200);
+assert.equal((await leerDoc(`billeteras/${uidDe(lucia)}`, beto)).status, 403, "nadie más lee tu billetera");
+const trampa = await fetch(`${DOCS}/billeteras/${uidDe(lucia)}?updateMask.fieldPaths=saldo`, {
+  method: "PATCH",
+  headers: { authorization: `Bearer ${lucia}`, "content-type": "application/json" },
+  body: JSON.stringify({ fields: { saldo: { integerValue: "9999" } } }),
+});
+assert.equal(trampa.status, 403, "el saldo no se modifica desde el cliente");
+console.log("✔ billetera: bienvenida, varias filas, saldo en el servidor y recarga");
+
+// Cerrar la sala devuelve todo lo pagado, fila por fila.
+await ok("cancelarSala", organizador, { codigo: varias.codigo, motivo: "Prueba" });
+assert.equal(await saldoDe(lucia), 35, "5 de saldo más 30 por las 6 filas devueltas");
+await ok("cancelarSala", organizador, { codigo: varias.codigo }); // cerrar otra vez no devuelve dos veces
+assert.equal(await saldoDe(lucia), 35);
+const movimientos = await (await leerDoc(`billeteras/${uidDe(lucia)}/movimientos?pageSize=50`, lucia)).json();
+const tipos = (movimientos.documents ?? []).map((d) => d.fields.tipo.stringValue);
+assert.equal(tipos.filter((t) => t === "fila").length, 6);
+assert.equal(tipos.filter((t) => t === "devolucion").length, 6);
+assert.equal(tipos.filter((t) => t === "recarga").length, 1);
+assert.equal(tipos.filter((t) => t === "regalo").length, 1);
+console.log("✔ cerrar la sala devuelve todo el dinero, una sola vez");
+
 // Doble reserva: la fila ya tiene dueño y el jugador ya tiene fila.
-await rechazada("reservarFila", await registrar(), { codigo, fila: 1, nombre: "Intruso" }, "FAILED_PRECONDITION");
+await rechazada("reservarFila", await cuenta("intruso"), { codigo, fila: 1, nombre: "Intruso" }, "FAILED_PRECONDITION");
 
 // Los clientes leen la sala, pero no pueden escribirla.
 const leer = await fetch(`${DOCS}/salas/${codigo}`, { headers: { authorization: `Bearer ${jugadores[0]}` } });
@@ -137,7 +194,8 @@ assert.equal(escribir.status, 403);
 console.log("✔ lectura permitida y escritura directa bloqueada");
 
 // Solo el organizador de esa sala sortea.
-await rechazada("sacarBolilla", jugadores[0], { codigo }, "PERMISSION_DENIED");
+await rechazada("sacarBolilla", jugadores[0], { codigo }, "FAILED_PRECONDITION"); // no es quien organiza
+await rechazada("sacarBolilla", anonimo, { codigo }, "PERMISSION_DENIED");
 await ok("empezarPartida", organizador, { codigo });
 await rechazada("cancelarSala", organizador, { codigo }, "FAILED_PRECONDITION"); // empezada: se juega hasta el final
 

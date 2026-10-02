@@ -6,6 +6,10 @@ import {
   Fila,
   Sala,
   aplicarReserva,
+  aplicarReservas,
+  cobrar,
+  validarRecarga,
+  validarFilasPorJugador,
   cancelar,
   comision,
   disponibleParaPremio,
@@ -270,5 +274,83 @@ describe("precio y premio", () => {
   it("usa la comisión que se le pase", () => {
     assert.equal(disponibleParaPremio(5, 20, 20), 80);
     assert.equal(codigoDe(() => validarPrecioPremio(5, 81, 20, 20)), "premio_invalido");
+  });
+});
+
+describe("aplicarReservas (varias filas)", () => {
+  const abierta = (extra: Partial<Sala> = {}) => sala({ filasPorJugador: 20, ...extra });
+
+  it("reserva varias filas a la vez y calcula el costo", () => {
+    const r = aplicarReservas(abierta(), filasLibres(), [7, 5, 6], "lucia", "Lucía");
+    assert.deepEqual(r.numeros, [5, 6, 7]);
+    assert.equal(r.costo, 15);
+    assert.equal(r.estado, "abierta");
+  });
+
+  it("una sala sin precio no cuesta nada", () => {
+    assert.equal(aplicarReservas(abierta({ precioFila: 0 }), filasLibres(), [1, 2], "a", "A").costo, 0);
+  });
+
+  it("es todo o nada: una fila ocupada rechaza la reserva entera", () => {
+    const filas = filasLibres();
+    filas[5].jugadorUid = "otra";
+    assert.equal(
+      codigoDe(() => aplicarReservas(abierta(), filas, [5, 6], "lucia", "Lucía")),
+      "fila_ocupada",
+    );
+  });
+
+  it("no acepta listas vacías, repetidas ni filas que no existen", () => {
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), [], "a", "A")), "filas_invalidas");
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), [3, 3], "a", "A")), "filas_invalidas");
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), "5", "a", "A")), "filas_invalidas");
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), [21], "a", "A")), "fila_inexistente");
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), [0], "a", "A")), "fila_inexistente");
+    assert.equal(codigoDe(() => aplicarReservas(abierta(), filasLibres(), [1.5], "a", "A")), "fila_inexistente");
+  });
+
+  it("respeta el límite de filas por jugador contando las que ya tiene", () => {
+    const filas = filasLibres();
+    filas[0].jugadorUid = "lucia";
+    const limitada = abierta({ filasPorJugador: 3 });
+    assert.equal(aplicarReservas(limitada, filas, [2, 3], "lucia", "Lucía").numeros.length, 2);
+    assert.equal(codigoDe(() => aplicarReservas(limitada, filas, [2, 3, 4], "lucia", "Lucía")), "limite_de_filas");
+  });
+
+  it("sin límite, se pueden reservar todas las filas libres y la sala se llena", () => {
+    const todas = Array.from({ length: 20 }, (_, i) => i + 1);
+    const r = aplicarReservas(abierta(), filasLibres(), todas, "lucia", "Lucía");
+    assert.equal(r.estado, "llena");
+    assert.equal(r.costo, 100);
+  });
+
+  it("no reserva en una sala que no está abierta", () => {
+    assert.equal(
+      codigoDe(() => aplicarReservas(abierta({ estado: "cancelada" }), filasLibres(), [1], "a", "A")),
+      "sala_no_abierta",
+    );
+  });
+});
+
+describe("billetera", () => {
+  it("cobrar descuenta y falla si no alcanza", () => {
+    assert.equal(cobrar(25, 15), 10);
+    assert.equal(cobrar(5, 5), 0);
+    assert.equal(codigoDe(() => cobrar(4, 5)), "saldo_insuficiente");
+  });
+
+  it("solo se recargan los montos fijos", () => {
+    for (const m of [10, 20, 50, 100]) assert.equal(validarRecarga(m), m);
+    assert.equal(codigoDe(() => validarRecarga(15)), "monto_invalido");
+    assert.equal(codigoDe(() => validarRecarga("20")), "monto_invalido");
+    assert.equal(codigoDe(() => validarRecarga(undefined)), "monto_invalido");
+  });
+
+  it("las filas por jugador son todas las filas si no se dice nada", () => {
+    assert.equal(validarFilasPorJugador(undefined, 20), 20);
+    assert.equal(validarFilasPorJugador(1, 20), 1);
+    assert.equal(codigoDe(() => validarFilasPorJugador(0, 20)), "filas_invalidas");
+    assert.equal(codigoDe(() => validarFilasPorJugador(21, 20)), "filas_invalidas");
+    assert.equal(codigoDe(() => validarFilasPorJugador(2.5, 20)), "filas_invalidas");
   });
 });

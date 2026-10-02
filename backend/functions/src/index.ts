@@ -6,8 +6,12 @@ import {
   ErrorSala,
   Fila,
   Sala,
-  aplicarReserva,
+  aplicarReservas,
   cancelar,
+  cobrar,
+  validarFilasPorJugador,
+  validarRecarga,
+  CREDITOS_INICIALES,
   empezar,
   exigirOrganizador,
   generarCartillas,
@@ -102,6 +106,16 @@ export const crearSala = onCall(async (request) => {
   const columnas = (request.data as { columnas?: unknown }).columnas === 6 ? 6 : 5;
   // Pública por defecto, como en "Nueva partida".
   const publica = (request.data as { publica?: unknown }).publica !== false;
+  const filasPorJugador = (() => {
+    try {
+      return validarFilasPorJugador(
+        (request.data as { filasPorJugador?: unknown }).filasPorJugador,
+        FILAS_TOTAL,
+      );
+    } catch (e) {
+      return aHttps(e);
+    }
+  })();
   const { precioFila, premio } = (() => {
     try {
       const d = request.data as { precioFila?: unknown; premio?: unknown };
@@ -127,7 +141,7 @@ export const crearSala = onCall(async (request) => {
         comisionPorcentaje: COMISION_PORCENTAJE,
         columnas,
         filasTotal: FILAS_TOTAL,
-        filasPorJugador: 1,
+        filasPorJugador,
         estado: "abierta",
         bolillas: [],
         ganadores: [],
@@ -143,26 +157,125 @@ export const crearSala = onCall(async (request) => {
   throw new HttpsError("resource-exhausted", "No se pudo crear la sala, intenta de nuevo");
 });
 
-/** `reservarFila({codigo, fila, nombre})`. En transacción: sin dobles reservas. */
-export const reservarFila = onCall(async (request) => {
+/** La billetera de una cuenta: `billeteras/{uid}` con su saldo y sus movimientos. */
+const billetera = (uid: string) => db.collection("billeteras").doc(uid);
+
+type TipoMovimiento = "regalo" | "recarga" | "fila" | "devolucion" | "premio";
+
+/** Anota un movimiento en el historial de la billetera (dentro de la transacción). */
+function anotar(
+  t: Transaction,
+  uid: string,
+  mov: { tipo: TipoMovimiento; monto: number; detalle: string; sala?: string },
+): void {
+  t.set(billetera(uid).collection("movimientos").doc(), {
+    ...mov,
+    creadaEn: FieldValue.serverTimestamp(),
+  });
+}
+
+/** Lee el saldo; si la cuenta no tiene billetera, nace con los créditos de prueba. */
+async function leerSaldo(t: Transaction, uid: string): Promise<{ saldo: number; nueva: boolean }> {
+  const doc = await t.get(billetera(uid));
+  if (doc.exists) return { saldo: Number((doc.data() as { saldo: number }).saldo), nueva: false };
+  return { saldo: CREDITOS_INICIALES, nueva: true };
+}
+
+/** Escribe el saldo nuevo (y el regalo de bienvenida si la billetera acaba de nacer). */
+function guardarSaldo(t: Transaction, uid: string, saldo: number, nueva: boolean): void {
+  if (nueva) {
+    anotar(t, uid, { tipo: "regalo", monto: CREDITOS_INICIALES, detalle: "Créditos de bienvenida" });
+  }
+  t.set(billetera(uid), { saldo, actualizadaEn: FieldValue.serverTimestamp() });
+}
+
+/** Elegir fila con precio exige una cuenta: sin ella no hay billetera. */
+function exigirCuenta(request: CallableRequest): void {
+  if (request.auth?.token.firebase.sign_in_provider === "anonymous") {
+    throw new HttpsError("permission-denied", "Hace falta iniciar sesión con una cuenta");
+  }
+}
+
+/**
+ * `reservarFilas({codigo, filas: [n…], nombre})`. En transacción y todo o nada:
+ * sin dobles reservas y cobrando el precio de cada fila de la billetera. También
+ * responde a `reservarFila({codigo, fila, nombre})`.
+ */
+const manejarReserva = async (request: CallableRequest) => {
   const uid = uidDe(request);
   const codigo = codigoDe(request.data);
-  const { fila, nombre } = request.data as { fila?: unknown; nombre?: unknown };
+  const { filas: varias, fila, nombre } = request.data as {
+    filas?: unknown;
+    fila?: unknown;
+    nombre?: unknown;
+  };
+  const numeros = varias !== undefined ? varias : [fila];
   try {
     return await db.runTransaction(async (t) => {
       const { ref, sala } = await leerSala(t, codigo);
       const filas = await leerFilas(t, codigo, sala.filasTotal);
-      const r = aplicarReserva(sala, filas, Number(fila), uid, nombre);
-      t.update(ref.collection("filas").doc(String(fila)), {
-        jugadorUid: uid,
-        nombre: r.nombre,
-        reservadaEn: FieldValue.serverTimestamp(),
-      });
+      const r = aplicarReservas(sala, filas, numeros, uid, nombre);
+      let saldo: number | null = null;
+      let cobro: { saldo: number; nueva: boolean } | null = null;
+      if (r.costo > 0) {
+        exigirCuenta(request);
+        const actual = await leerSaldo(t, uid);
+        cobro = { saldo: cobrar(actual.saldo, r.costo), nueva: actual.nueva };
+        saldo = cobro.saldo;
+      }
+      for (const n of r.numeros) {
+        t.update(ref.collection("filas").doc(String(n)), {
+          jugadorUid: uid,
+          nombre: r.nombre,
+          reservadaEn: FieldValue.serverTimestamp(),
+        });
+      }
       t.update(ref, {
-        ocupadas: filas.filter((f) => f.jugadorUid).length + 1,
+        ocupadas: filas.filter((f) => f.jugadorUid).length + r.numeros.length,
         ...(r.estado !== sala.estado ? { estado: r.estado } : {}),
       });
-      return { fila: Number(fila), estado: r.estado };
+      if (cobro !== null) {
+        guardarSaldo(t, uid, cobro.saldo, cobro.nueva);
+        for (const n of r.numeros) {
+          anotar(t, uid, {
+            tipo: "fila",
+            monto: -sala.precioFila,
+            detalle: `Fila ${n} · ${sala.nombre}`,
+            sala: codigo,
+          });
+        }
+      }
+      return { filas: r.numeros, estado: r.estado, costo: r.costo, saldo };
+    });
+  } catch (e) {
+    return aHttps(e);
+  }
+};
+export const reservarFilas = onCall(manejarReserva);
+export const reservarFila = onCall(manejarReserva);
+
+/** `obtenerBilletera()` → `{saldo}`. La primera vez regala los créditos de prueba. */
+export const obtenerBilletera = onCall(async (request) => {
+  const uid = uidDe(request);
+  exigirCuenta(request);
+  return db.runTransaction(async (t) => {
+    const { saldo, nueva } = await leerSaldo(t, uid);
+    if (nueva) guardarSaldo(t, uid, saldo, true);
+    return { saldo };
+  });
+});
+
+/** `recargar({monto})`: créditos de prueba que se agregan al instante, sin cobro. */
+export const recargar = onCall(async (request) => {
+  const uid = uidDe(request);
+  exigirCuenta(request);
+  try {
+    const monto = validarRecarga((request.data as { monto?: unknown }).monto);
+    return await db.runTransaction(async (t) => {
+      const { saldo, nueva } = await leerSaldo(t, uid);
+      guardarSaldo(t, uid, saldo + monto, nueva);
+      anotar(t, uid, { tipo: "recarga", monto, detalle: "Recarga" });
+      return { saldo: saldo + monto };
     });
   } catch (e) {
     return aHttps(e);
@@ -259,6 +372,31 @@ export const cancelarSala = onCall(async (request) => {
       const { ref, sala } = await leerSala(t, codigo);
       const motivo = cancelar(sala, uid, (request.data as { motivo?: unknown }).motivo);
       if (sala.estado !== "cancelada") {
+        // Cada fila reservada vuelve a su billetera: devolución completa.
+        const filas = await leerFilas(t, codigo, sala.filasTotal);
+        const porJugador = new Map<string, number[]>();
+        filas.forEach((f, i) => {
+          if (f.jugadorUid !== undefined) {
+            porJugador.set(f.jugadorUid, [...(porJugador.get(f.jugadorUid) ?? []), i + 1]);
+          }
+        });
+        const saldos = new Map<string, { saldo: number; nueva: boolean }>();
+        if (sala.precioFila > 0) {
+          for (const jugador of porJugador.keys()) saldos.set(jugador, await leerSaldo(t, jugador));
+        }
+        for (const [jugador, numeros] of porJugador) {
+          const actual = saldos.get(jugador);
+          if (actual === undefined) continue;
+          guardarSaldo(t, jugador, actual.saldo + sala.precioFila * numeros.length, actual.nueva);
+          for (const n of numeros) {
+            anotar(t, jugador, {
+              tipo: "devolucion",
+              monto: sala.precioFila,
+              detalle: `Devolución · fila ${n} de ${sala.nombre}`,
+              sala: codigo,
+            });
+          }
+        }
         t.update(ref, {
           estado: "cancelada",
           motivoCierre: motivo,

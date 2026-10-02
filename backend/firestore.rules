@@ -23,5 +23,17 @@ service cloud.firestore {
         allow write: if false;
       }
     }
+
+    // La billetera es de cada cuenta: solo su dueña la lee, y solo el servidor la
+    // modifica (reservas, recargas, devoluciones y premios).
+    match /billeteras/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+
+      match /movimientos/{movimiento} {
+        allow read: if request.auth != null && request.auth.uid == uid;
+        allow write: if false;
+      }
+    }
   }
 }

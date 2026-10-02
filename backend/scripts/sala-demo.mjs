@@ -39,7 +39,9 @@ async function organizador() {
   return (await post(`${AUTH}:signUp?key=x`, { ...cuerpo, ...cuenta })).idToken;
 }
 
-const anonimo = async () => (await post(`${AUTH}:signUp?key=x`, { returnSecureToken: true })).idToken;
+// Con precio hace falta una cuenta (el cobro sale de su billetera de prueba).
+const anonimo = async () =>
+  (await post(`${AUTH}:signUp?key=x`, { returnSecureToken: true, email: `jugador+${Date.now()}${Math.floor(Math.random() * 1e6)}@prueba.pe`, password: "clave-de-prueba" })).idToken;
 
 async function llamar(nombre, token, data) {
   const r = await post(`${FUNCIONES}/${nombre}`, { data }, token);
