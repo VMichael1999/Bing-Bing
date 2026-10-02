@@ -22,8 +22,8 @@
   <img alt="Plataformas: Android e iOS" src="https://img.shields.io/badge/plataformas-Android%20%7C%20iOS-3DDC84">
   <img alt="Tema claro y oscuro" src="https://img.shields.io/badge/tema-claro%20%2B%20oscuro-181C33">
   <br>
-  <img alt="116 pruebas pasan" src="https://img.shields.io/badge/pruebas-116%20pasan-13895A">
-  <img alt="Cobertura 92 %" src="https://img.shields.io/badge/cobertura-92%25-13895A">
+  <img alt="132 pruebas pasan" src="https://img.shields.io/badge/pruebas-132%20pasan-13895A">
+  <img alt="Cobertura 94 %" src="https://img.shields.io/badge/cobertura-94%25-13895A">
   <img alt="Backend: TypeScript y Firebase" src="https://img.shields.io/badge/backend-TypeScript%20%7C%20Firebase-3178C6?logo=typescript&logoColor=white">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-C81B60">
 </p>
@@ -59,18 +59,19 @@ Medidas el 2 de octubre de 2026 sobre el proyecto completo.
 
 | Métrica | Valor |
 | --- | --- |
-| Pruebas de Flutter | **99** (`bing_core` 23, `bing_ui` 19, `bing_firebase` 10, Host 31, Play 16) |
+| Pruebas de Flutter | **115** (`bing_core` 23, `bing_ui` 19, `bing_firebase` 26, Host 31, Play 16) |
 | Pruebas del backend | **17** |
-| Cobertura de líneas | **92,4 %** (`bing_ui` 99,8 %, Play 93,8 %, `bing_core` 92,8 %, Host 91,1 %, `bing_firebase` 37,9 %) |
-| Código Dart | 7 123 líneas en `lib` y 1 856 en pruebas (sin líneas en blanco) |
+| Cobertura de líneas | **94,4 %** (`bing_ui` 99,8 %, Play 93,8 %, `bing_core` 92,8 %, Host 91,1 %, `bing_firebase` 78,9 %) |
+| Código Dart | 7 138 líneas en `lib` y 2 083 en pruebas (sin líneas en blanco) |
 | Código TypeScript | 538 líneas (funciones y pruebas) y 194 en scripts de prueba |
 | Pantallas del diseño | **15 de 15** (9 de Host y 6 de Play) |
 | Fidelidad con el diseño | ≈ 2,8 % de píxeles distintos de media; solo 3 de 15 cumplen el objetivo de menos de 1,5 % |
 | Versiones | Flutter 3.29.2 (estable), Dart 3.7.2, Node 20 |
 
-La cobertura cuenta las líneas ejecutables que cargan las pruebas. `bing_firebase` queda
-baja porque sus llamadas a Firestore, Auth y Functions solo se ejercen contra el
-emulador (ver [Backend](#backend)), no con pruebas automáticas. Los valores de las
+La cobertura cuenta las líneas ejecutables que cargan las pruebas. En `bing_firebase`
+no se prueban con pruebas automáticas el arranque real de Firebase ni el inicio de
+sesión con Google (dependen del dispositivo); esos caminos se verifican a mano con el
+emulador (ver [Backend](#backend)). Los valores de las
 insignias son fijos: hay que actualizarlos a mano al volver a medir. Las pruebas golden
 solo corren en macOS.
 
