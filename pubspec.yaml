@@ -9,6 +9,7 @@ workspace:
   - apps/play
   - packages/bing_ui
   - packages/bing_core
+  - packages/bing_firebase
 
 flutter:
   uses-material-design: false
