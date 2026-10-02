@@ -3,6 +3,7 @@ import 'package:bing_firebase/bing_firebase.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
+import 'src/cuenta_real.dart';
 import 'src/demo.dart';
 import 'src/flujo_real.dart';
 import 'src/paginas/codigo_page.dart';
@@ -23,7 +24,12 @@ Future<void> main() async {
   }
   try {
     await SesionBing().entrarAnonimo();
-    runApp(BingPlayApp(repositorio: RepositorioFirestore()));
+    runApp(
+      BingPlayApp(
+        repositorio: RepositorioFirestore(),
+        sesion: SesionJugadorFirebase(),
+      ),
+    );
   } catch (e) {
     debugPrint('Play: no se pudo iniciar sesión: $e');
     runApp(const BingPlayApp(inicio: _SinConexion()));
@@ -37,6 +43,7 @@ class BingPlayApp extends StatelessWidget {
     this.repositorio,
     this.camaraEscaner,
     this.enlaces,
+    this.sesion,
   });
 
   /// Pantalla con la que arranca; por defecto, la del código de sala.
@@ -51,6 +58,9 @@ class BingPlayApp extends StatelessWidget {
   /// Enlaces que abren la app; sin ellos se usan los del sistema (pruebas).
   final Stream<Uri>? enlaces;
 
+  /// Quién juega (cuentas de Google); sin ella no se pide iniciar sesión.
+  final SesionJugador? sesion;
+
   @override
   Widget build(BuildContext context) {
     return BingTema(
@@ -64,7 +74,11 @@ class BingPlayApp extends StatelessWidget {
               settings: settings,
               pageBuilder: (context, _, __) => builder(context),
             ),
-        builder: (context, child) => BingSistema(child: child!),
+        builder:
+            (context, child) => AlcanceSesion(
+              sesion: sesion,
+              child: BingSistema(child: child!),
+            ),
         home:
             inicio ??
             pantallaDemo(_pantallaElegida) ??
@@ -74,6 +88,7 @@ class BingPlayApp extends StatelessWidget {
                   repositorio: repositorio!,
                   camaraEscaner: camaraEscaner,
                   enlaces: enlaces,
+                  sesion: sesion,
                 )),
       ),
     );

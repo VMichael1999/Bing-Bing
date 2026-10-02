@@ -16,6 +16,7 @@ class CodigoPage extends StatelessWidget {
     this.verFilasHabilitado = true,
     this.alVolver,
     this.bajoElQr,
+    this.accion,
   });
 
   final String codigo;
@@ -39,6 +40,9 @@ class CodigoPage extends StatelessWidget {
   /// Contenido bajo el botón del QR (las salas abiertas); sin él, el diseño.
   /// Recibe `true` cuando ocupa el espacio que sobra y debe moverse solo.
   final Widget Function(bool desplazable)? bajoElQr;
+
+  /// Arriba a la derecha: "Iniciar sesión" o la cuenta abierta; sin él, el diseño.
+  final Widget? accion;
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +92,8 @@ class CodigoPage extends StatelessWidget {
                             ],
                           ),
                         ),
+                      if (accion != null)
+                        Positioned(right: 14, top: 11, child: accion!),
                       if (alVolver != null)
                         Positioned(
                           left: 14,

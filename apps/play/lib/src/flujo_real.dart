@@ -6,6 +6,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'cuenta_real.dart';
 import 'escaner.dart';
 import 'paginas/codigo_page.dart';
 import 'paginas/elegir_fila_page.dart';
@@ -49,9 +50,13 @@ class FlujoReal extends StatefulWidget {
     required this.repositorio,
     this.camaraEscaner,
     this.enlaces,
+    this.sesion,
   });
 
   final RepositorioSala repositorio;
+
+  /// Quién juega; sin ella no hay cuentas ni se pide iniciar sesión.
+  final SesionJugador? sesion;
 
   /// Sustituye a la cámara del escáner (pruebas).
   final Widget Function(BuildContext, ValueChanged<String>)? camaraEscaner;
@@ -68,6 +73,8 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   // Una sola suscripción: el diseño cambia con el teclado y no debe abrir otra.
   StreamSubscription<List<SalaEnVivo>>? _suscripcion;
   StreamSubscription<Uri>? _enlaces;
+  StreamSubscription<UsuarioBing?>? _usuarioSub;
+  UsuarioBing? _usuario;
   List<SalaEnVivo>? _salas;
   bool _errorSalas = false;
   bool _tecladoVisible = false;
@@ -85,6 +92,9 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
     _texto.addListener(_alEscribir);
     WidgetsBinding.instance.addObserver(this);
     _escucharEnlaces();
+    _usuarioSub = widget.sesion?.cambios.listen(
+      (u) => setState(() => _usuario = u),
+    );
     _suscripcion = widget.repositorio.salasAbiertas().listen(
       (salas) => setState(() {
         _salas = salas;
@@ -99,6 +109,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _suscripcion?.cancel();
     _enlaces?.cancel();
+    _usuarioSub?.cancel();
     _texto.dispose();
     _foco.dispose();
     super.dispose();
@@ -277,6 +288,16 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
       verFilasHabilitado: puede,
       // Quien escribe un código no necesita ver las salas.
       alEscanear: _abrirEscaner,
+      accion:
+          widget.sesion == null
+              ? null
+              : AccesoCuenta(
+                usuario: _usuario,
+                alEntrar:
+                    () => unawaited(mostrarHojaSesion(context, widget.sesion!)),
+                alAbrirCuenta:
+                    () => _ir(context, CuentaReal(sesion: widget.sesion!)),
+              ),
       bajoElQr:
           (desplazable) =>
               _tecladoVisible
@@ -376,8 +397,14 @@ class _ElegirFilaReal extends StatelessWidget {
           duenos: [for (final f in filas) f.libre ? null : (f.nombre ?? '')],
           seleccionInicial: primeraLibre < 0 ? 1 : primeraLibre + 1,
           alVolver: () => Navigator.of(context).pop(),
-          alSeguir: (fila) {
+          alSeguir: (fila) async {
             if (!filas[fila - 1].libre) return;
+            // Mirar la sala es libre; para elegir fila hace falta una cuenta.
+            final sesion = AlcanceSesion.de(context);
+            if (sesion != null && !sesion.actual.tieneCuenta) {
+              if (!await mostrarHojaSesion(context, sesion)) return;
+              if (!context.mounted) return;
+            }
             _ir(
               context,
               _ReservarReal(
@@ -457,6 +484,7 @@ class _ReservarRealState extends State<_ReservarReal> {
       organizador: widget.sala.organizador,
       fila: widget.fila,
       numeros: widget.numeros,
+      nombreInicial: AlcanceSesion.de(context)?.actual?.primerNombre ?? '',
       alVolver: () => Navigator.of(context).pop(),
       alReservar: _reservar,
       error: _error,

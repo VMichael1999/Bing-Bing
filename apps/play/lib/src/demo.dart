@@ -1,12 +1,15 @@
 import 'package:bing_core/bing_core.dart';
+import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
 import 'paginas/codigo_page.dart';
+import 'paginas/cuenta_page.dart';
 import 'paginas/elegir_fila_page.dart';
 import 'paginas/en_vivo_page.dart';
 import 'paginas/escaner_page.dart';
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
+import 'paginas/iniciar_sesion_hoja.dart';
 import 'paginas/reservar_page.dart';
 import 'paginas/salas_abiertas.dart';
 
@@ -50,6 +53,7 @@ Widget? pantallaDemo(String id) => switch (id) {
     filasLibres: 0,
     resultado: const SizedBox(height: 40),
     alEscanear: () {},
+    accion: const BingChip('Iniciar sesión', icono: 'user'),
     bajoElQr:
         (desplazable) => SalasAbiertas(
           salas: salasConSitio(salasDemo()),
@@ -63,6 +67,19 @@ Widget? pantallaDemo(String id) => switch (id) {
     filasLibres: 0,
     resultado: SizedBox(height: 40),
     bajoElQr: _sinSalas,
+  ),
+  'jug-09-iniciar-sesion' => IniciarSesionHoja(
+    fondo: ElegirFilaPage(
+      salaNombre: salaDemoNombre,
+      cartillas: cartillasDemo.take(6).toList(),
+      duenos: filasDemoDuenos.take(6).toList(),
+      seleccionInicial: 5,
+    ),
+    alAhoraNo: () {},
+  ),
+  'jug-13-cuenta' => const CuentaPage(
+    nombre: 'Lucía Torres',
+    correo: 'lucia@correo.com',
   ),
   'jug-08-escanear' => const EscanerPage(),
   'jug-08b-camara-denegada' => const CamaraDenegadaPage(),

@@ -60,6 +60,12 @@ void main() {
     }, skip: skip);
   }
 
+  for (final id in ['jug-09-iniciar-sesion', 'jug-13-cuenta']) {
+    testWidgets(id, (tester) async {
+      await _capturar(tester, id, pantallaDemo(id)!);
+    }, skip: skip);
+  }
+
   for (final id in ['jug-08-escanear', 'jug-08b-camara-denegada']) {
     testWidgets(id, (tester) async {
       await _capturar(tester, id, pantallaDemo(id)!, sinMovimiento: true);
