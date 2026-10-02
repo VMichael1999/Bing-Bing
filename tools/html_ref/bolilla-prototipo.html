@@ -1,0 +1,415 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Bolilla Bingo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: cartilla de 20 filas (una por jugador) a la izquierda, tablero de bolillas a la derecha; la bolilla para sacar flota abajo a la derecha */
+:root{
+  --bg:#EDF0F6; --card:#FFFFFF; --ink:#181C33; --muted:#59607A; --line:#DCE1EC; --soft:#F3F5FA;
+  --dauber:#C81B60; --dauber-ink:#FFFFFF; --near:#8A5A00; --near-soft:#FFF1CC; --win:#B07E00; --win-soft:#FFE9A8;
+  --b:#2B6BE0; --i:#D93A33; --n:#EEF0F6; --n-ink:#181C33; --g:#13895A; --o:#F2B400; --x:#7B45D0;
+  --face:#FFFFFF; --face-ink:#181C33; --scrim:rgba(14,17,38,.62); --shadow:0 10px 30px rgba(24,28,51,.12);
+  --display:"Bungee","Arial Black",Impact,sans-serif; --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ color-scheme:dark;
+    --bg:#10132A; --card:#1A1E3A; --ink:#EEF0F8; --muted:#A5ABC6; --line:#2C3256; --soft:#232849;
+    --dauber:#FF4C8B; --dauber-ink:#1A0812; --near:#F5C04A; --near-soft:#3A3115; --win:#F5C04A; --win-soft:#4A3C10;
+    --n:#E4E7F1; --scrim:rgba(4,5,14,.72); --shadow:0 10px 30px rgba(0,0,0,.4); }
+}
+:root[data-theme="dark"]{ color-scheme:dark;
+  --bg:#10132A; --card:#1A1E3A; --ink:#EEF0F8; --muted:#A5ABC6; --line:#2C3256; --soft:#232849;
+  --dauber:#FF4C8B; --dauber-ink:#1A0812; --near:#F5C04A; --near-soft:#3A3115; --win:#F5C04A; --win-soft:#4A3C10;
+  --n:#E4E7F1; --scrim:rgba(4,5,14,.72); --shadow:0 10px 30px rgba(0,0,0,.4); }
+
+*{ box-sizing:border-box; }
+[hidden]{ display:none !important; }
+body{ background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.45; padding-inline:16px; padding-block:20px 150px; }
+h1,h2,h3{ margin:0; text-wrap:balance; }
+p{ margin:0; }
+button{ font:inherit; color:inherit; cursor:pointer; }
+button:focus-visible, input:focus-visible{ outline:3px solid var(--b); outline-offset:2px; }
+.wrap{ max-width:1120px; margin:0 auto; display:grid; gap:16px; }
+
+/* encabezado */
+.top{ display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px; }
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand h1{ font-family:var(--display); font-weight:400; font-size:30px; letter-spacing:.01em; line-height:1; }
+.brand p{ font-size:13px; color:var(--muted); font-weight:600; }
+.guest{ display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 12px; border-radius:16px; background:var(--card); border:1px solid var(--line); font-size:12.5px; font-weight:600; color:var(--muted); }
+.guest i{ width:18px; height:18px; border-radius:50%; background:var(--soft); display:grid; place-items:center; font-style:normal; font-size:11px; }
+.controls{ margin-left:auto; display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.seg{ display:inline-grid; grid-template-columns:1fr 1fr; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:3px; }
+.seg button{ border:0; background:transparent; border-radius:9px; padding:6px 11px; font-size:13px; font-weight:700; color:var(--muted); }
+.seg button[aria-checked="true"]{ background:var(--ink); color:var(--bg); }
+.btn{ height:38px; padding:0 14px; border-radius:12px; border:1px solid var(--line); background:var(--card); font-weight:700; font-size:13.5px; }
+.btn:disabled{ opacity:.45; cursor:default; }
+.how{ font-size:13.5px; color:var(--muted); max-width:70ch; }
+.how b{ color:var(--ink); font-weight:700; }
+
+.confirm{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; background:var(--near-soft); border-radius:14px; padding:10px 12px; font-size:14px; font-weight:600; }
+.confirm .btn{ height:34px; }
+.confirm .yes{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+
+/* bandeja de bolillas */
+.tray{ background:var(--card); border-radius:20px; padding:14px 16px; display:grid; grid-template-columns:auto 1fr auto; gap:6px 16px; align-items:center; box-shadow:var(--shadow); }
+.tray .balls{ display:flex; align-items:center; gap:8px; min-width:0; overflow:hidden; }
+.tray .meta{ display:grid; gap:2px; text-align:right; }
+.tray .meta b{ font-family:var(--display); font-weight:400; font-size:22px; font-variant-numeric:tabular-nums; line-height:1.1; }
+.tray .meta small{ font-size:12px; color:var(--muted); font-weight:600; }
+.tray .lab{ font-size:12px; font-weight:700; color:var(--muted); letter-spacing:.04em; }
+.msg{ grid-column:1 / -1; font-size:13.5px; font-weight:600; display:flex; flex-wrap:wrap; gap:4px 14px; align-items:center; }
+.msg .nearchip{ color:var(--near); background:var(--near-soft); border-radius:8px; padding:2px 8px; font-size:12.5px; }
+.linkbtn{ border:0; background:none; padding:0; font-size:12.5px; font-weight:700; color:var(--muted); text-decoration:underline; text-underline-offset:3px; }
+.linkbtn:disabled{ opacity:.4; cursor:default; }
+.empty{ font-size:13.5px; color:var(--muted); font-weight:600; }
+
+/* bolillas */
+.k-b{ --c:var(--b); --ci:#FFFFFF; } .k-i{ --c:var(--i); --ci:#FFFFFF; } .k-n{ --c:var(--n); --ci:var(--n-ink); }
+.k-g{ --c:var(--g); --ci:#FFFFFF; } .k-o{ --c:var(--o); --ci:#181C33; } .k-x{ --c:var(--x); --ci:#FFFFFF; }
+.ball{ --s:40px; width:var(--s); height:var(--s); border-radius:50%; flex:none; display:grid; place-items:center;
+  background:radial-gradient(circle at 32% 26%, rgba(255,255,255,.6) 0 10%, rgba(255,255,255,0) 34%), radial-gradient(circle at 50% 120%, rgba(0,0,0,.28), rgba(0,0,0,0) 60%), var(--c);
+  box-shadow:inset 0 -3px 6px rgba(0,0,0,.18), 0 2px 5px rgba(24,28,51,.18); }
+.k-n.ball{ box-shadow:inset 0 -3px 6px rgba(0,0,0,.12), 0 2px 5px rgba(24,28,51,.18), inset 0 0 0 1px rgba(24,28,51,.12); }
+.ball .face{ width:66%; height:66%; border-radius:50%; background:var(--face); color:var(--face-ink); display:grid; place-items:center; align-content:center; line-height:1; font-weight:800; font-size:calc(var(--s) * .3); font-variant-numeric:tabular-nums; }
+.ball .face small{ font-size:.5em; font-weight:800; color:var(--muted); margin-bottom:1px; }
+.k-n .face small, .k-o .face small{ color:#59607A; }
+.ball.lg{ --s:58px; }
+.ball.lg .face{ font-family:var(--display); font-weight:400; }
+
+/* cuerpo */
+.layout{ display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:16px; align-items:start; }
+@media (max-width:880px){ .layout{ grid-template-columns:minmax(0,1fr); } }
+.card{ background:var(--card); border-radius:20px; padding:10px 8px 12px; box-shadow:var(--shadow); min-width:0; }
+.cardhead{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; padding:4px 8px 10px; }
+.cardhead h2{ font-size:16px; font-weight:800; }
+.toggle{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; }
+.toggle input{ width:18px; height:18px; accent-color:var(--dauber); }
+.grid{ display:flex; flex-direction:column; gap:3px; --cols:5; }
+.row{ display:grid; grid-template-columns:24px repeat(var(--cols), minmax(0,46px)) minmax(96px,1fr); gap:6px; align-items:center; padding:5px 6px; border-radius:14px; transition:background .25s; }
+.row.head{ order:-9999; position:sticky; top:env(safe-area-inset-top,0px); z-index:2; background:var(--card); padding-top:4px; padding-bottom:8px; border-bottom:1px solid var(--line); border-radius:0; }
+.idx{ font-size:12px; font-weight:700; color:var(--muted); text-align:center; font-variant-numeric:tabular-nums; }
+.hcol{ display:grid; justify-items:center; gap:2px; }
+.hcol small{ font-size:10px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.dot{ width:26px; height:26px; border-radius:50%; background:var(--c); color:var(--ci); display:grid; place-items:center; font-family:var(--display); font-size:13px; box-shadow:inset 0 -2px 4px rgba(0,0,0,.15); }
+.k-n.dot{ box-shadow:inset 0 0 0 1px rgba(24,28,51,.15); }
+.hname{ font-size:12px; font-weight:700; color:var(--muted); padding-left:4px; }
+.cell{ position:relative; height:42px; border-radius:11px; background:var(--soft); display:grid; place-items:center; font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; }
+.cell::before{ content:""; position:absolute; inset:4px; border-radius:50%; background:var(--dauber); opacity:.92; transform:scale(0); transition:transform .18s ease-out; }
+.cell span{ position:relative; }
+.cell.on::before{ transform:scale(1); }
+.cell.on span{ color:var(--dauber-ink); }
+.cell.fresh::before{ animation:daub .42s cubic-bezier(.3,1.6,.5,1); }
+@keyframes daub{ 0%{ transform:scale(0) rotate(-20deg); } 100%{ transform:scale(1) rotate(0); } }
+.row.near{ background:var(--near-soft); }
+.row.won{ background:var(--win-soft); box-shadow:inset 0 0 0 2px var(--win); }
+.who{ display:grid; gap:1px; min-width:0; padding-left:4px; }
+.who input{ width:100%; min-width:0; border:0; border-bottom:1.5px dashed transparent; background:transparent; font-weight:700; font-size:14.5px; padding:2px 0; border-radius:0; }
+.who input:hover{ border-bottom-color:var(--line); }
+.who input:focus{ outline:none; border-bottom-color:var(--ink); }
+.prog{ font-size:12px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; }
+.prog.is-near{ color:var(--near); font-weight:800; }
+.prog.is-won{ color:var(--win); font-weight:800; }
+@media (max-width:420px){ .row{ gap:4px; padding:5px 3px; grid-template-columns:20px repeat(var(--cols), minmax(0,42px)) minmax(84px,1fr); } .cell{ height:38px; font-size:15px; } .hcol small{ display:none; } }
+
+/* tablero */
+.board{ background:var(--card); border-radius:20px; padding:14px; box-shadow:var(--shadow); display:grid; gap:12px; }
+.board h2{ font-size:16px; font-weight:800; }
+.board p{ font-size:12.5px; color:var(--muted); }
+.brows{ display:grid; gap:6px; }
+.brow{ display:grid; grid-template-columns:26px repeat(15, minmax(0,1fr)); gap:3px; align-items:center; }
+.bn{ aspect-ratio:1; max-width:100%; border-radius:50%; display:grid; place-items:center; font-size:9.5px; font-weight:700; color:var(--muted); background:var(--soft); font-variant-numeric:tabular-nums; }
+.bn.on{ background:var(--c); color:var(--ci); }
+.k-n .bn.on{ box-shadow:inset 0 0 0 1px rgba(24,28,51,.25); }
+.bn.last{ box-shadow:0 0 0 2px var(--card), 0 0 0 4px var(--ink); }
+.stats{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.stats div{ background:var(--soft); border-radius:12px; padding:9px 11px; display:grid; }
+.stats b{ font-family:var(--display); font-weight:400; font-size:20px; font-variant-numeric:tabular-nums; }
+.stats small{ font-size:12px; color:var(--muted); font-weight:600; }
+
+/* bolilla flotante */
+.fab{ position:fixed; right:18px; bottom:calc(18px + env(safe-area-inset-bottom,0px)); z-index:20; display:grid; justify-items:center; gap:6px; border:0; background:none; padding:0; }
+.fab .ball{ --s:96px; box-shadow:inset 0 -6px 10px rgba(0,0,0,.2), 0 14px 28px rgba(24,28,51,.35); transition:transform .15s; }
+.fab .ball .face{ font-family:var(--display); font-weight:400; font-size:30px; }
+.fab .ball .face small{ font-family:var(--body); font-weight:800; font-size:13px; }
+.fab .pill{ background:var(--ink); color:var(--bg); font-weight:800; font-size:13px; padding:6px 12px; border-radius:14px; box-shadow:0 6px 14px rgba(24,28,51,.25); }
+.fab:hover .ball{ transform:translateY(-2px); }
+.fab:active .ball{ transform:scale(.95); }
+.fab:disabled{ cursor:default; opacity:.6; }
+.fab.rolling .ball{ animation:roll .11s linear infinite alternate; }
+@keyframes roll{ from{ transform:rotate(-14deg) translateY(-3px); } to{ transform:rotate(14deg) translateY(2px); } }
+.fab.idle .ball{ background:radial-gradient(circle at 32% 26%, rgba(255,255,255,.6) 0 10%, rgba(255,255,255,0) 34%), conic-gradient(var(--b) 0 20%, var(--i) 0 40%, var(--n) 0 60%, var(--g) 0 80%, var(--o) 0); }
+
+/* ganador */
+.win{ position:fixed; inset:0; z-index:40; background:var(--scrim); display:grid; place-items:center; padding:16px; }
+.win .dlg{ width:min(100%,400px); background:var(--card); border-radius:24px; padding:22px 20px 18px; display:grid; gap:14px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,.35); animation:pop .45s cubic-bezier(.3,1.5,.5,1); }
+@keyframes pop{ from{ transform:scale(.7); opacity:0; } to{ transform:none; opacity:1; } }
+.win h2{ font-family:var(--display); font-weight:400; font-size:54px; line-height:1; color:var(--dauber); letter-spacing:.02em; }
+.win .who-won{ font-size:22px; font-weight:800; }
+.win .sub{ font-size:14px; color:var(--muted); }
+.wrow{ display:grid; gap:8px; justify-items:center; background:var(--win-soft); border-radius:16px; padding:12px; }
+.wrow .balls{ display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
+.wrow b{ font-weight:800; font-size:15px; }
+.win .acts{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.win .acts .btn{ height:48px; font-size:14.5px; }
+.win .acts .primary{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+#fx{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:50; }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+@media (prefers-reduced-motion: reduce){ *{ animation:none!important; transition:none!important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="ball k-o" style="--s:44px" aria-hidden="true"><span class="face" style="font-family:var(--display);font-weight:400">B</span></span>
+      <div><h1>Bolilla</h1><p>Bingo para 20 jugadores</p></div>
+    </div>
+    <span class="guest"><i aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20.5c1.2-3.6 4.1-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg></i>Jugando como invitado</span>
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="Columnas por fila">
+        <button type="button" role="radio" id="c5" aria-checked="true">5 columnas · 75</button>
+        <button type="button" role="radio" id="c6" aria-checked="false">6 columnas · 90</button>
+      </div>
+      <button type="button" class="btn" id="newgame">Nueva partida</button>
+    </div>
+  </header>
+
+  <p class="how" id="how">Toca la <b>bolilla de abajo</b> para sacar un número. Se marca solo en cada fila que lo tenga. Gana la <b>primera fila completa</b>. Los nombres de la derecha se pueden cambiar.</p>
+
+  <div class="confirm" id="confirm" hidden>
+    <span id="confirmText">Se perderán las bolillas que ya salieron.</span>
+    <button type="button" class="btn yes" id="confirmYes">Sí, empezar otra</button>
+    <button type="button" class="btn" id="confirmNo">Seguir con esta</button>
+  </div>
+
+  <section class="tray" aria-label="Bolillas que salieron">
+    <span class="lab">ÚLTIMAS</span>
+    <div class="balls" id="tray"></div>
+    <div class="meta"><b id="count">0 de 75</b><small>bolillas</small></div>
+    <div class="msg"><span id="msg">Partida de ejemplo en curso.</span><span class="nearchip" id="near"></span><button type="button" class="linkbtn" id="undo">Deshacer última</button></div>
+  </section>
+
+  <main class="layout">
+    <section class="card" aria-label="Cartilla">
+      <div class="cardhead"><h2>Cartilla</h2><label class="toggle"><input type="checkbox" id="sort">Primero los que van ganando</label></div>
+      <div class="grid" id="grid" role="table" aria-label="Cartilla: una fila por jugador"></div>
+    </section>
+    <aside class="board" aria-label="Tablero de bolillas">
+      <div><h2>Tablero</h2><p>Todas las bolillas de la tómbola. Las de color ya salieron.</p></div>
+      <div class="brows" id="board"></div>
+      <div class="stats"><div><b id="sLeft">0</b><small>quedan en la tómbola</small></div><div><b id="sNear">0</b><small>filas a una bolilla</small></div></div>
+    </aside>
+  </main>
+</div>
+
+<button type="button" class="fab idle" id="draw" aria-label="Sacar bolilla">
+  <span class="ball k-n" id="fabBall"><span class="face" id="fabFace">?</span></span>
+  <span class="pill" id="fabPill">Sacar bolilla</span>
+</button>
+
+<div class="win" id="win" hidden role="dialog" aria-modal="true" aria-labelledby="winTitle">
+  <div class="dlg">
+    <h2 id="winTitle">¡Bingo!</h2>
+    <div id="winBody"></div>
+    <p class="sub" id="winSub"></p>
+    <div class="acts"><button type="button" class="btn" id="cont">Seguir jugando</button><button type="button" class="btn primary" id="again">Nueva partida</button></div>
+  </div>
+</div>
+<canvas id="fx" hidden></canvas>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script>
+(() => {
+  const ROWS = 20, SPAN = 15, LET = ['B','I','N','G','O'], KEYS = ['b','i','n','g','o','x'];
+  const NAMES = ['Rosa','Javier','Milagros','Carlos','Lucía','Jhon','Fiorella','Miguel','Kiara','Luis','Ana Lucía','Renzo','Pilar','Diego','Yolanda','Bruno','Claudia','Marco','Sofía','Héctor'];
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function rng(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const makeCards = (cols, seed) => { const r = rng(seed); return Array.from({length: ROWS}, () => Array.from({length: cols}, (_, c) => c * SPAN + 1 + Math.floor(r() * SPAN))); };
+  const shuffle = (a, r) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const colOf = n => Math.floor((n - 1) / SPAN);
+  const letter = n => S.cols === 5 ? LET[colOf(n)] : '';
+  const label = n => S.cols === 5 ? `${LET[colOf(n)]}-${n}` : String(n);
+
+  let names = NAMES.slice();
+  try { const s = JSON.parse(localStorage.getItem('bolilla.names') || 'null'); if (Array.isArray(s) && s.length === ROWS) names = s.map((x, i) => typeof x === 'string' ? x : NAMES[i]); } catch (e) {}
+  const saveNames = () => { try { localStorage.setItem('bolilla.names', JSON.stringify(names)); } catch (e) {} };
+
+  const S = { cols: 5, cards: [], drawn: [], announced: new Set(), busy: false, sort: false };
+  const total = () => S.cols * SPAN;
+  const hitsOf = (row, d) => row.reduce((k, n) => k + (d.has(n) ? 1 : 0), 0);
+
+  // Partida de ejemplo: 17 bolillas, nadie ha ganado y dos filas están a una bolilla.
+  function exampleStart(){
+    for (const strict of [true, false]) for (let seed = 7; seed < 3000; seed++) {
+      const cards = makeCards(5, seed);
+      const bag = shuffle(Array.from({length: 75}, (_, k) => k + 1), rng(seed * 31 + 1)).slice(0, 17);
+      const d = new Set(bag), h = cards.map(r => hitsOf(r, d));
+      const n4 = h.filter(x => x === 4).length;
+      if (Math.max(...h) === 4 && (strict ? n4 === 2 : n4 >= 1)) { S.cards = cards; S.drawn = bag; return; }
+    }
+    S.cards = makeCards(5, 7); S.drawn = [];
+  }
+
+  const grid = $('#grid');
+  function ballHTML(n, cls){ return `<span class="ball k-${KEYS[colOf(n)]} ${cls||''}" role="img" aria-label="${label(n)}"><span class="face">${letter(n) ? `<small>${letter(n)}</small>` : ''}${n}</span></span>`; }
+
+  function build(){
+    grid.style.setProperty('--cols', S.cols);
+    let h = `<div class="row head" role="row"><span class="idx" role="columnheader">#</span>`;
+    for (let c = 0; c < S.cols; c++) h += `<span class="hcol k-${KEYS[c]}" role="columnheader" aria-label="Columna ${S.cols === 5 ? LET[c] : c + 1}, del ${c*SPAN+1} al ${c*SPAN+SPAN}"><span class="dot">${S.cols === 5 ? LET[c] : c + 1}</span><small>${c*SPAN+1}–${c*SPAN+SPAN}</small></span>`;
+    h += `<span class="hname" role="columnheader">Jugador</span></div>`;
+    S.cards.forEach((r, i) => {
+      h += `<div class="row" role="row" data-i="${i}"><span class="idx" role="rowheader">${i + 1}</span>` +
+        r.map(n => `<span class="cell" role="cell" data-n="${n}"><span>${n}</span></span>`).join('') +
+        `<span class="who" role="cell"><input id="p${i}" value="${esc(names[i])}" maxlength="18" autocomplete="off" aria-label="Nombre del jugador de la fila ${i + 1}"><small class="prog"></small></span></div>`;
+    });
+    grid.innerHTML = h;
+    grid.querySelectorAll('input').forEach((inp, i) => inp.addEventListener('input', () => { names[i] = inp.value; saveNames(); }));
+    let b = '';
+    for (let c = 0; c < S.cols; c++) {
+      b += `<div class="brow k-${KEYS[c]}"><span class="dot">${S.cols === 5 ? LET[c] : c + 1}</span>`;
+      for (let n = c * SPAN + 1; n <= c * SPAN + SPAN; n++) b += `<span class="bn" data-n="${n}">${n}</span>`;
+      b += `</div>`;
+    }
+    $('#board').innerHTML = b;
+    $('#c5').setAttribute('aria-checked', S.cols === 5); $('#c6').setAttribute('aria-checked', S.cols === 6);
+    update(null);
+  }
+
+  function update(fresh){
+    const d = new Set(S.drawn); let near = 0;
+    grid.querySelectorAll('.row:not(.head)').forEach((el, i) => {
+      let k = 0;
+      el.querySelectorAll('.cell').forEach(c => { const n = +c.dataset.n, on = d.has(n); c.classList.toggle('on', on); c.classList.toggle('fresh', on && n === fresh); if (on) k++; });
+      const left = S.cols - k;
+      el.classList.toggle('won', left === 0); el.classList.toggle('near', left === 1);
+      if (left === 1) near++;
+      const p = el.querySelector('.prog');
+      p.textContent = left === 0 ? '¡Bingo!' : left === 1 ? 'Le falta 1' : `${k} de ${S.cols}`;
+      p.className = 'prog' + (left === 0 ? ' is-won' : left === 1 ? ' is-near' : '');
+      el.style.order = S.sort ? String(left * 100 + i) : '';
+    });
+    const last = S.drawn.slice(-7).reverse();
+    $('#tray').innerHTML = last.length ? last.map((n, j) => ballHTML(n, j === 0 ? 'lg' : '')).join('') : '<span class="empty">Aún no sale ninguna bolilla</span>';
+    $('#count').textContent = `${S.drawn.length} de ${total()}`;
+    $('#near').textContent = near ? `${near} ${near === 1 ? 'fila' : 'filas'} a una bolilla` : '';
+    $('#near').hidden = !near;
+    const lastN = S.drawn[S.drawn.length - 1];
+    document.querySelectorAll('.bn').forEach(b => { const n = +b.dataset.n; b.classList.toggle('on', d.has(n)); b.classList.toggle('last', n === lastN); });
+    $('#sLeft').textContent = total() - S.drawn.length; $('#sNear').textContent = near;
+    $('#undo').disabled = !S.drawn.length || S.busy;
+    const done = S.drawn.length >= total();
+    $('#draw').disabled = done; $('#fabPill').textContent = done ? 'Tómbola vacía' : 'Sacar bolilla';
+  }
+
+  function setFab(n){
+    const ball = $('#fabBall'), face = $('#fabFace');
+    $('#draw').classList.toggle('idle', n == null);
+    ball.className = 'ball ' + (n == null ? 'k-n' : 'k-' + KEYS[colOf(n)]);
+    face.innerHTML = n == null ? '?' : (letter(n) ? `<small>${letter(n)}</small>` : '') + n;
+  }
+
+  function draw(){
+    if (S.busy || !$('#win').hidden) return;
+    const d = new Set(S.drawn), pool = [];
+    for (let n = 1; n <= total(); n++) if (!d.has(n)) pool.push(n);
+    if (!pool.length) return;
+    S.busy = true;
+    const n = pool[Math.floor(Math.random() * pool.length)], fab = $('#draw');
+    const finish = () => {
+      fab.classList.remove('rolling');
+      S.drawn.push(n); setFab(n); S.busy = false; update(n);
+      const count = S.cards.filter(r => r.includes(n)).length;
+      const txt = `Salió la ${label(n)}. ` + (count ? `Se marcó en ${count} ${count === 1 ? 'fila' : 'filas'}.` : 'Ninguna fila la tiene.');
+      $('#msg').textContent = txt; $('#live').textContent = txt;
+      checkWin(n);
+    };
+    if (reduce) { finish(); return; }
+    fab.classList.add('rolling');
+    let t = 0;
+    const iv = setInterval(() => { setFab(pool[Math.floor(Math.random() * pool.length)]); if (++t >= 12) { clearInterval(iv); finish(); } }, 55);
+  }
+
+  function checkWin(n){
+    const d = new Set(S.drawn);
+    const fresh = S.cards.map((r, i) => hitsOf(r, d) === S.cols && !S.announced.has(i) ? i : -1).filter(i => i >= 0);
+    if (!fresh.length) return;
+    fresh.forEach(i => S.announced.add(i));
+    S.busy = true;
+    setTimeout(() => { S.busy = false; showWin(fresh, n); }, reduce ? 0 : 520);
+  }
+
+  function showWin(rows, n){
+    $('#winBody').innerHTML = rows.map(i => `<div class="wrow"><span class="who-won">${esc(names[i].trim() || 'Fila ' + (i + 1))}</span><span class="sub">Fila ${i + 1}</span><div class="balls">${S.cards[i].map(x => ballHTML(x)).join('')}</div></div>`).join('');
+    $('#winTitle').textContent = rows.length > 1 ? '¡Doble bingo!' : '¡Bingo!';
+    $('#winSub').textContent = `Con la ${label(n)}, la bolilla ${S.drawn.length} de la partida.` + (S.announced.size > rows.length ? ` Ya van ${S.announced.size} ganadores.` : '');
+    $('#win').hidden = false; $('#cont').focus();
+    confetti();
+  }
+
+  function newGame(cols){
+    S.cols = cols; S.cards = makeCards(cols, Math.floor(Math.random() * 1e9)); S.drawn = []; S.announced.clear();
+    $('#win').hidden = true; $('#confirm').hidden = true;
+    $('#msg').textContent = 'Partida nueva. Toca la bolilla para empezar.';
+    setFab(null); build();
+  }
+  let pending = null;
+  function ask(text, fn){
+    if (!S.drawn.length) { fn(); return; }
+    pending = fn; $('#confirmText').textContent = text; $('#confirm').hidden = false; $('#confirmYes').focus();
+  }
+  $('#confirmYes').onclick = () => { const f = pending; pending = null; $('#confirm').hidden = true; f && f(); };
+  $('#confirmNo').onclick = () => { pending = null; $('#confirm').hidden = true; };
+  $('#newgame').onclick = () => ask(`¿Empezar otra partida? Se perderán las ${S.drawn.length} bolillas que ya salieron. Los nombres se quedan.`, () => newGame(S.cols));
+  $('#c5').onclick = () => { if (S.cols !== 5) ask('Con 5 columnas se arman cartillas nuevas y empieza otra partida.', () => newGame(5)); };
+  $('#c6').onclick = () => { if (S.cols !== 6) ask('Con 6 columnas (90 bolillas) se arman cartillas nuevas y empieza otra partida.', () => newGame(6)); };
+  $('#draw').onclick = draw;
+  $('#undo').onclick = () => {
+    if (!S.drawn.length || S.busy) return;
+    const n = S.drawn.pop(), d = new Set(S.drawn);
+    [...S.announced].forEach(i => { if (hitsOf(S.cards[i], d) < S.cols) S.announced.delete(i); });
+    setFab(S.drawn.length ? S.drawn[S.drawn.length - 1] : null);
+    $('#msg').textContent = `Se devolvió la ${label(n)} a la tómbola.`;
+    update(null);
+  };
+  $('#sort').onchange = e => { S.sort = e.target.checked; update(null); };
+  $('#cont').onclick = () => { $('#win').hidden = true; $('#draw').focus(); };
+  $('#again').onclick = () => newGame(S.cols);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('#win').hidden) { $('#win').hidden = true; return; }
+    if (e.code === 'Space' && !/INPUT|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); draw(); }
+  });
+
+  function confetti(){
+    if (reduce) return;
+    const cv = $('#fx'), ctx = cv.getContext('2d'), dpr = window.devicePixelRatio || 1;
+    const W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr; cv.hidden = false;
+    const cs = getComputedStyle(document.documentElement);
+    const cols = ['--b','--i','--g','--o','--x','--dauber'].map(v => cs.getPropertyValue(v).trim());
+    const P = Array.from({length: 150}, () => ({ x: W/2 + (Math.random() - .5) * W * .35, y: H * .38, vx: (Math.random() - .5) * 15 * dpr, vy: (-Math.random() * 15 - 4) * dpr, r: (5 + Math.random() * 6) * dpr, c: cols[Math.floor(Math.random() * cols.length)], round: Math.random() < .5, a: Math.random() * 6 }));
+    let f = 0;
+    (function step(){
+      ctx.clearRect(0, 0, W, H);
+      P.forEach(p => { p.vy += .35 * dpr; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.a += .15; ctx.fillStyle = p.c; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); if (p.round) { ctx.beginPath(); ctx.arc(0, 0, p.r * .6, 0, 7); ctx.fill(); } else ctx.fillRect(-p.r / 2, -p.r / 4, p.r, p.r / 2); ctx.restore(); });
+      if (++f < 160) requestAnimationFrame(step); else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+    })();
+  }
+
+  function start(data){
+    if (data && Array.isArray(data.cards) && data.cards.length === ROWS) {
+      S.cols = data.cols; S.cards = data.cards; S.drawn = data.drawn || []; S.announced = new Set(data.announced || []);
+    } else exampleStart();
+    setFab(S.drawn.length ? S.drawn[S.drawn.length - 1] : null);
+    if (S.drawn.length) $('#msg').textContent = `Partida de ejemplo: ya salieron ${S.drawn.length} bolillas.`;
+    build();
+  }
+  window.claude?.hot?.snapshot?.(() => ({ cols: S.cols, cards: S.cards, drawn: S.drawn, announced: [...S.announced] }));
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body></html>
