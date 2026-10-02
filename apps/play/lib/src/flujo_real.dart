@@ -5,6 +5,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'escaner.dart';
 import 'paginas/codigo_page.dart';
 import 'paginas/elegir_fila_page.dart';
 import 'paginas/en_vivo_page.dart';
@@ -42,9 +43,12 @@ enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
 /// reserva la decide el servidor. Arranca en el código y el QR, con las salas
 /// públicas abiertas debajo.
 class FlujoReal extends StatefulWidget {
-  const FlujoReal({super.key, required this.repositorio});
+  const FlujoReal({super.key, required this.repositorio, this.camaraEscaner});
 
   final RepositorioSala repositorio;
+
+  /// Sustituye a la cámara del escáner (pruebas).
+  final Widget Function(BuildContext, ValueChanged<String>)? camaraEscaner;
 
   @override
   State<FlujoReal> createState() => _FlujoRealState();
@@ -91,6 +95,58 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   void didChangeMetrics() {
     final visible = View.of(context).viewInsets.bottom > 0;
     if (visible != _tecladoVisible) setState(() => _tecladoVisible = visible);
+  }
+
+  /// Abre la sala con ese código (de un QR o de un enlace). Devuelve el motivo
+  /// si no se puede entrar; si entra, cambia de pantalla y devuelve `null`.
+  Future<String?> _entrarPorCodigo(
+    BuildContext contexto,
+    String codigo, {
+    bool reemplazar = false,
+  }) async {
+    try {
+      final sala = await widget.repositorio.buscar(codigo);
+      if (sala == null) return 'No encontramos esa sala. Revisa el QR.';
+      final llena =
+          sala.estado == EstadoSala.llena ||
+          (sala.estado == EstadoSala.abierta && sala.libres <= 0);
+      if (llena) return 'Esa sala ya está llena.';
+      if (sala.estado != EstadoSala.abierta) {
+        return 'Esa sala ya no recibe jugadores.';
+      }
+      if (!contexto.mounted) return null;
+      _ir(
+        contexto,
+        _ElegirFilaReal(repositorio: widget.repositorio, sala: sala),
+        reemplazar: reemplazar,
+      );
+      return null;
+    } catch (_) {
+      return 'No pudimos conectar. Revisa tu internet.';
+    }
+  }
+
+  void _abrirEscaner() {
+    _ir(
+      context,
+      Builder(
+        builder:
+            (contextoEscaner) => EscanerReal(
+              camara: widget.camaraEscaner,
+              alLeer:
+                  (codigo) => _entrarPorCodigo(
+                    contextoEscaner,
+                    codigo,
+                    reemplazar: true,
+                  ),
+              alEscribir: () {
+                Navigator.of(contextoEscaner).pop();
+                _foco.requestFocus();
+                _editor.currentState?.requestKeyboard();
+              },
+            ),
+      ),
+    );
   }
 
   Future<void> _alEscribir() async {
@@ -173,6 +229,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
       filasLibres: _libres,
       verFilasHabilitado: puede,
       // Quien escribe un código no necesita ver las salas.
+      alEscanear: _abrirEscaner,
       bajoElQr:
           (desplazable) =>
               _tecladoVisible
