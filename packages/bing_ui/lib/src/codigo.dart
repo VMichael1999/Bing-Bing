@@ -53,15 +53,20 @@ class BingEncontrada extends StatelessWidget {
     super.key,
     required this.titulo,
     required this.detalle,
+    this.verificacion = false,
   });
 
   final String titulo;
   final String detalle;
 
+  /// Variante `.verify`: título de 13.5 y 10 dp entre el ícono y el texto.
+  final bool verificacion;
+
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
     return Container(
+      width: verificacion ? double.infinity : null,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: paleta.okSuave,
@@ -70,7 +75,7 @@ class BingEncontrada extends StatelessWidget {
       child: Row(
         children: [
           BingIcono('check', color: paleta.ok),
-          const SizedBox(width: 12),
+          SizedBox(width: verificacion ? 10 : 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
