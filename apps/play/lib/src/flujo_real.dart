@@ -312,51 +312,6 @@ class _ReservarRealState extends State<_ReservarReal> {
   }
 }
 
-/// Escucha la sala y sus filas a la vez y dibuja cuando llegan las dos.
-class _SalaEnVivo extends StatefulWidget {
-  const _SalaEnVivo({
-    required this.repositorio,
-    required this.codigo,
-    required this.constructor,
-  });
-
-  final RepositorioSala repositorio;
-  final String codigo;
-  final Widget Function(
-    BuildContext context,
-    SalaEnVivo sala,
-    List<FilaEnVivo> filas,
-  )
-  constructor;
-
-  @override
-  State<_SalaEnVivo> createState() => _SalaEnVivoState();
-}
-
-class _SalaEnVivoState extends State<_SalaEnVivo> {
-  late final _sala = widget.repositorio.sala(widget.codigo);
-  late final _filas = widget.repositorio.filas(widget.codigo);
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<SalaEnVivo?>(
-      stream: _sala,
-      builder:
-          (context, sala) => StreamBuilder<List<FilaEnVivo>>(
-            stream: _filas,
-            builder: (context, filas) {
-              final s = sala.data;
-              final f = filas.data;
-              if (s == null || f == null) {
-                return ColoredBox(color: BingTema.of(context).fondo);
-              }
-              return widget.constructor(context, s, f);
-            },
-          ),
-    );
-  }
-}
-
 class _EsperandoReal extends StatefulWidget {
   const _EsperandoReal({
     required this.repositorio,
@@ -381,9 +336,10 @@ class _EsperandoRealState extends State<_EsperandoReal> {
 
   @override
   Widget build(BuildContext context) {
-    return _SalaEnVivo(
+    return SalaEnVivoBuilder(
       repositorio: widget.repositorio,
       codigo: widget.sala.codigo,
+      espera: ColoredBox(color: BingTema.of(context).fondo),
       constructor: (context, sala, filas) {
         // La partida empieza cuando sale la primera bolilla.
         if (sala.estado == EstadoSala.enJuego &&
@@ -477,9 +433,10 @@ class _EnVivoRealState extends State<_EnVivoReal> {
 
   @override
   Widget build(BuildContext context) {
-    return _SalaEnVivo(
+    return SalaEnVivoBuilder(
       repositorio: widget.repositorio,
       codigo: widget.sala.codigo,
+      espera: ColoredBox(color: BingTema.of(context).fondo),
       constructor: (context, sala, filas) {
         if (sala.bolillas.length != _vistas) {
           _vistas = sala.bolillas.length;
