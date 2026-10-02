@@ -3,8 +3,10 @@ import 'package:flutter/widgets.dart';
 
 import 'tema.dart';
 
-/// Ajusta la barra de estado y la de navegación del sistema al tema: íconos
-/// oscuros sobre fondo claro (Play) y claros sobre fondo oscuro (Host).
+/// Ajusta la barra de estado y la de navegación del sistema al tema (íconos
+/// oscuros sobre fondo claro en Play y claros sobre fondo oscuro en Host) y
+/// sube el contenido cuando aparece el teclado, para que el botón del pie no
+/// quede tapado.
 class BingSistema extends StatelessWidget {
   const BingSistema({super.key, required this.child});
 
@@ -26,7 +28,16 @@ class BingSistema extends StatelessWidget {
         systemNavigationBarDividerColor: const Color(0x00000000),
         systemNavigationBarContrastEnforced: false,
       ),
-      child: child,
+      child: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: MediaQuery.removeViewInsets(
+          context: context,
+          removeBottom: true,
+          child: child,
+        ),
+      ),
     );
   }
 }
