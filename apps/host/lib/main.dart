@@ -1,4 +1,5 @@
 import 'package:bing_core/bing_core.dart';
+import 'package:bing_firebase/bing_firebase.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,7 +14,12 @@ import 'src/paginas/nueva_partida_page.dart';
 /// `--dart-define=BING_PANTALLA=org-06-bolilla`.
 const _pantallaElegida = String.fromEnvironment('BING_PANTALLA');
 
-void main() => runApp(const BingHostApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Sin los valores de .env (ver .env.example) sigue el modo demostración.
+  await iniciarFirebase(AppBing.host);
+  runApp(const BingHostApp());
+}
 
 class BingHostApp extends StatelessWidget {
   const BingHostApp({super.key, this.inicio});
