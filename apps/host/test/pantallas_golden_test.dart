@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:bing_core/bing_core.dart';
 import 'package:bing_host/main.dart';
+import 'package:bing_ui/bing_ui.dart';
 import 'package:bing_host/src/paginas/entrar_page.dart';
 import 'package:bing_host/src/paginas/mis_partidas_page.dart';
+import 'package:bing_host/src/paginas/cartilla_llena_sheet.dart';
 import 'package:bing_host/src/paginas/nueva_partida_page.dart';
+import 'package:bing_host/src/paginas/sala_abierta_page.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,6 +61,47 @@ void main() {
       tester,
       'org-03-nueva-partida',
       const NuevaPartidaPage(nombreInicial: 'Bingo de los sábados'),
+    );
+  }, skip: skip);
+
+  testWidgets('org-04-sala-abierta', (tester) async {
+    await _capturar(
+      tester,
+      'org-04-sala-abierta',
+      SalaAbiertaPage(
+        salaNombre: salaDemoNombre,
+        codigo: salaDemoCodigo,
+        ocupadas: 17,
+        total: 20,
+        jugadores: [
+          for (var i = 0; i < 5; i++)
+            BingJugador.normal(
+              '${i + 1}',
+              jugadoresDemo[i],
+              horasReservaDemo[i],
+            ),
+          const BingJugador.salto('filas 6 a 16'),
+          const BingJugador.nuevo('17', 'Claudia', 'recién entró'),
+          const BingJugador.libre('18'),
+          const BingJugador.libre('19'),
+          const BingJugador.libre('20'),
+        ],
+      ),
+    );
+  }, skip: skip);
+
+  testWidgets('org-05-cartilla-llena', (tester) async {
+    await _capturar(
+      tester,
+      'org-05-cartilla-llena',
+      CartillaLlenaSheet(
+        salaNombre: salaDemoNombre,
+        total: 20,
+        ultimos: [
+          for (var i = 14; i < 20; i++)
+            BingJugador.normal('${i + 1}', jugadoresDemo[i], 'listo'),
+        ],
+      ),
     );
   }, skip: skip);
 }
