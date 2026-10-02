@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Bing Bing Play</title>
+  <defs>
+    <clipPath id="redondeo"><rect width="512" height="512" rx="112"/></clipPath>
+    <radialGradient id="esfera" cx="0.36" cy="0.30" r="0.85">
+      <stop offset="0" stop-color="#6FA3FF"/>
+      <stop offset="0.55" stop-color="#2B6BE0"/>
+      <stop offset="1" stop-color="#1A44A0"/>
+    </radialGradient>
+  </defs>
+  <g clip-path="url(#redondeo)">
+    <rect id="fondo" width="512" height="512" fill="#C81B60"/>
+    <g id="icon">
+      <ellipse id="sombra" cx="256" cy="452" rx="128" ry="16" fill="#000" opacity="0.22"/>
+      <circle id="bolilla" cx="256" cy="262" r="178" fill="url(#esfera)"/>
+      <ellipse id="brillo" cx="170" cy="150" rx="62" ry="34" transform="rotate(-35 170 150)" fill="#fff" opacity="0.5"/>
+      <circle id="cara" cx="256" cy="262" r="112" fill="#FFFFFF"/>
+      <g id="marca">
+        <circle cx="256" cy="262" r="64" fill="#C81B60"/>
+        <path d="M226 264l22 22 40-46" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Bing Bing Host</title>
+  <defs>
+    
+    <radialGradient id="esfera" cx="0.36" cy="0.30" r="0.85">
+      <stop offset="0" stop-color="#FFD866"/>
+      <stop offset="0.55" stop-color="#F2B400"/>
+      <stop offset="1" stop-color="#B07E00"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <rect id="fondo" width="512" height="512" fill="#10132A"/>
+    <g id="icon">
+      <ellipse id="sombra" cx="256" cy="452" rx="128" ry="16" fill="#000" opacity="0.22"/>
+      <circle id="bolilla" cx="256" cy="262" r="178" fill="url(#esfera)"/>
+      <ellipse id="brillo" cx="170" cy="150" rx="62" ry="34" transform="rotate(-35 170 150)" fill="#fff" opacity="0.5"/>
+      <circle id="cara" cx="256" cy="262" r="112" fill="#FFFFFF"/>
+      <g id="corona" fill="#10132A">
+        <path d="M198 300V222l40 42 18-58 18 58 40-42v78z"/>
+        <rect x="198" y="308" width="116" height="22" rx="6"/>
+      </g>
+    </g>
+  </g>
+</svg>
