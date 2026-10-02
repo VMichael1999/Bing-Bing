@@ -1,5 +1,4 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Reglas del juego y entidades compartidas de Bing Bing.
+library;
+
+export 'src/reglas.dart';
