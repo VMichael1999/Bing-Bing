@@ -88,4 +88,9 @@ void main() {
     await tester.pump();
     expect(find.text('17 de 75 · quedan 58 en la tómbola'), findsOneWidget);
   });
+
+  testWidgets('"Van ganando" muestra las 20 filas de la sala', (tester) async {
+    await tester.pumpWidget(BingHostApp(inicio: _juego(17)));
+    expect(find.byType(BingFilaCompacta), findsNWidgets(20));
+  });
 }

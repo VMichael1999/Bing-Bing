@@ -27,6 +27,7 @@ class JuegoPage extends StatefulWidget {
     this.pestanaInicial = 0,
     this.alTerminar,
     this.conAutomatico = false,
+    this.filasGanando = 20,
     this.cadaAutomatico = const Duration(milliseconds: 2800),
   });
 
@@ -41,6 +42,10 @@ class JuegoPage extends StatefulWidget {
 
   /// Muestra el interruptor "Automático" (solo para la simulación).
   final bool conAutomatico;
+
+  /// Cuántas filas se muestran en "Van ganando" (el diseño dibuja 3; la app
+  /// muestra todas las de la sala).
+  final int filasGanando;
   final Duration cadaAutomatico;
 
   @override
@@ -225,7 +230,10 @@ class _JuegoPageState extends State<JuegoPage>
   }
 
   Widget _bolilla(BingPaleta paleta, Set<int> salidas, int? ultima) {
-    final orden = ordenarPorAvance(widget.cartillas, salidas).take(3);
+    final orden = ordenarPorAvance(
+      widget.cartillas,
+      salidas,
+    ).take(widget.filasGanando);
     final recientes = _salidas.reversed.take(5).toList();
     return Column(
       children: [
