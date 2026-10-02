@@ -7,6 +7,7 @@ import {
   Fila,
   Sala,
   aplicarReserva,
+  cancelar,
   empezar,
   exigirOrganizador,
   generarCartillas,
@@ -220,6 +221,32 @@ export const terminarPartida = onCall(async (request) => {
       exigirOrganizador(sala, uid);
       t.update(ref, { estado: "terminada" });
       return { estado: "terminada" };
+    });
+  } catch (e) {
+    return aHttps(e);
+  }
+});
+
+/**
+ * `cancelarSala({codigo, motivo?})`: quien organiza cierra una sala que no se
+ * jugó (por ejemplo, porque no se llenó). Solo antes de empezar. La sala deja de
+ * recibir jugadores y de aparecer en la lista; los jugadores ven el aviso.
+ */
+export const cancelarSala = onCall(async (request) => {
+  const uid = uidOrganizador(request);
+  const codigo = codigoDe(request.data);
+  try {
+    return await db.runTransaction(async (t) => {
+      const { ref, sala } = await leerSala(t, codigo);
+      const motivo = cancelar(sala, uid, (request.data as { motivo?: unknown }).motivo);
+      if (sala.estado !== "cancelada") {
+        t.update(ref, {
+          estado: "cancelada",
+          motivoCierre: motivo,
+          canceladaEn: FieldValue.serverTimestamp(),
+        });
+      }
+      return { estado: "cancelada" };
     });
   } catch (e) {
     return aHttps(e);
