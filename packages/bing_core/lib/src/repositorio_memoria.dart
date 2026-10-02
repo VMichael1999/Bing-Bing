@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'billetera.dart';
 import 'sala_en_vivo.dart';
 
 /// [RepositorioSala] en memoria para probar las apps sin Firebase.
@@ -19,6 +20,8 @@ class RepositorioMemoria implements RepositorioOrganizador {
     this.publica = true,
     this.precioFila = 0,
     this.premio = 0,
+    this.filasPorJugador = 20,
+    this.billetera,
   }) : _filas = [for (final n in cartillas) FilaEnVivo(numeros: n)];
 
   final List<List<int>> cartillas;
@@ -36,6 +39,10 @@ class RepositorioMemoria implements RepositorioOrganizador {
   /// Precio y premio de la sala; cambian al crearla con `crearSala`.
   int precioFila;
   int premio;
+  int filasPorJugador;
+
+  /// Si se da, cobra y devuelve como lo hace el servidor.
+  final BilleteraMemoria? billetera;
 
   final List<FilaEnVivo> _filas;
   final List<int> _bolillas = [];
@@ -64,6 +71,7 @@ class RepositorioMemoria implements RepositorioOrganizador {
     motivoCierre: _motivoCierre,
     precioFila: precioFila,
     premio: premio,
+    filasPorJugador: filasPorJugador,
   );
 
   @override
@@ -98,9 +106,9 @@ class RepositorioMemoria implements RepositorioOrganizador {
   }
 
   @override
-  Future<void> reservarFila({
+  Future<void> reservarFilas({
     required String codigo,
-    required int fila,
+    required List<int> filas,
     required String nombre,
   }) async {
     if (codigo != this.codigo) {
@@ -112,17 +120,55 @@ class RepositorioMemoria implements RepositorioOrganizador {
         'La sala ya no está abierta',
       );
     }
-    if (_filas.any((f) => f.jugadorUid == miUid)) {
-      throw const ErrorSalaBing('limite_de_filas', 'Ya tienes una fila');
+    if (filas.isEmpty || filas.toSet().length != filas.length) {
+      throw const ErrorSalaBing('filas_invalidas', 'Elige filas distintas');
     }
-    if (fila < 1 || fila > _filas.length) {
-      throw const ErrorSalaBing('fila_inexistente', 'Esa fila no existe');
+    for (final fila in filas) {
+      if (fila < 1 || fila > _filas.length) {
+        throw const ErrorSalaBing('fila_inexistente', 'Esa fila no existe');
+      }
+      if (!_filas[fila - 1].libre) {
+        throw const ErrorSalaBing('fila_ocupada', 'Esa fila ya tiene dueño');
+      }
     }
-    if (!_filas[fila - 1].libre) {
-      throw const ErrorSalaBing('fila_ocupada', 'Esa fila ya tiene dueño');
+    final propias = _filas.where((f) => f.jugadorUid == miUid).length;
+    if (propias + filas.length > filasPorJugador) {
+      throw const ErrorSalaBing(
+        'limite_de_filas',
+        'Superas el límite de filas por jugador',
+      );
     }
-    ocupar(fila, nombre, miUid);
+    final costo = precioFila * filas.length;
+    final cartera = billetera;
+    if (costo > 0 && cartera != null) {
+      if (costo > cartera.saldoActual) {
+        throw const ErrorSalaBing(
+          'saldo_insuficiente',
+          'No te alcanza el saldo',
+        );
+      }
+      for (final fila in [...filas]..sort()) {
+        cartera.aplicar(
+          Movimiento(
+            tipo: TipoMovimiento.fila,
+            monto: -precioFila,
+            detalle: 'Fila $fila · $nombreSala',
+            creadaEn: DateTime.now(),
+          ),
+        );
+      }
+    }
+    for (final fila in filas) {
+      ocupar(fila, nombre, miUid);
+    }
   }
+
+  @override
+  Future<void> reservarFila({
+    required String codigo,
+    required int fila,
+    required String nombre,
+  }) => reservarFilas(codigo: codigo, filas: [fila], nombre: nombre);
 
   /// Otra persona toma la fila [fila] (base 1).
   void ocupar(int fila, String nombre, String uid) {
@@ -176,10 +222,12 @@ class RepositorioMemoria implements RepositorioOrganizador {
     bool publica = true,
     int precioFila = 0,
     int premio = 0,
+    int filasPorJugador = 20,
   }) async {
     this.publica = publica;
     this.precioFila = precioFila;
     this.premio = premio;
+    this.filasPorJugador = filasPorJugador;
     return codigo;
   }
 
@@ -232,6 +280,22 @@ class RepositorioMemoria implements RepositorioOrganizador {
     }
     final limpio = motivo?.trim();
     _motivoCierre = limpio == null || limpio.isEmpty ? null : limpio;
+    // Cada fila que pagó la persona de esta app vuelve a su billetera.
+    final cartera = billetera;
+    if (_estado != EstadoSala.cancelada && cartera != null && precioFila > 0) {
+      for (var i = 0; i < _filas.length; i++) {
+        if (_filas[i].jugadorUid == miUid) {
+          cartera.aplicar(
+            Movimiento(
+              tipo: TipoMovimiento.devolucion,
+              monto: precioFila,
+              detalle: 'Devolución · fila ${i + 1} de $nombreSala',
+              creadaEn: DateTime.now(),
+            ),
+          );
+        }
+      }
+    }
     _estado = EstadoSala.cancelada;
     _salaCambios.add(null);
   }

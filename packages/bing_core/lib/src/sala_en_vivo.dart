@@ -39,6 +39,7 @@ class SalaEnVivo {
     this.motivoCierre,
     this.precioFila = 0,
     this.premio = 0,
+    this.filasPorJugador = 20,
   });
 
   final String codigo;
@@ -65,6 +66,10 @@ class SalaEnVivo {
 
   /// Créditos que gana la fila ganadora.
   final int premio;
+
+  /// Cuántas filas puede tener una persona; por defecto, las que quiera (con
+  /// saldo para pagarlas).
+  final int filasPorJugador;
 
   /// Por qué quien organiza cerró la sala (si lo dijo); solo en las canceladas.
   final String? motivoCierre;
@@ -120,12 +125,21 @@ abstract class RepositorioSala {
   Stream<List<SalaEnVivo>> salasAbiertas();
   Stream<List<FilaEnVivo>> filas(String codigo);
 
-  /// Reserva [fila] (base 1) a nombre de [nombre]. Lanza [ErrorSalaBing].
+  /// Reserva las [filas] (base 1) a nombre de [nombre], todas o ninguna, y cobra
+  /// su precio de la billetera. Lanza [ErrorSalaBing] (`fila_ocupada`,
+  /// `saldo_insuficiente`, `limite_de_filas`…).
+  Future<void> reservarFilas({
+    required String codigo,
+    required List<int> filas,
+    required String nombre,
+  });
+
+  /// Reserva una sola fila (base 1).
   Future<void> reservarFila({
     required String codigo,
     required int fila,
     required String nombre,
-  });
+  }) => reservarFilas(codigo: codigo, filas: [fila], nombre: nombre);
 
   /// Uid de quien usa la app, para saber cuál es su fila.
   String? get uid;
@@ -144,6 +158,7 @@ abstract class RepositorioOrganizador implements RepositorioSala {
     bool publica = true,
     int precioFila = 0,
     int premio = 0,
+    int filasPorJugador = 20,
   });
 
   Future<void> empezar(String codigo);

@@ -1,6 +1,7 @@
 /// Reglas del juego y entidades compartidas de Bing Bing.
 library;
 
+export 'src/billetera.dart';
 export 'src/demo.dart';
 export 'src/enlaces.dart';
 export 'src/reglas.dart';

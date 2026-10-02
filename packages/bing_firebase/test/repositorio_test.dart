@@ -26,6 +26,11 @@ void main() {
     expect(sala.ganadoras.single.fila, 5);
   });
 
+  test('salaDesdeMapa lee las filas por jugador, 20 si no hay', () {
+    expect(salaDesdeMapa('K7Q4', {'filasPorJugador': 3}).filasPorJugador, 3);
+    expect(salaDesdeMapa('K7Q4', {}).filasPorJugador, 20);
+  });
+
   test('salaDesdeMapa lee el precio y el premio, o 0 si no hay', () {
     final sala = salaDesdeMapa('K7Q4', {'precioFila': 5, 'premio': 80});
     expect(sala.precioFila, 5);

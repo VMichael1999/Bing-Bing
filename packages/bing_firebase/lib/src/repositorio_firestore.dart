@@ -92,17 +92,24 @@ class RepositorioFirestore implements RepositorioOrganizador {
   }
 
   @override
+  Future<void> reservarFilas({
+    required String codigo,
+    required List<int> filas,
+    required String nombre,
+  }) async {
+    await _llamar('reservarFilas', {
+      'codigo': codigo,
+      'filas': filas,
+      'nombre': nombre,
+    });
+  }
+
+  @override
   Future<void> reservarFila({
     required String codigo,
     required int fila,
     required String nombre,
-  }) async {
-    await _llamar('reservarFila', {
-      'codigo': codigo,
-      'fila': fila,
-      'nombre': nombre,
-    });
-  }
+  }) => reservarFilas(codigo: codigo, filas: [fila], nombre: nombre);
 
   // --- Quien organiza -------------------------------------------------------
 
@@ -124,6 +131,7 @@ class RepositorioFirestore implements RepositorioOrganizador {
     bool publica = true,
     int precioFila = 0,
     int premio = 0,
+    int filasPorJugador = 20,
   }) async {
     final r = await _llamar('crearSala', {
       'nombre': nombre,
@@ -131,6 +139,7 @@ class RepositorioFirestore implements RepositorioOrganizador {
       'publica': publica,
       'precioFila': precioFila,
       'premio': premio,
+      'filasPorJugador': filasPorJugador,
     });
     return r['codigo'] as String;
   }
@@ -204,6 +213,7 @@ SalaEnVivo salaDesdeMapa(String codigo, Map<String, dynamic> datos) {
     motivoCierre: datos['motivoCierre'] as String?,
     precioFila: (datos['precioFila'] as num?)?.toInt() ?? 0,
     premio: (datos['premio'] as num?)?.toInt() ?? 0,
+    filasPorJugador: (datos['filasPorJugador'] as num?)?.toInt() ?? 20,
     ganadoras: [
       for (final g in datos['ganadores'] as List? ?? [])
         (

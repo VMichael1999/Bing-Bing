@@ -155,14 +155,24 @@ void main() {
   });
 
   group('llamadas al servidor', () {
-    test('reservarFila envía el código, la fila y el nombre', () async {
+    test('reservarFila envía la fila como una lista de una', () async {
       await repo().reservarFila(codigo: 'K7Q4', fila: 5, nombre: 'Lucía');
-      expect(llamadas.single.$1, 'reservarFila');
+      expect(llamadas.single.$1, 'reservarFilas');
       expect(llamadas.single.$2, {
         'codigo': 'K7Q4',
-        'fila': 5,
+        'filas': [5],
         'nombre': 'Lucía',
       });
+    });
+
+    test('reservarFilas envía todas las filas elegidas', () async {
+      await repo().reservarFilas(
+        codigo: 'K7Q4',
+        filas: [5, 6, 9],
+        nombre: 'Lucía',
+      );
+      expect(llamadas.single.$1, 'reservarFilas');
+      expect(llamadas.single.$2['filas'], [5, 6, 9]);
     });
 
     test('crearSala devuelve el código que responde el servidor', () async {
@@ -175,6 +185,7 @@ void main() {
         'publica': true,
         'precioFila': 0,
         'premio': 0,
+        'filasPorJugador': 20,
       });
     });
 
