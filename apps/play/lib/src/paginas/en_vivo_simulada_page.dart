@@ -101,6 +101,8 @@ class _EnVivoSimuladaPageState extends State<EnVivoSimuladaPage> {
             miFila: widget.fila + 1,
             bolillas: List.of(widget.sala.bolillas),
             hace: textoHace(widget.sala.ultimaSalida, DateTime.now()),
+            // La sala completa: los otros 19 jugadores (más la fila propia, arriba).
+            mostrar: widget.sala.total - 1,
           ),
     );
   }
