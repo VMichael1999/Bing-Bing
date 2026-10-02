@@ -24,6 +24,26 @@ pruebas; **aún no hay conexión entre las apps y Firebase**.
 | Backend (`backend/`): reservas, sorteo y ganadores | Escrito y probado en lógica; sin probar con el emulador de Firebase |
 | Conectar las apps a Firebase | Pendiente (necesita un proyecto de Firebase) |
 
+## Capturas
+
+Tomadas en un emulador Pixel 10 Pro XL (Android 17) con **datos falsos**: la sala se
+llena sola, las bolillas salen una tras otra y gana Lucía con la B-12.
+
+### Bing Bing Play
+
+<table>
+<tr><td align="center"><img src="docs/capturas/play/01-codigo.png" width="170"><br><sub>Código de sala</sub></td><td align="center"><img src="docs/capturas/play/02-elegir-fila.png" width="170"><br><sub>Elegir fila</sub></td><td align="center"><img src="docs/capturas/play/03-reservar.png" width="170"><br><sub>Reservar</sub></td><td align="center"><img src="docs/capturas/play/04c-esperando-lleno.png" width="170"><br><sub>Esperando (20 de 20)</sub></td></tr>
+<tr><td align="center"><img src="docs/capturas/play/05a-en-vivo-inicio.png" width="170"><br><sub>En vivo</sub></td><td align="center"><img src="docs/capturas/play/05c-en-vivo-final.png" width="170"><br><sub>En vivo, casi al final</sub></td><td align="center"><img src="docs/capturas/play/06b-ganaste-confeti.png" width="170"><br><sub>¡Ganaste!</sub></td></tr>
+</table>
+
+### Bing Bing Host
+
+<table>
+<tr><td align="center"><img src="docs/capturas/host/01-entrar.png" width="170"><br><sub>Entrar</sub></td><td align="center"><img src="docs/capturas/host/02-mis-partidas.png" width="170"><br><sub>Mis partidas</sub></td><td align="center"><img src="docs/capturas/host/03-nueva-partida.png" width="170"><br><sub>Nueva partida</sub></td><td align="center"><img src="docs/capturas/host/04c-sala-abierta-20.png" width="170"><br><sub>Sala abierta</sub></td></tr>
+<tr><td align="center"><img src="docs/capturas/host/05-cartilla-llena.png" width="170"><br><sub>¡Cartilla llena!</sub></td><td align="center"><img src="docs/capturas/host/06b-sorteando.png" width="170"><br><sub>Sacando bolilla</sub></td><td align="center"><img src="docs/capturas/host/06d-bolilla-mitad.png" width="170"><br><sub>Partida en juego</sub></td><td align="center"><img src="docs/capturas/host/07-cartilla.png" width="170"><br><sub>Cartilla</sub></td></tr>
+<tr><td align="center"><img src="docs/capturas/host/08-tablero.png" width="170"><br><sub>Tablero</sub></td><td align="center"><img src="docs/capturas/host/09a-ganador-confeti.png" width="170"><br><sub>¡Bingo!</sub></td></tr>
+</table>
+
 ## Modo demo
 
 Las dos apps arrancan con los datos exactos del diseño (sala K7Q4, "Bingo de los
@@ -33,6 +53,11 @@ sábados", organiza Carmen). Para abrir una pantalla concreta sin recorrer el fl
 cd apps/host && flutter run --dart-define=BING_PANTALLA=org-06-bolilla
 cd apps/play && flutter run --dart-define=BING_PANTALLA=jug-05-en-vivo
 ```
+
+Sin esa opción, cada app arranca un **recorrido simulado** de punta a punta con datos
+falsos: en Play, la sala se va llenando sola tras reservar y las bolillas salen solas
+hasta que gana tu fila; en Host, la sala se llena, sube "¡Cartilla llena!" y la
+partida se puede jugar a mano o con el interruptor "Automático".
 
 Los identificadores son los del diseño: `org-01-entrar` … `org-09-ganador` y
 `jug-01-codigo` … `jug-06-ganaste`. En Host, `org-06-bolilla` parte con 17 bolillas y
