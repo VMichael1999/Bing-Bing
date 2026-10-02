@@ -12,37 +12,46 @@ class BingEncabezado extends StatelessWidget {
     required this.titulo,
     required this.subtitulo,
     this.alVolver,
+    this.conVolver = true,
+    this.accion,
   });
 
   final String titulo;
   final String subtitulo;
   final VoidCallback? alVolver;
 
+  /// Muestra el botón redondo de volver (no está en `jug-05`).
+  final bool conVolver;
+
+  /// Widget alineado a la derecha, por ejemplo el chip "En vivo".
+  final Widget? accion;
+
   @override
   Widget build(BuildContext context) {
     final paleta = BingTema.of(context);
     return Row(
       children: [
-        Semantics(
-          button: true,
-          label: 'Volver',
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: alVolver,
-            child: Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: paleta.tarjeta,
-                border: Border.all(color: paleta.linea),
+        if (conVolver)
+          Semantics(
+            button: true,
+            label: 'Volver',
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: alVolver,
+              child: Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: paleta.tarjeta,
+                  border: Border.all(color: paleta.linea),
+                ),
+                child: BingIcono('left', color: paleta.tinta),
               ),
-              child: BingIcono('left', color: paleta.tinta),
             ),
           ),
-        ),
-        const SizedBox(width: 10),
+        if (conVolver) const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +68,7 @@ class BingEncabezado extends StatelessWidget {
             ],
           ),
         ),
+        if (accion != null) ...[const SizedBox(width: 10), accion!],
       ],
     );
   }
