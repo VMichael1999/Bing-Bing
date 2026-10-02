@@ -1,6 +1,5 @@
 import 'package:bing_core/bing_core.dart';
 import 'package:bing_play/main.dart';
-import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -98,21 +97,16 @@ void main() {
       expect(find.text('Ver filas libres'), findsOneWidget);
     });
 
-    testWidgets('al escribir el código se esconden las salas', (tester) async {
+    testWidgets('con el teclado arriba se esconden las salas', (tester) async {
       await abrir(tester, sala());
       await tester.pumpAndSettle();
-      await tester.tap(
-        find
-            .ancestor(
-              of: find.byType(BingCasillasCodigo),
-              matching: find.byType(GestureDetector),
-            )
-            .first,
-      );
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300 * 2);
+      addTearDown(tester.view.resetViewInsets);
       await tester.pumpAndSettle();
       expect(find.text('SALAS ABIERTAS AHORA'), findsNothing);
-      // Al soltar el foco vuelven.
-      FocusManager.instance.primaryFocus?.unfocus();
+      // Al cerrar el teclado vuelven.
+      tester.view.resetViewInsets();
       await tester.pumpAndSettle();
       expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
     });

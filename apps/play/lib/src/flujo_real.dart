@@ -50,11 +50,13 @@ class FlujoReal extends StatefulWidget {
   State<FlujoReal> createState() => _FlujoRealState();
 }
 
-class _FlujoRealState extends State<FlujoReal> {
+class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   // Una sola suscripción: el diseño cambia con el teclado y no debe abrir otra.
   StreamSubscription<List<SalaEnVivo>>? _suscripcion;
   List<SalaEnVivo>? _salas;
   bool _errorSalas = false;
+  bool _tecladoVisible = false;
+  final _editor = GlobalKey<EditableTextState>();
 
   final _texto = TextEditingController();
   final _foco = FocusNode();
@@ -66,7 +68,7 @@ class _FlujoRealState extends State<FlujoReal> {
   void initState() {
     super.initState();
     _texto.addListener(_alEscribir);
-    _foco.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addObserver(this);
     _suscripcion = widget.repositorio.salasAbiertas().listen(
       (salas) => setState(() {
         _salas = salas;
@@ -78,10 +80,17 @@ class _FlujoRealState extends State<FlujoReal> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _suscripcion?.cancel();
     _texto.dispose();
     _foco.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    final visible = View.of(context).viewInsets.bottom > 0;
+    if (visible != _tecladoVisible) setState(() => _tecladoVisible = visible);
   }
 
   Future<void> _alEscribir() async {
@@ -166,7 +175,7 @@ class _FlujoRealState extends State<FlujoReal> {
       // Quien escribe un código no necesita ver las salas.
       bajoElQr:
           (desplazable) =>
-              _foco.hasFocus
+              _tecladoVisible
                   ? const SizedBox.shrink()
                   : SalasAbiertas(
                     salas: _salas == null ? null : salasConSitio(_salas!),
@@ -184,7 +193,11 @@ class _FlujoRealState extends State<FlujoReal> {
                   ),
       casillas: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _foco.requestFocus,
+        onTap: () {
+          _foco.requestFocus();
+          // Si el teclado se cerró con "atrás", el foco sigue y hay que pedirlo.
+          _editor.currentState?.requestKeyboard();
+        },
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -201,6 +214,7 @@ class _FlujoRealState extends State<FlujoReal> {
               child: Opacity(
                 opacity: 0,
                 child: EditableText(
+                  key: _editor,
                   controller: _texto,
                   focusNode: _foco,
                   autofocus: false,
