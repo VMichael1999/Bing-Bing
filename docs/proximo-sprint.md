@@ -30,6 +30,32 @@ sección está bloqueada con "Pronto" y no tiene lógica.
 - Pantallas nuevas que el HTML no define: recarga, saldo insuficiente, historial de
   movimientos, y el listado de pagos para quien organiza.
 
+## Decisiones del 2 de octubre de 2026
+
+Salas abiertas, QR, cuenta y billetera. Prototipos en
+`tools/html_ref/bolilla-pantallas-nuevas.html`, **pendientes de aprobar**.
+
+- **Salas públicas y privadas.** Quien organiza elige la visibilidad al crear la sala.
+  Una **pública** aparece en la lista de Play para cualquiera, aunque no haya iniciado
+  sesión. Una **privada** solo se entra con el código, el enlace o el QR.
+- **Elegir fila exige cuenta con saldo.** Mirar la sala es libre; si no hay sesión, al
+  tocar "Seguir con la fila" sube una hoja para iniciarla. Sin saldo suficiente las
+  filas se ven pero no se pueden elegir. La comprobación se hace **en el servidor**.
+- **Inicio de sesión del jugador:** Google y celular (el SMS tiene costo). La sesión
+  anónima se **vincula** a la cuenta para no perder la fila ni el historial. Hay que
+  poder borrar la cuenta desde la app (requisito de las tiendas).
+- **Billetera en dos etapas.** Primero **créditos de prueba** (sin valor en dinero, no
+  se retiran): saldo, precio por fila, premio e historial. Los pagos reales solo
+  después de validar lo legal (ver arriba).
+- **Precio y premio.** Quien organiza fija el precio por fila; el premio propuesto es
+  lo recaudado de las 20 filas (por confirmar).
+- **Enlaces y QR.** Dominio gratis de Firebase Hosting
+  (`bingbing-f1491.web.app/sala/CÓDIGO`); el QR contiene ese enlace. Sin la app
+  instalada, el enlace muestra una página con las tiendas.
+
+Orden previsto: prototipos aprobados → compartir y QR → escanear → salas disponibles →
+cuenta del jugador → billetera con créditos de prueba.
+
 ## Pendientes menores
 
 - Estados que el diseño no define: vacío, error, sin conexión y permiso de cámara
