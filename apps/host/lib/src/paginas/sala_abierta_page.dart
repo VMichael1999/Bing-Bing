@@ -16,6 +16,7 @@ class SalaAbiertaPage extends StatelessWidget {
     this.alVolver,
     this.alCompartir,
     this.alCopiar,
+    this.alEmpezar,
   });
 
   final String salaNombre;
@@ -26,6 +27,10 @@ class SalaAbiertaPage extends StatelessWidget {
   final VoidCallback? alVolver;
   final VoidCallback? alCompartir;
   final VoidCallback? alCopiar;
+
+  /// Con la cartilla llena el botón pasa a "Empezar partida" (estado que el
+  /// diseño no muestra: solo enseña la hoja `org-05`).
+  final VoidCallback? alEmpezar;
 
   @override
   Widget build(BuildContext context) {
@@ -68,16 +73,25 @@ class SalaAbiertaPage extends StatelessWidget {
               ),
             ),
             BingPie(
-              boton: BingBoton(
-                texto:
-                    faltan == 1
-                        ? 'Esperando a 1 jugador'
-                        : 'Esperando a $faltan jugadores',
-                tipo: BingBotonTipo.linea,
-                deshabilitado: true,
-              ),
+              boton:
+                  faltan == 0 && alEmpezar != null
+                      ? BingBoton(
+                        texto: 'Empezar partida',
+                        tipo: BingBotonTipo.dauber,
+                        alPresionar: alEmpezar,
+                      )
+                      : BingBoton(
+                        texto:
+                            faltan == 1
+                                ? 'Esperando a 1 jugador'
+                                : 'Esperando a $faltan jugadores',
+                        tipo: BingBotonTipo.linea,
+                        deshabilitado: true,
+                      ),
               nota:
-                  'Cuando se llenen las $total filas te avisamos para empezar',
+                  faltan == 0
+                      ? 'Las $total filas ya tienen jugador'
+                      : 'Cuando se llenen las $total filas te avisamos para empezar',
             ),
           ],
         ),

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'src/demo.dart';
 import 'src/paginas/codigo_page.dart';
 import 'src/paginas/elegir_fila_page.dart';
-import 'src/paginas/esperando_page.dart';
+import 'src/paginas/esperando_simulada_page.dart';
 import 'src/paginas/reservar_page.dart';
 
 /// Abre una pantalla del diseño directamente:
@@ -33,22 +33,36 @@ class BingPlayApp extends StatelessWidget {
               settings: settings,
               pageBuilder: (context, _, __) => builder(context),
             ),
+        builder: (context, child) => BingSistema(child: child!),
         home: inicio ?? pantallaDemo(_pantallaElegida) ?? const _FlujoDemo(),
       ),
     );
   }
 }
 
-/// Recorrido en modo demo con los datos del diseño:
-/// código → elegir fila → reservar → esperando.
-class _FlujoDemo extends StatelessWidget {
+/// Recorrido demo completo con datos falsos:
+/// código → elegir fila → reservar → esperando (la sala se llena sola) →
+/// en vivo (las bolillas salen solas) → ¡Ganaste! si tu fila completa.
+class _FlujoDemo extends StatefulWidget {
   const _FlujoDemo();
+
+  @override
+  State<_FlujoDemo> createState() => _FlujoDemoState();
+}
+
+class _FlujoDemoState extends State<_FlujoDemo> {
+  // Las 4 primeras filas ya están tomadas, como en el diseño.
+  final _sala = SalaSimulada(ocupadasIniciales: 4);
 
   void _ir(BuildContext context, WidgetBuilder pantalla) => Navigator.of(
     context,
-  ).push(
-    PageRouteBuilder<void>(pageBuilder: (context, _, __) => pantalla(context)),
-  );
+  ).push(PageRouteBuilder<void>(pageBuilder: (c, _, __) => pantalla(c)));
+
+  @override
+  void dispose() {
+    _sala.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +70,14 @@ class _FlujoDemo extends StatelessWidget {
       codigo: salaDemoCodigo,
       salaNombre: salaDemoNombre,
       organizador: salaDemoOrganizador,
-      filasLibres: 16,
+      filasLibres: _sala.total - _sala.ocupadas,
       alVerFilas:
           () => _ir(
             context,
             (context) => ElegirFilaPage(
               salaNombre: salaDemoNombre,
               cartillas: cartillasDemo,
-              duenos: filasDemoDuenos,
+              duenos: _sala.duenos,
               seleccionInicial: 5,
               alVolver: () => Navigator.of(context).pop(),
               alSeguir:
@@ -76,19 +90,18 @@ class _FlujoDemo extends StatelessWidget {
                       numeros: cartillasDemo[fila - 1],
                       nombreInicial: 'Lucía',
                       alVolver: () => Navigator.of(context).pop(),
-                      alReservar:
-                          (nombre) => _ir(
-                            context,
-                            (context) => EsperandoPage(
-                              nombre: nombre,
-                              salaNombre: salaDemoNombre,
-                              organizador: salaDemoOrganizador,
-                              fila: fila,
-                              numeros: cartillasDemo[fila - 1],
-                              ocupadas: 17,
-                              total: 20,
-                            ),
+                      alReservar: (nombre) {
+                        final nombreFinal = nombre.isEmpty ? 'Lucía' : nombre;
+                        if (!_sala.reservar(fila - 1, nombreFinal)) return;
+                        _ir(
+                          context,
+                          (context) => EsperandoSimuladaPage(
+                            sala: _sala,
+                            fila: fila - 1,
+                            nombre: nombreFinal,
                           ),
+                        );
+                      },
                     ),
                   ),
             ),

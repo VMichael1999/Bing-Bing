@@ -3,3 +3,4 @@ library;
 
 export 'src/demo.dart';
 export 'src/reglas.dart';
+export 'src/simulacion.dart';

@@ -26,6 +26,9 @@ class JuegoPage extends StatefulWidget {
     required this.sorteo,
     this.pestanaInicial = 0,
     this.alTerminar,
+    this.conAutomatico = false,
+    this.filasGanando = 5,
+    this.cadaAutomatico = const Duration(milliseconds: 2800),
   });
 
   final String salaNombre;
@@ -36,6 +39,15 @@ class JuegoPage extends StatefulWidget {
   final Sorteo sorteo;
   final int pestanaInicial;
   final VoidCallback? alTerminar;
+
+  /// Muestra el interruptor "Automático" (solo para la simulación).
+  final bool conAutomatico;
+
+  /// Cuántas filas se muestran en "Van ganando" (el diseño dibuja 3; la app
+  /// muestra las 5 más adelantadas y la lista completa está en la pestaña
+  /// Cartilla).
+  final int filasGanando;
+  final Duration cadaAutomatico;
 
   @override
   State<JuegoPage> createState() => _JuegoPageState();
@@ -51,6 +63,8 @@ class _JuegoPageState extends State<JuegoPage>
   late int _pestana = widget.pestanaInicial;
   late final AnimationController _balanceo;
   Timer? _reloj;
+  Timer? _auto;
+  bool _automatico = false;
   bool _ocupado = false;
   int? _mostrada;
   String _mensaje = '';
@@ -71,8 +85,26 @@ class _JuegoPageState extends State<JuegoPage>
   @override
   void dispose() {
     _reloj?.cancel();
+    _auto?.cancel();
     _balanceo.dispose();
     super.dispose();
+  }
+
+  void _alternarAutomatico() {
+    setState(() => _automatico = !_automatico);
+    _auto?.cancel();
+    if (!_automatico) return;
+    _auto = Timer.periodic(widget.cadaAutomatico, (t) {
+      if (!mounted) return;
+      // No saca bolillas mientras hay otra pantalla encima (el ganador).
+      if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+      if (widget.sorteo(_salidas) == null) {
+        t.cancel();
+        setState(() => _automatico = false);
+        return;
+      }
+      _sacar();
+    });
   }
 
   int _filasCon(int n) => widget.cartillas.where((f) => f.contains(n)).length;
@@ -199,7 +231,10 @@ class _JuegoPageState extends State<JuegoPage>
   }
 
   Widget _bolilla(BingPaleta paleta, Set<int> salidas, int? ultima) {
-    final orden = ordenarPorAvance(widget.cartillas, salidas).take(3);
+    final orden = ordenarPorAvance(
+      widget.cartillas,
+      salidas,
+    ).take(widget.filasGanando);
     final recientes = _salidas.reversed.take(5).toList();
     return Column(
       children: [
@@ -217,6 +252,13 @@ class _JuegoPageState extends State<JuegoPage>
           mensaje: _mensaje,
           alTocar: _sacar,
         ),
+        if (widget.conAutomatico) ...[
+          BingMini(
+            texto: _automatico ? 'Automático: sí' : 'Automático: no',
+            icono: 'swap',
+            alPresionar: _alternarAutomatico,
+          ),
+        ],
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
