@@ -32,24 +32,10 @@ class BingEncabezado extends StatelessWidget {
     return Row(
       children: [
         if (conVolver)
-          Semantics(
-            button: true,
-            label: 'Volver',
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: alVolver,
-              child: Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: paleta.tarjeta,
-                  border: Border.all(color: paleta.linea),
-                ),
-                child: BingIcono('left', color: paleta.tinta),
-              ),
-            ),
+          BingBotonIcono(
+            icono: 'left',
+            etiqueta: 'Volver',
+            alPresionar: alVolver,
           ),
         if (conVolver) const SizedBox(width: 10),
         Expanded(
@@ -76,9 +62,9 @@ class BingEncabezado extends StatelessWidget {
 
 /// Pie fijo de pantalla (`.foot`): botón principal y una nota debajo.
 class BingPie extends StatelessWidget {
-  const BingPie({super.key, required this.boton, this.nota});
+  const BingPie({super.key, this.boton, this.nota});
 
-  final Widget boton;
+  final Widget? boton;
   final String? nota;
 
   @override
@@ -96,9 +82,9 @@ class BingPie extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          boton,
+          if (boton != null) boton!,
           if (nota != null) ...[
-            const SizedBox(height: 8),
+            if (boton != null) const SizedBox(height: 8),
             Text(
               nota!,
               textAlign: TextAlign.center,
@@ -106,6 +92,44 @@ class BingPie extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Botón redondo de 40 dp con borde (`.icb`).
+class BingBotonIcono extends StatelessWidget {
+  const BingBotonIcono({
+    super.key,
+    required this.icono,
+    required this.etiqueta,
+    this.alPresionar,
+  });
+
+  final String icono;
+  final String etiqueta;
+  final VoidCallback? alPresionar;
+
+  @override
+  Widget build(BuildContext context) {
+    final paleta = BingTema.of(context);
+    return Semantics(
+      button: true,
+      label: etiqueta,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: alPresionar,
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: paleta.tarjeta,
+            border: Border.all(color: paleta.linea),
+          ),
+          child: BingIcono(icono, color: paleta.tinta),
+        ),
       ),
     );
   }

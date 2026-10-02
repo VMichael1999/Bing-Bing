@@ -33,7 +33,15 @@ class CodigoPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
                 child: Column(
                   children: [
-                    const _Encabezado(),
+                    const BingHero(
+                      arriba: 14,
+                      bolillas: [
+                        (columna: 0, numero: 9, letra: 'B'),
+                        (columna: 1, numero: 30, letra: 'I'),
+                        (columna: 2, numero: 38, letra: 'N'),
+                      ],
+                      texto: 'Escribe el código que te dio quien organiza',
+                    ),
                     const SizedBox(height: 14),
                     BingCasillasCodigo(codigo: codigo),
                     const SizedBox(height: 14),
@@ -66,51 +74,6 @@ class CodigoPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _Encabezado extends StatelessWidget {
-  const _Encabezado();
-
-  @override
-  Widget build(BuildContext context) {
-    final paleta = BingTema.of(context);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 14, 8, 6),
-      child: Column(
-        children: [
-          const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              BingBolilla(columna: 0, numero: 9, letra: 'B'),
-              SizedBox(width: 6),
-              BingBolilla(columna: 1, numero: 30, letra: 'I'),
-              SizedBox(width: 6),
-              BingBolilla(columna: 2, numero: 38, letra: 'N'),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Bing Bing',
-            textAlign: TextAlign.center,
-            style: BingTexto.marca.copyWith(color: paleta.tinta),
-          ),
-          const SizedBox(height: 10),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 250),
-            child: Text(
-              'Escribe el código que te dio quien organiza',
-              textAlign: TextAlign.center,
-              style: BingTexto.figtree(
-                14.5,
-                400,
-                altura: 1.38,
-              ).copyWith(color: paleta.apagado),
-            ),
-          ),
-        ],
       ),
     );
   }

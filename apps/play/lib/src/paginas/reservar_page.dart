@@ -72,7 +72,11 @@ class _ReservarPageState extends State<ReservarPage> {
                     BingSeccion(
                       cabecera: '¿CÓMO TE VEN LOS DEMÁS?',
                       children: [
-                        BingCampo(controlador: _nombre, icono: 'user'),
+                        BingCampo(
+                          controlador: _nombre,
+                          icono: 'user',
+                          autofoco: true,
+                        ),
                         Text(
                           'Este nombre aparece en la cartilla de todos y en '
                           'la pantalla de ${widget.organizador}.',
