@@ -94,6 +94,42 @@ Sesión y perfil (**por diseñar**, hoy no hay forma de salir en ninguna app):
 - Pantallas nuevas que el HTML aún no define: Ajustes del Host, Mi cuenta de Play,
   confirmar cerrar sesión y confirmar borrar cuenta.
 
+## Cerrar una sala que no se llenó (idea decidida, por diseñar)
+
+Caso: la sala es de 20 filas y solo se registraron 5. Pasó el **plazo de registro** y
+quien organiza decide no seguir.
+
+- **Plazo de registro.** Quien organiza lo fija al crear la sala (por ejemplo, hasta una
+  hora o fecha). Es distinto de la caducidad automática por abandono: este plazo lo
+  decide la persona y se muestra a los jugadores.
+- **Botón para cerrar la sala** (nombre por definir: "Cancelar partida", "Cerrar sala" o
+  "Terminar sin jugar"), con un motivo opcional. Pide confirmación y explica que se
+  **devolverá el dinero** a quienes ya reservaron. Disponible en la sala abierta, antes
+  de empezar la partida.
+- **Aviso a los jugadores.** Una ventana flotante (diálogo) que dice que la sala se cerró
+  porque no se completó el número de filas, y que se les devolvió el saldo. Debe quedar
+  guardado en la sala (estado `cancelada` con motivo), no solo enviarse una vez, para que
+  lo vea quien abra la app después. Si la app está cerrada, una notificación push.
+- **Devolución.** El servidor devuelve a la **billetera** de cada jugador lo que pagó,
+  en **una sola operación atómica** (sala cancelada + abonos + historial), para que no
+  quede nadie sin reembolso ni se devuelva dos veces. Aparece en el historial como
+  "Devolución · sala cancelada". Con los créditos de prueba es igual, sin dinero real.
+- **La sala sale de la lista pública** y su código deja de aceptar jugadores.
+- Quien organiza también puede **borrar** una partida en borrador (sin jugadores) desde
+  "Tus partidas".
+
+Por decidir:
+
+- ¿Se puede cancelar con la partida ya empezada? Propuesta: no; solo antes de la primera
+  bolilla. Después se juega hasta terminar.
+- Si pasa el plazo y hay jugadores, ¿se cierra sola o la persona decide? Propuesta:
+  avisar a quien organiza y dejar elegir entre **cancelar y devolver** o **jugar con las
+  filas que hay** (con el premio recalculado, ver comisión).
+- ¿Quien organiza o la plataforma se queda con alguna parte si cancela? Propuesta: no,
+  devolución completa.
+- Pantallas nuevas del HTML: confirmar cierre de sala, aviso de sala cancelada para el
+  jugador y el movimiento "Devolución" en el historial.
+
 ## Pendientes menores
 
 - Estados que el diseño no define: vacío, error, sin conexión y permiso de cámara
