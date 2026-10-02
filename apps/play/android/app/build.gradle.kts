@@ -7,8 +7,9 @@ plugins {
 
 android {
     namespace = "pe.bingbing.bing_play"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // mobile_scanner (CameraX) y otros plugins compilan contra la API 36.
+    compileSdk = 36
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

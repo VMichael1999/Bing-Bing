@@ -126,7 +126,7 @@ class _EscanerRealState extends State<EscanerReal> with WidgetsBindingObserver {
           camara: MobileScanner(
             controller: controlador,
             onDetect: _alDetectar,
-            errorBuilder: (context, _) => const SizedBox.shrink(),
+            errorBuilder: (context, _, __) => const SizedBox.shrink(),
           ),
           linternaEncendida: estado.torchState == TorchState.on,
           alLinterna:
