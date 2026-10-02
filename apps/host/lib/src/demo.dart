@@ -98,6 +98,7 @@ Widget? pantallaDemo(String id) => switch (id) {
   'org-11-compartir' => const CompartirPage(
     salaNombre: salaDemoNombre,
     codigo: salaDemoCodigo,
+    publica: true,
   ),
   'org-12-qr-pantalla' => const QrPantallaPage(codigo: salaDemoCodigo),
   _ => null,

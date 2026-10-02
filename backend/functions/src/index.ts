@@ -80,7 +80,7 @@ async function leerFilas(t: Transaction, codigo: string, total: number): Promise
   return (await t.getAll(...refs)).map((d) => d.data() as Fila);
 }
 
-/** `crearSala({nombre, columnas})` → `{codigo}`. Reparte las 20 cartillas. */
+/** `crearSala({nombre, columnas, publica})` → `{codigo}`. Reparte las 20 cartillas. */
 export const crearSala = onCall(async (request) => {
   const uid = uidOrganizador(request);
   const nombre = (() => {
@@ -91,6 +91,8 @@ export const crearSala = onCall(async (request) => {
     }
   })();
   const columnas = (request.data as { columnas?: unknown }).columnas === 6 ? 6 : 5;
+  // Pública por defecto, como en "Nueva partida".
+  const publica = (request.data as { publica?: unknown }).publica !== false;
 
   for (let intento = 0; intento < 10; intento++) {
     const codigo = generarCodigo();
@@ -101,6 +103,8 @@ export const crearSala = onCall(async (request) => {
         nombre,
         organizadorUid: uid,
         organizadorNombre: organizadorNombre(request),
+        publica,
+        ocupadas: 0,
         columnas,
         filasTotal: FILAS_TOTAL,
         filasPorJugador: 1,
@@ -134,7 +138,10 @@ export const reservarFila = onCall(async (request) => {
         nombre: r.nombre,
         reservadaEn: FieldValue.serverTimestamp(),
       });
-      if (r.estado !== sala.estado) t.update(ref, { estado: r.estado });
+      t.update(ref, {
+        ocupadas: filas.filter((f) => f.jugadorUid).length + 1,
+        ...(r.estado !== sala.estado ? { estado: r.estado } : {}),
+      });
       return { fila: Number(fila), estado: r.estado };
     });
   } catch (e) {

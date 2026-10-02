@@ -55,6 +55,18 @@ class RepositorioFirestore implements RepositorioOrganizador {
   });
 
   @override
+  Stream<List<SalaEnVivo>> salasAbiertas() => _db
+      .collection('salas')
+      .where('publica', isEqualTo: true)
+      .where('estado', whereIn: ['abierta', 'llena'])
+      .snapshots()
+      .map(
+        (q) => ordenarSalas([
+          for (final d in q.docs) salaDesdeMapa(d.id, d.data()),
+        ]),
+      );
+
+  @override
   Stream<List<FilaEnVivo>> filas(String codigo) => _sala(codigo)
       .collection('filas')
       .snapshots()
@@ -109,10 +121,12 @@ class RepositorioFirestore implements RepositorioOrganizador {
   Future<String> crearSala({
     required String nombre,
     required int columnas,
+    bool publica = true,
   }) async {
     final r = await _llamar('crearSala', {
       'nombre': nombre,
       'columnas': columnas,
+      'publica': publica,
     });
     return r['codigo'] as String;
   }
@@ -173,6 +187,8 @@ SalaEnVivo salaDesdeMapa(String codigo, Map<String, dynamic> datos) {
     ],
     organizadorUid: datos['organizadorUid'] as String?,
     creadaEn: fechaDe(datos['creadaEn']),
+    publica: datos['publica'] == true,
+    ocupadas: (datos['ocupadas'] as num?)?.toInt() ?? 0,
     ganadoras: [
       for (final g in datos['ganadores'] as List? ?? [])
         (

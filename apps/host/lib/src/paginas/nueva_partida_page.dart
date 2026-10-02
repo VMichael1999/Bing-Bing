@@ -1,8 +1,9 @@
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
-/// `org-03-nueva-partida`: nombre, columnas, filas por jugador y la sección de
-/// premio, bloqueada ("Pronto") y sin acción.
+/// `org-03-nueva-partida` y `org-10-nueva-partida-v2`: nombre, visibilidad
+/// (pública o privada), columnas, filas por jugador y la sección de premio,
+/// bloqueada ("Pronto") y sin acción.
 class NuevaPartidaPage extends StatefulWidget {
   const NuevaPartidaPage({
     super.key,
@@ -16,8 +17,8 @@ class NuevaPartidaPage extends StatefulWidget {
   final String nombreInicial;
   final VoidCallback? alVolver;
 
-  /// Recibe el nombre y las columnas elegidas (5 o 6).
-  final void Function(String nombre, int columnas)? alAbrirSala;
+  /// Recibe el nombre, las columnas elegidas (5 o 6) y si la sala es pública.
+  final void Function(String nombre, int columnas, bool publica)? alAbrirSala;
 
   /// Por qué falló crear la sala, si falló.
   final String? error;
@@ -32,6 +33,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
     text: widget.nombreInicial,
   );
   int _columnas = 0; // índice: 0 = 5 columnas, 1 = 6 columnas.
+  int _visibilidad = 0; // índice: 0 = pública, 1 = privada.
 
   @override
   void dispose() {
@@ -65,6 +67,25 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                     BingSeccion(
                       cabecera: 'NOMBRE',
                       children: [BingCampo(controlador: _nombre, maxLargo: 40)],
+                    ),
+                    const SizedBox(height: 10),
+                    BingSeccion(
+                      cabecera: 'VISIBILIDAD',
+                      children: [
+                        BingSegmento(
+                          opciones: const ['Pública', 'Privada'],
+                          seleccion: _visibilidad,
+                          alCambiar: (i) => setState(() => _visibilidad = i),
+                        ),
+                        Text(
+                          'Pública: la ve cualquiera en Play. Privada: solo con '
+                          'código, enlace o QR.',
+                          style: BingTexto.figtree(
+                            12,
+                            600,
+                          ).copyWith(color: paleta.apagado),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     BingSeccion(
@@ -151,6 +172,7 @@ class _NuevaPartidaPageState extends State<NuevaPartidaPage> {
                     () => widget.alAbrirSala?.call(
                       _nombre.text.trim(),
                       _columnas == 0 ? 5 : 6,
+                      _visibilidad == 0,
                     ),
               ),
             ),

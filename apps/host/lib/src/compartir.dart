@@ -13,6 +13,7 @@ void abrirCompartirSala(
   BuildContext context, {
   required String nombre,
   required String codigo,
+  bool? publica,
 }) {
   Navigator.of(context).push(
     PageRouteBuilder<void>(
@@ -20,6 +21,7 @@ void abrirCompartirSala(
           (contexto, _, __) => CompartirPage(
             salaNombre: nombre,
             codigo: codigo,
+            publica: publica,
             alVolver: () => Navigator.of(contexto).pop(),
             alCopiarEnlace: () async {
               await Clipboard.setData(ClipboardData(text: enlaceSala(codigo)));

@@ -45,7 +45,8 @@ const anonimo = await registrar();
 
 // Quien juega no puede organizar.
 await rechazada("crearSala", anonimo, { nombre: "X" }, "PERMISSION_DENIED");
-const { codigo } = await ok("crearSala", organizador, { nombre: "Bingo de los sábados", columnas: 5 });
+const { codigo } = await ok("crearSala", organizador, { nombre: "Bingo de los sábados", columnas: 5, publica: true });
+const privada = await ok("crearSala", organizador, { nombre: "Solo familia", columnas: 5, publica: false });
 assert.match(codigo, /^[A-Z2-9]{4}$/);
 const datosSala = await (
   await fetch(`${DOCS}/salas/${codigo}`, { headers: { authorization: `Bearer ${organizador}` } })
@@ -65,6 +66,36 @@ for (let i = 0; i < 20; i++) {
   assert.equal(r.fila, i + 1);
 }
 console.log("✔ 20 filas reservadas, una por jugador");
+
+// Contador de filas ocupadas y visibilidad en el documento de la sala.
+const doc = await (await fetch(`${DOCS}/salas/${codigo}`, { headers: { authorization: `Bearer ${jugadores[0]}` } })).json();
+assert.equal(Number(doc.fields.ocupadas.integerValue), 20);
+assert.equal(doc.fields.publica.booleanValue, true);
+
+// Listar: las públicas sí, las privadas no se pueden enumerar.
+const consultar = async (token, filtro) => {
+  const r = await fetch(`${DOCS}:runQuery`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify({ structuredQuery: { from: [{ collectionId: "salas" }], ...(filtro && { where: filtro }) } }),
+  });
+  return { http: r.status, filas: await r.json() };
+};
+const campo = (nombre, valor) => ({ fieldFilter: { field: { fieldPath: nombre }, op: "EQUAL", value: valor } });
+const publicas = await consultar(jugadores[0], campo("publica", { booleanValue: true }));
+assert.equal(publicas.http, 200);
+const codigos = publicas.filas.filter((f) => f.document).map((f) => f.document.name.split("/").pop());
+assert.ok(codigos.includes(codigo), "la sala pública debe aparecer en la lista");
+assert.ok(!codigos.includes(privada.codigo), "la sala privada no debe aparecer en la lista");
+assert.equal((await consultar(jugadores[0], null)).http, 403, "listar todas las salas debe estar prohibido");
+assert.equal((await consultar(jugadores[0], campo("publica", { booleanValue: false }))).http, 403, "listar las privadas debe estar prohibido");
+const propias = await consultar(organizador, campo("organizadorUid", { stringValue: JSON.parse(Buffer.from(organizador.split(".")[1], "base64url")).user_id }));
+assert.equal(propias.http, 200);
+assert.ok(propias.filas.some((f) => f.document?.name.endsWith(privada.codigo)), "quien organiza ve sus salas privadas");
+// Una sala privada sí se abre con su código.
+const abierta = await fetch(`${DOCS}/salas/${privada.codigo}`, { headers: { authorization: `Bearer ${jugadores[0]}` } });
+assert.equal(abierta.status, 200);
+console.log("✔ visibilidad: públicas listables, privadas solo con código, contador de filas");
 
 // Doble reserva: la fila ya tiene dueño y el jugador ya tiene fila.
 await rechazada("reservarFila", await registrar(), { codigo, fila: 1, nombre: "Intruso" }, "FAILED_PRECONDITION");
