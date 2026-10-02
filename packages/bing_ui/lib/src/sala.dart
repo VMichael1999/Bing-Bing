@@ -66,11 +66,15 @@ class BingCodigoSala extends StatelessWidget {
   const BingCodigoSala({
     super.key,
     required this.codigo,
+    this.datosQr,
     this.alCompartir,
     this.alCopiar,
   });
 
   final String codigo;
+
+  /// Lo que codifica el QR; por defecto, el código solo.
+  final String? datosQr;
   final VoidCallback? alCompartir;
   final VoidCallback? alCopiar;
 
@@ -126,7 +130,7 @@ class BingCodigoSala extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: QrImageView(
-                    data: codigo,
+                    data: datosQr ?? codigo,
                     padding: EdgeInsets.zero,
                     backgroundColor: const Color(0xFFFFFFFF),
                     eyeStyle: const QrEyeStyle(
