@@ -212,8 +212,8 @@ class _CirculoGrande extends StatelessWidget {
         boxShadow:
             marcada && reciente
                 ? [
-                  BoxShadow(color: paleta.suave, spreadRadius: 3),
                   BoxShadow(color: paleta.dauber, spreadRadius: 5),
+                  BoxShadow(color: paleta.suave, spreadRadius: 3),
                 ]
                 : null,
       ),

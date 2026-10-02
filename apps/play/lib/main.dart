@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 
 import 'src/paginas/codigo_page.dart';
 import 'src/paginas/elegir_fila_page.dart';
+import 'src/paginas/esperando_page.dart';
+import 'src/paginas/reservar_page.dart';
 
 void main() => runApp(const BingPlayApp());
 
@@ -32,9 +34,16 @@ class BingPlayApp extends StatelessWidget {
   }
 }
 
-/// Recorrido en modo demo con los datos del diseño.
+/// Recorrido en modo demo con los datos del diseño:
+/// código → elegir fila → reservar → esperando.
 class _FlujoDemo extends StatelessWidget {
   const _FlujoDemo();
+
+  void _ir(BuildContext context, WidgetBuilder pantalla) => Navigator.of(
+    context,
+  ).push(
+    PageRouteBuilder<void>(pageBuilder: (context, _, __) => pantalla(context)),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -44,15 +53,38 @@ class _FlujoDemo extends StatelessWidget {
       organizador: salaDemoOrganizador,
       filasLibres: 16,
       alVerFilas:
-          () => Navigator.of(context).push(
-            PageRouteBuilder<void>(
-              pageBuilder:
-                  (context, _, __) => ElegirFilaPage(
-                    salaNombre: salaDemoNombre,
-                    cartillas: cartillasDemo,
-                    duenos: filasDemoDuenos,
-                    seleccionInicial: 5,
-                    alVolver: () => Navigator.of(context).pop(),
+          () => _ir(
+            context,
+            (context) => ElegirFilaPage(
+              salaNombre: salaDemoNombre,
+              cartillas: cartillasDemo,
+              duenos: filasDemoDuenos,
+              seleccionInicial: 5,
+              alVolver: () => Navigator.of(context).pop(),
+              alSeguir:
+                  (fila) => _ir(
+                    context,
+                    (context) => ReservarPage(
+                      salaNombre: salaDemoNombre,
+                      organizador: salaDemoOrganizador,
+                      fila: fila,
+                      numeros: cartillasDemo[fila - 1],
+                      nombreInicial: 'Lucía',
+                      alVolver: () => Navigator.of(context).pop(),
+                      alReservar:
+                          (nombre) => _ir(
+                            context,
+                            (context) => EsperandoPage(
+                              nombre: nombre,
+                              salaNombre: salaDemoNombre,
+                              organizador: salaDemoOrganizador,
+                              fila: fila,
+                              numeros: cartillasDemo[fila - 1],
+                              ocupadas: 17,
+                              total: 20,
+                            ),
+                          ),
+                    ),
                   ),
             ),
           ),
