@@ -30,9 +30,8 @@ class SesionBing {
   /// Entra con Google (organizadores). `null` si la persona cancela.
   Future<User?> entrarConGoogle() async {
     final google = GoogleSignIn(
-      serverClientId: _config.clienteWebGoogle.isEmpty
-          ? null
-          : _config.clienteWebGoogle,
+      serverClientId:
+          _config.clienteWebGoogle.isEmpty ? null : _config.clienteWebGoogle,
     );
     final cuenta = await google.signIn();
     if (cuenta == null) return null;
