@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>pe.bingbing.play.sala</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>bingbing</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Usamos la cámara solo para leer el QR de la sala. No guardamos fotos ni video.</string>
 	<key>CFBundleDevelopmentRegion</key>

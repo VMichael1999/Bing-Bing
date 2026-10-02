@@ -90,7 +90,10 @@ void main() {
     leer('bingbing://sala/ZZZ2');
     await tester.pump();
     await tester.pump();
-    expect(find.text('No encontramos esa sala. Revisa el QR.'), findsOneWidget);
+    expect(
+      find.text('No encontramos esa sala. Revisa el código.'),
+      findsOneWidget,
+    );
     expect(find.text('Elige tu fila'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_links/app_links.dart';
 import 'package:bing_core/bing_core.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/services.dart';
@@ -43,12 +44,21 @@ enum _Busqueda { vacio, buscando, encontrada, noExiste, fallo }
 /// reserva la decide el servidor. Arranca en el código y el QR, con las salas
 /// públicas abiertas debajo.
 class FlujoReal extends StatefulWidget {
-  const FlujoReal({super.key, required this.repositorio, this.camaraEscaner});
+  const FlujoReal({
+    super.key,
+    required this.repositorio,
+    this.camaraEscaner,
+    this.enlaces,
+  });
 
   final RepositorioSala repositorio;
 
   /// Sustituye a la cámara del escáner (pruebas).
   final Widget Function(BuildContext, ValueChanged<String>)? camaraEscaner;
+
+  /// Enlaces que abren la app (el que la lanzó y los que lleguen después). Sin
+  /// ellos se usan los del sistema.
+  final Stream<Uri>? enlaces;
 
   @override
   State<FlujoReal> createState() => _FlujoRealState();
@@ -57,6 +67,7 @@ class FlujoReal extends StatefulWidget {
 class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   // Una sola suscripción: el diseño cambia con el teclado y no debe abrir otra.
   StreamSubscription<List<SalaEnVivo>>? _suscripcion;
+  StreamSubscription<Uri>? _enlaces;
   List<SalaEnVivo>? _salas;
   bool _errorSalas = false;
   bool _tecladoVisible = false;
@@ -73,6 +84,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
     super.initState();
     _texto.addListener(_alEscribir);
     WidgetsBinding.instance.addObserver(this);
+    _escucharEnlaces();
     _suscripcion = widget.repositorio.salasAbiertas().listen(
       (salas) => setState(() {
         _salas = salas;
@@ -86,6 +98,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _suscripcion?.cancel();
+    _enlaces?.cancel();
     _texto.dispose();
     _foco.dispose();
     super.dispose();
@@ -97,6 +110,40 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
     if (visible != _tecladoVisible) setState(() => _tecladoVisible = visible);
   }
 
+  void _escucharEnlaces() {
+    final propios = widget.enlaces;
+    if (propios != null) {
+      _enlaces = propios.listen(_alEnlace);
+      return;
+    }
+    final app = AppLinks();
+    // La app puede haberla lanzado un enlace; los siguientes llegan por el flujo.
+    unawaited(
+      app.getInitialLink().then((uri) {
+        if (uri != null) _alEnlace(uri);
+      }, onError: (_) {}),
+    );
+    _enlaces = app.uriLinkStream.listen(_alEnlace, onError: (_) {});
+  }
+
+  String? _ultimoEnlace;
+  DateTime _ultimoEnlaceHora = DateTime.fromMillisecondsSinceEpoch(0);
+
+  Future<void> _alEnlace(Uri uri) async {
+    final codigo = codigoDeEnlace(uri.toString());
+    if (codigo == null) return;
+    // El sistema puede entregar el mismo enlace dos veces seguidas.
+    final ahora = DateTime.now();
+    if (codigo == _ultimoEnlace &&
+        ahora.difference(_ultimoEnlaceHora) < const Duration(seconds: 2)) {
+      return;
+    }
+    _ultimoEnlace = codigo;
+    _ultimoEnlaceHora = ahora;
+    final motivo = await _entrarPorCodigo(context, codigo);
+    if (motivo != null && mounted) mostrarAvisoBing(context, motivo);
+  }
+
   /// Abre la sala con ese código (de un QR o de un enlace). Devuelve el motivo
   /// si no se puede entrar; si entra, cambia de pantalla y devuelve `null`.
   Future<String?> _entrarPorCodigo(
@@ -106,7 +153,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
   }) async {
     try {
       final sala = await widget.repositorio.buscar(codigo);
-      if (sala == null) return 'No encontramos esa sala. Revisa el QR.';
+      if (sala == null) return 'No encontramos esa sala. Revisa el código.';
       final llena =
           sala.estado == EstadoSala.llena ||
           (sala.estado == EstadoSala.abierta && sala.libres <= 0);

@@ -36,6 +36,7 @@ class BingPlayApp extends StatelessWidget {
     this.inicio,
     this.repositorio,
     this.camaraEscaner,
+    this.enlaces,
   });
 
   /// Pantalla con la que arranca; por defecto, la del código de sala.
@@ -46,6 +47,9 @@ class BingPlayApp extends StatelessWidget {
 
   /// Sustituye a la cámara del escáner (pruebas).
   final Widget Function(BuildContext, ValueChanged<String>)? camaraEscaner;
+
+  /// Enlaces que abren la app; sin ellos se usan los del sistema (pruebas).
+  final Stream<Uri>? enlaces;
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +73,7 @@ class BingPlayApp extends StatelessWidget {
                 : FlujoReal(
                   repositorio: repositorio!,
                   camaraEscaner: camaraEscaner,
+                  enlaces: enlaces,
                 )),
       ),
     );
