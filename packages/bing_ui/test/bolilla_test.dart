@@ -75,4 +75,14 @@ void main() {
       );
     }
   });
+
+  testWidgets('admite un diámetro propio', (tester) async {
+    await tester.pumpWidget(
+      _lienzo(const BingBolilla(columna: 1, numero: 23, diametro: 46)),
+    );
+    expect(
+      tester.getSize(find.byType(CustomPaint).last),
+      const Size.square(46),
+    );
+  });
 }
