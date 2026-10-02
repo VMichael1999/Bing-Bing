@@ -1,9 +1,16 @@
+import 'package:bing_core/bing_core.dart';
 import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
+import 'src/demo.dart';
 import 'src/paginas/entrar_page.dart';
 import 'src/paginas/mis_partidas_page.dart';
 import 'src/paginas/nueva_partida_page.dart';
+import 'src/paginas/sala_abierta_page.dart';
+
+/// Abre una pantalla del diseño directamente:
+/// `--dart-define=BING_PANTALLA=org-06-bolilla`.
+const _pantallaElegida = String.fromEnvironment('BING_PANTALLA');
 
 void main() => runApp(const BingHostApp());
 
@@ -26,32 +33,13 @@ class BingHostApp extends StatelessWidget {
               settings: settings,
               pageBuilder: (context, _, __) => builder(context),
             ),
-        home: inicio ?? const _FlujoDemo(),
+        home: inicio ?? pantallaDemo(_pantallaElegida) ?? const _FlujoDemo(),
       ),
     );
   }
 }
 
-/// Partidas guardadas del modo demo.
-const partidasDemo = <PartidaResumen>[
-  (
-    icono: 'cal',
-    titulo: 'Bingo de los sábados',
-    detalle: 'Hoy 21:00 · borrador · 0 jugadores',
-  ),
-  (
-    icono: 'trophy',
-    titulo: 'Bingo de los sábados',
-    detalle: '26 set · 20 jugadores · ganó Kiara',
-  ),
-  (
-    icono: 'trophy',
-    titulo: 'Cumpleaños de Pilar',
-    detalle: '19 set · 14 jugadores · ganó Renzo',
-  ),
-];
-
-/// Recorrido demo: entrar → mis partidas → nueva partida.
+/// Recorrido demo: entrar → mis partidas → nueva partida → sala abierta.
 class _FlujoDemo extends StatelessWidget {
   const _FlujoDemo();
 
@@ -72,8 +60,21 @@ class _FlujoDemo extends StatelessWidget {
                   () => _ir(
                     context,
                     (context) => NuevaPartidaPage(
-                      nombreInicial: 'Bingo de los sábados',
+                      nombreInicial: salaDemoNombre,
                       alVolver: () => Navigator.of(context).pop(),
+                      alAbrirSala:
+                          (nombre, columnas) => _ir(
+                            context,
+                            (context) => SalaAbiertaPage(
+                              salaNombre:
+                                  nombre.isEmpty ? salaDemoNombre : nombre,
+                              codigo: salaDemoCodigo,
+                              ocupadas: 17,
+                              total: 20,
+                              jugadores: jugadoresSalaAbiertaDemo(),
+                              alVolver: () => Navigator.of(context).pop(),
+                            ),
+                          ),
                     ),
                   ),
             ),
