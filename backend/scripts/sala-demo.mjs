@@ -6,6 +6,7 @@
 //   node backend/scripts/sala-demo.mjs empezar CODIGO   cierra la sala y empieza la partida
 //   node backend/scripts/sala-demo.mjs sacar CODIGO [n] saca n bolillas (por defecto 1)
 //   node backend/scripts/sala-demo.mjs ganar CODIGO FILA saca bolillas hasta que gane esa fila
+//   node backend/scripts/sala-demo.mjs cerrar CODIGO [motivo]  cierra la sala que no se jugó (con motivo opcional)
 //
 // La cuenta de la organizadora se guarda en un archivo temporal para repetir.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -111,6 +112,10 @@ switch (orden) {
   case "ganar":
     console.log(`Gana la fila ${cuantas} con ${await ganar(codigo, Number(cuantas), token)} bolillas`);
     break;
+  case "cerrar":
+    await llamar("cancelarSala", token, { codigo, ...(cuantas ? { motivo: cuantas } : {}) });
+    console.log(`Sala ${codigo} cerrada${cuantas ? ` · motivo: ${cuantas}` : " sin motivo"}`);
+    break;
   default:
-    console.log("Uso: crear | llenar CODIGO [n] | empezar CODIGO | sacar CODIGO [n] | ganar CODIGO FILA");
+    console.log("Uso: crear | llenar CODIGO [n] | empezar CODIGO | sacar CODIGO [n] | ganar CODIGO FILA | cerrar CODIGO [motivo]");
 }

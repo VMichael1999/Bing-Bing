@@ -48,7 +48,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('La sala se cerró'), findsOneWidget);
     expect(find.textContaining('Motivo: No se llenó.'), findsOneWidget);
-    expect(find.textContaining('la partida no se juega'), findsOneWidget);
+    expect(find.textContaining('La partida no se juega'), findsOneWidget);
 
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
@@ -65,6 +65,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('La sala se cerró'), findsOneWidget);
     expect(find.textContaining('Motivo:'), findsNothing);
+    expect(
+      find.textContaining(
+        'porque no se llegó al número de jugadores necesario',
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('quien ya reservó y espera también lo ve, una sola vez', (
@@ -101,5 +107,87 @@ void main() {
     expect(find.text('Esa sala se cerró.'), findsOneWidget);
     expect(find.text('Elige tus filas'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
+  });
+
+  group('con billetera', () {
+    const lucia = UsuarioBing(uid: 'g1', nombre: 'Lucía', correo: 'l@c.com');
+
+    Future<({RepositorioMemoria repo, BilleteraMemoria cartera})> abrirPago(
+      WidgetTester tester, {
+      int saldo = 25,
+    }) async {
+      tester.view
+        ..devicePixelRatio = 2
+        ..physicalSize = const Size(360 * 2, 800 * 2);
+      addTearDown(tester.view.reset);
+      final cartera = BilleteraMemoria(saldo: saldo);
+      final repo = RepositorioMemoria(
+        cartillas: cartillasDemo,
+        precioFila: 5,
+        premio: 80,
+        billetera: cartera,
+      );
+      await tester.pumpWidget(
+        BingPlayApp(
+          repositorio: repo,
+          sesion: SesionMemoria(inicial: lucia),
+          billetera: cartera,
+        ),
+      );
+      await tester.pumpAndSettle();
+      return (repo: repo, cartera: cartera);
+    }
+
+    testWidgets('si había pagado filas, el aviso dice cuánto se le devolvió', (
+      tester,
+    ) async {
+      final r = await abrirPago(tester);
+      await tester.tap(find.text('Bingo de los sábados'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Fila 6, libre'));
+      await tester.pump();
+      await tester.tap(find.text('Seguir con 2 filas'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Reservar 2 filas'));
+      await tester.pumpAndSettle();
+      expect(r.cartera.saldoActual, 15);
+      await r.repo.cancelarSala('K7Q4');
+      await tester.pumpAndSettle();
+      expect(find.text('La sala se cerró'), findsOneWidget);
+      expect(find.textContaining('Te devolvimos 10 créditos.'), findsOneWidget);
+      expect(r.cartera.saldoActual, 25);
+    });
+
+    testWidgets('si solo estaba mirando, no habla de devoluciones', (
+      tester,
+    ) async {
+      final r = await abrirPago(tester);
+      await tester.tap(find.text('Bingo de los sábados'));
+      await tester.pumpAndSettle();
+      await r.repo.cancelarSala('K7Q4');
+      await tester.pumpAndSettle();
+      expect(find.text('La sala se cerró'), findsOneWidget);
+      expect(find.textContaining('Te devolvimos'), findsNothing);
+    });
+
+    testWidgets('el aviso sube aunque haya otra pantalla encima', (
+      tester,
+    ) async {
+      final r = await abrirPago(tester, saldo: 2);
+      await tester.tap(find.text('Bingo de los sábados'));
+      await tester.pumpAndSettle();
+      // Sin saldo: "Recargar créditos" abre Mi billetera encima de la sala.
+      await tester.tap(find.text('Recargar créditos'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mi billetera'), findsOneWidget);
+
+      await r.repo.cancelarSala('K7Q4', motivo: 'No se llenó');
+      await tester.pumpAndSettle();
+      expect(find.text('La sala se cerró'), findsOneWidget);
+      await tester.tap(find.text('Entendido'));
+      await tester.pumpAndSettle();
+      expect(find.text('Mi billetera'), findsNothing);
+      expect(find.text('Escanear el QR'), findsOneWidget);
+    });
   });
 }
