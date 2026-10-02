@@ -106,15 +106,20 @@ class SalaCerradaHoja extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final motivo = sala.motivoCierre;
+    // Sin nombre, quien organiza es "quien organiza": la frase empieza en mayúscula.
+    final quien =
+        sala.organizador.isEmpty
+            ? sala.organizador
+            : sala.organizador[0].toUpperCase() + sala.organizador.substring(1);
     return BingHoja(
       fondo: fondo,
       alIzquierda: true,
       titulo: 'La sala se cerró',
       texto:
           motivo == null
-              ? '${sala.organizador} cerró «${sala.nombre}» porque no se llegó '
+              ? '$quien cerró «${sala.nombre}» porque no se llegó '
                   'al número de jugadores necesario. La partida no se juega.'
-              : '${sala.organizador} cerró «${sala.nombre}» antes de empezar. '
+              : '$quien cerró «${sala.nombre}» antes de empezar. '
                   'Motivo: $motivo. La partida no se juega.',
       children: [
         if (devueltos > 0)

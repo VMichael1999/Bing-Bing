@@ -57,6 +57,26 @@ void main() {
     expect(find.text('Escanear el QR'), findsOneWidget);
   });
 
+  testWidgets('la frase empieza en mayúscula aunque falte el nombre', (
+    tester,
+  ) async {
+    tester.view
+      ..devicePixelRatio = 2
+      ..physicalSize = const Size(360 * 2, 800 * 2);
+    addTearDown(tester.view.reset);
+    final repo = RepositorioMemoria(
+      cartillas: cartillasDemo,
+      organizador: 'quien organiza',
+    );
+    await tester.pumpWidget(BingPlayApp(repositorio: repo));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bingo de los sábados'));
+    await tester.pumpAndSettle();
+    await repo.cancelarSala('K7Q4');
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Quien organiza cerró «Bingo'), findsOneWidget);
+  });
+
   testWidgets('sin motivo el aviso no inventa uno', (tester) async {
     final repo = await abrir(tester);
     await tester.tap(find.text('Bingo de los sábados'));

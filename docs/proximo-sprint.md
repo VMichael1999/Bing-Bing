@@ -127,6 +127,12 @@ Decidido:
 - **Devolución completa.** Ni quien organiza ni la plataforma se quedan con nada, porque
   la partida no se jugó.
 
+Aviso al jugador (hecho): si quien organiza cierra la sala, en Play sube un diálogo "La
+sala se cerró" **esté la persona donde esté dentro de la sala** (aunque tenga Mi billetera u
+otra pantalla encima). Con motivo: "Carmen cerró «X» antes de empezar. Motivo: …". **Sin
+motivo**: "… porque no se llegó al número de jugadores necesario". Si había pagado filas,
+dice cuántos créditos se le devolvieron.
+
 Por decidir:
 
 - Si pasa el plazo y hay jugadores, ¿qué opciones se le ofrecen a quien organiza?
