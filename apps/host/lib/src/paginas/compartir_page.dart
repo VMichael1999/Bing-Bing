@@ -13,6 +13,7 @@ class CompartirPage extends StatelessWidget {
     this.alCopiarEnlace,
     this.alCompartir,
     this.alPantallaCompleta,
+    this.publica,
   });
 
   final String salaNombre;
@@ -21,6 +22,9 @@ class CompartirPage extends StatelessWidget {
   final VoidCallback? alCopiarEnlace;
   final VoidCallback? alCompartir;
   final VoidCallback? alPantallaCompleta;
+
+  /// Si se conoce, un chip indica si la sala es pública o privada.
+  final bool? publica;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +44,13 @@ class CompartirPage extends StatelessWidget {
                       titulo: 'Comparte tu sala',
                       subtitulo: salaNombre,
                       alVolver: alVolver,
+                      accion:
+                          publica == null
+                              ? null
+                              : BingChip(
+                                publica! ? 'Pública' : 'Privada',
+                                icono: publica! ? 'globe' : 'lock',
+                              ),
                     ),
                     const SizedBox(height: 12),
                     BingTarjetaQr(

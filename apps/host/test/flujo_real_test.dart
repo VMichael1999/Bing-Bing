@@ -93,6 +93,42 @@ void main() {
     expect(find.textContaining('32'), findsWidgets);
   });
 
+  testWidgets('la sala se crea pública por defecto y privada si se elige', (
+    tester,
+  ) async {
+    final repo = _repo();
+    await tester.pumpWidget(_app(repo));
+    await tester.tap(find.text('Continuar con Google'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nueva partida'));
+    await tester.pumpAndSettle();
+    expect(find.text('VISIBILIDAD'), findsOneWidget);
+    await tester.enterText(find.byType(EditableText).first, 'Solo familia');
+    await tester.tap(find.text('Abrir sala'));
+    await tester.pumpAndSettle();
+    expect(repo.publica, isTrue);
+    // Sala abierta → Compartir muestra el chip de visibilidad.
+    await tester.tap(find.text('Compartir'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pública'), findsOneWidget);
+  });
+
+  testWidgets('elegir Privada crea una sala que no se lista', (tester) async {
+    final repo = _repo();
+    await tester.pumpWidget(_app(repo));
+    await tester.tap(find.text('Continuar con Google'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Nueva partida'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(EditableText).first, 'Solo familia');
+    await tester.tap(find.text('Privada'));
+    await tester.pump();
+    await tester.tap(find.text('Abrir sala'));
+    await tester.pumpAndSettle();
+    expect(repo.publica, isFalse);
+    expect(await repo.salasAbiertas().first, isEmpty);
+  });
+
   testWidgets('si no se puede entrar se explica y no se avanza', (
     tester,
   ) async {

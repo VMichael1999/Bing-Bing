@@ -275,7 +275,7 @@ class _NuevaPartidaRealState extends State<_NuevaPartidaReal> {
   String? _error;
   bool _creando = false;
 
-  Future<void> _abrir(String nombre, int columnas) async {
+  Future<void> _abrir(String nombre, int columnas, bool publica) async {
     if (columnas == 6) {
       // La pantalla de partida aún dibuja solo las 75 bolillas de 5 columnas.
       setState(() => _error = 'Las 6 columnas llegan pronto.');
@@ -289,6 +289,7 @@ class _NuevaPartidaRealState extends State<_NuevaPartidaReal> {
       final codigo = await widget.repositorio.crearSala(
         nombre: nombre,
         columnas: columnas,
+        publica: publica,
       );
       if (!mounted) return;
       _ir(
@@ -419,6 +420,7 @@ class _SalaAbiertaRealState extends State<_SalaAbiertaReal> {
                 context,
                 nombre: sala.nombre,
                 codigo: widget.codigo,
+                publica: sala.publica,
               ),
           alCopiar: () {
             Clipboard.setData(ClipboardData(text: widget.codigo));

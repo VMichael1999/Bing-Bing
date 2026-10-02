@@ -36,6 +36,28 @@ void main() {
       expect(find.text('Mostrar QR a pantalla completa'), findsOneWidget);
     });
 
+    testWidgets('un chip indica si la sala es pública o privada', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const BingHostApp(
+          inicio: CompartirPage(salaNombre: 'X', codigo: 'K7Q4', publica: true),
+        ),
+      );
+      expect(find.text('Pública'), findsOneWidget);
+      await tester.pumpWidget(
+        const BingHostApp(
+          inicio: CompartirPage(
+            salaNombre: 'X',
+            codigo: 'K7Q4',
+            publica: false,
+          ),
+        ),
+      );
+      expect(find.text('Privada'), findsOneWidget);
+      expect(find.text('Pública'), findsNothing);
+    });
+
     testWidgets('cada botón y el enlace avisan al tocarlos', (tester) async {
       final tocados = <String>[];
       await tester.pumpWidget(
