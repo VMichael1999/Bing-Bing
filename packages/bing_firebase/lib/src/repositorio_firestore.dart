@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'configuracion.dart';
 import 'iniciar.dart';
 
+/// Llama a una Function del servidor por su nombre. Las pruebas la reemplazan.
+typedef LlamadaFuncion =
+    Future<Object?> Function(String funcion, Map<String, Object?> datos);
+
 /// Lee la sala de Firestore (solo lectura) y reserva filas con la Function
 /// `reservarFila`: el servidor es quien decide quién se queda con cada fila.
 class RepositorioFirestore implements RepositorioOrganizador {
@@ -14,13 +18,22 @@ class RepositorioFirestore implements RepositorioOrganizador {
     FirebaseFunctions? funciones,
     FirebaseAuth? auth,
     ConfigFirebase config = ConfigFirebase.entorno,
+    LlamadaFuncion? llamador,
   }) : _db = db ?? FirebaseFirestore.instance,
-       _funciones = funciones ?? funcionesBing(config),
+       _config = config,
+       _funcionesDadas = funciones,
+       _llamador = llamador,
        _auth = auth ?? FirebaseAuth.instance;
 
   final FirebaseFirestore _db;
-  final FirebaseFunctions _funciones;
+  final ConfigFirebase _config;
+  final FirebaseFunctions? _funcionesDadas;
+  final LlamadaFuncion? _llamador;
   final FirebaseAuth _auth;
+
+  /// Las Functions de la región del proyecto, solo si hace falta llamarlas.
+  late final FirebaseFunctions _funciones =
+      _funcionesDadas ?? funcionesBing(_config);
 
   DocumentReference<Map<String, dynamic>> _sala(String codigo) =>
       _db.collection('salas').doc(codigo);
@@ -54,8 +67,12 @@ class RepositorioFirestore implements RepositorioOrganizador {
     Map<String, Object?> datos,
   ) async {
     try {
-      final r = await _funciones.httpsCallable(funcion).call<Object?>(datos);
-      final resultado = r.data;
+      final resultado =
+          _llamador != null
+              ? await _llamador(funcion, datos)
+              : (await _funciones
+                  .httpsCallable(funcion)
+                  .call<Object?>(datos)).data;
       return resultado is Map ? Map<String, dynamic>.from(resultado) : {};
     } on FirebaseFunctionsException catch (e) {
       throw errorDeFunciones(e.code, e.message, e.details);
