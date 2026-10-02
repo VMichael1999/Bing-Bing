@@ -16,12 +16,20 @@ import {
   siguienteBolilla,
   sinUltima,
   validarNombreSala,
+  validarPrecioPremio,
+  COMISION_PORCENTAJE_POR_DEFECTO,
 } from "./logica";
 
 initializeApp();
 const db: Firestore = getFirestore();
 
 const FILAS_TOTAL = 20;
+
+/** Comisión de Bing Bing en %: configurable sin tocar el código (por definir). */
+const COMISION_PORCENTAJE = (() => {
+  const valor = Number(process.env.COMISION_PORCENTAJE);
+  return Number.isFinite(valor) && valor >= 0 && valor < 100 ? valor : COMISION_PORCENTAJE_POR_DEFECTO;
+})();
 
 // El sorteo y las reservas se resuelven aquí: los clientes solo leen. Las reglas
 // de Firestore (`firestore.rules`) prohíben cualquier escritura directa.
@@ -94,6 +102,14 @@ export const crearSala = onCall(async (request) => {
   const columnas = (request.data as { columnas?: unknown }).columnas === 6 ? 6 : 5;
   // Pública por defecto, como en "Nueva partida".
   const publica = (request.data as { publica?: unknown }).publica !== false;
+  const { precioFila, premio } = (() => {
+    try {
+      const d = request.data as { precioFila?: unknown; premio?: unknown };
+      return validarPrecioPremio(d.precioFila, d.premio, FILAS_TOTAL, COMISION_PORCENTAJE);
+    } catch (e) {
+      return aHttps(e);
+    }
+  })();
 
   for (let intento = 0; intento < 10; intento++) {
     const codigo = generarCodigo();
@@ -106,6 +122,9 @@ export const crearSala = onCall(async (request) => {
         organizadorNombre: organizadorNombre(request),
         publica,
         ocupadas: 0,
+        precioFila,
+        premio,
+        comisionPorcentaje: COMISION_PORCENTAJE,
         columnas,
         filasTotal: FILAS_TOTAL,
         filasPorJugador: 1,

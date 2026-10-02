@@ -5,6 +5,11 @@ const ALFABETO_CODIGO = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin 0/O ni 1/I
 
 export type EstadoSala = "abierta" | "llena" | "en_juego" | "terminada" | "cancelada";
 
+/** Lo que retiene Bing Bing de lo recaudado, en %. Por definir con el negocio. */
+export const COMISION_PORCENTAJE_POR_DEFECTO = 10;
+/** Tope del precio por fila, en créditos. */
+export const PRECIO_MAXIMO = 1000;
+
 export interface Sala {
   nombre: string;
   organizadorUid: string;
@@ -13,6 +18,12 @@ export interface Sala {
   publica: boolean;
   /** Filas con jugador. Se mantiene al reservar para listar sin leer las 20 filas. */
   ocupadas: number;
+  /** Créditos que cuesta cada fila; 0 es una partida sin premio. */
+  precioFila: number;
+  /** Créditos que gana la fila ganadora; nunca más de lo que queda tras la comisión. */
+  premio: number;
+  /** Comisión vigente al crear la sala (se guarda para que no cambie después). */
+  comisionPorcentaje: number;
   columnas: 5 | 6;
   filasTotal: number;
   filasPorJugador: number;
@@ -40,6 +51,8 @@ export class ErrorSala extends Error {
       | "sala_no_en_juego"
       | "sala_ya_empezada"
       | "motivo_invalido"
+      | "precio_invalido"
+      | "premio_invalido"
       | "tombola_vacia"
       | "sala_no_llena",
     mensaje: string,
@@ -145,6 +158,53 @@ export function empezar(sala: Sala, uid: string): EstadoSala {
     throw new ErrorSala("sala_no_llena", "Faltan jugadores para empezar");
   }
   return "en_juego";
+}
+
+/** Lo que se recauda si se llenan todas las filas. */
+export function recaudado(precioFila: number, filas: number): number {
+  return precioFila * filas;
+}
+
+/** La parte de Bing Bing, redondeada hacia arriba para no regalar centavos. */
+export function comision(total: number, porcentaje: number): number {
+  return Math.ceil((total * porcentaje) / 100);
+}
+
+/** Lo que queda para premio y para quien organiza. */
+export function disponibleParaPremio(precioFila: number, filas: number, porcentaje: number): number {
+  const total = recaudado(precioFila, filas);
+  return total - comision(total, porcentaje);
+}
+
+/**
+ * Valida el precio y el premio de una sala nueva. Sin precio no hay premio. El
+ * premio no puede pasar de lo disponible con las filas llenas. Devuelve los
+ * valores limpios; por defecto, una partida sin premio.
+ */
+export function validarPrecioPremio(
+  precio: unknown,
+  premio: unknown,
+  filas: number,
+  porcentaje: number = COMISION_PORCENTAJE_POR_DEFECTO,
+): { precioFila: number; premio: number } {
+  const precioFila = precio === undefined || precio === null ? 0 : precio;
+  if (!Number.isInteger(precioFila) || (precioFila as number) < 0 || (precioFila as number) > PRECIO_MAXIMO) {
+    throw new ErrorSala("precio_invalido", `El precio debe ser un entero de 0 a ${PRECIO_MAXIMO}`);
+  }
+  const p = precioFila as number;
+  const premioFinal = premio === undefined || premio === null ? 0 : premio;
+  if (!Number.isInteger(premioFinal) || (premioFinal as number) < 0) {
+    throw new ErrorSala("premio_invalido", "El premio debe ser un entero de 0 en adelante");
+  }
+  const g = premioFinal as number;
+  if (p === 0 && g > 0) {
+    throw new ErrorSala("premio_invalido", "Sin precio por fila no hay premio");
+  }
+  const tope = disponibleParaPremio(p, filas, porcentaje);
+  if (g > tope) {
+    throw new ErrorSala("premio_invalido", `El premio no puede pasar de ${tope}`);
+  }
+  return { precioFila: p, premio: g };
 }
 
 /** Largo máximo del motivo con el que se cierra una sala. */

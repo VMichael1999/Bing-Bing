@@ -87,7 +87,7 @@ const [orden, codigo, cuantas] = process.argv.slice(2);
 const token = await organizador();
 switch (orden) {
   case "crear": {
-    const r = await llamar("crearSala", token, { nombre: "Bingo de los sábados", columnas: 5 });
+    const r = await llamar("crearSala", token, { nombre: "Bingo de los sábados", columnas: 5, publica: true, precioFila: 5, premio: 80 });
     await tomar(r.codigo, 4);
     console.log(`Sala ${r.codigo} creada con 4 filas tomadas`);
     break;

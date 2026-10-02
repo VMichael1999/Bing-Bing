@@ -7,6 +7,9 @@ import {
   Sala,
   aplicarReserva,
   cancelar,
+  comision,
+  disponibleParaPremio,
+  validarPrecioPremio,
   empezar,
   generarCartillas,
   generarCodigo,
@@ -39,6 +42,9 @@ const sala = (extra: Partial<Sala> = {}): Sala => ({
   organizadorNombre: "Carmen",
   publica: true,
   ocupadas: 0,
+  precioFila: 5,
+  premio: 80,
+  comisionPorcentaje: 10,
   columnas: 5,
   filasTotal: 20,
   filasPorJugador: 1,
@@ -219,5 +225,50 @@ describe("cancelar", () => {
   it("rechaza un motivo que no es texto o es muy largo", () => {
     assert.equal(codigoDe(() => cancelar(sala(), "carmen", 5)), "motivo_invalido");
     assert.equal(codigoDe(() => cancelar(sala(), "carmen", "x".repeat(121))), "motivo_invalido");
+  });
+});
+
+describe("precio y premio", () => {
+  it("con 5 créditos por fila y 10 % quedan 90 para premio (como en el prototipo)", () => {
+    assert.equal(comision(100, 10), 10);
+    assert.equal(disponibleParaPremio(5, 20, 10), 90);
+  });
+
+  it("la comisión se redondea hacia arriba", () => {
+    assert.equal(comision(35, 10), 4);
+    assert.equal(disponibleParaPremio(1, 20, 10), 18);
+  });
+
+  it("acepta el premio del prototipo y el tope exacto", () => {
+    assert.deepEqual(validarPrecioPremio(5, 80, 20), { precioFila: 5, premio: 80 });
+    assert.deepEqual(validarPrecioPremio(5, 90, 20), { precioFila: 5, premio: 90 });
+  });
+
+  it("sin datos es una partida sin premio", () => {
+    assert.deepEqual(validarPrecioPremio(undefined, undefined, 20), { precioFila: 0, premio: 0 });
+    assert.deepEqual(validarPrecioPremio(null, null, 20), { precioFila: 0, premio: 0 });
+  });
+
+  it("el premio no puede pasar de lo disponible", () => {
+    assert.equal(codigoDe(() => validarPrecioPremio(5, 91, 20)), "premio_invalido");
+  });
+
+  it("sin precio no hay premio", () => {
+    assert.equal(codigoDe(() => validarPrecioPremio(0, 10, 20)), "premio_invalido");
+    assert.deepEqual(validarPrecioPremio(0, 0, 20), { precioFila: 0, premio: 0 });
+  });
+
+  it("rechaza precios y premios que no son enteros válidos", () => {
+    assert.equal(codigoDe(() => validarPrecioPremio(-1, 0, 20)), "precio_invalido");
+    assert.equal(codigoDe(() => validarPrecioPremio(2.5, 0, 20)), "precio_invalido");
+    assert.equal(codigoDe(() => validarPrecioPremio("5", 0, 20)), "precio_invalido");
+    assert.equal(codigoDe(() => validarPrecioPremio(1001, 0, 20)), "precio_invalido");
+    assert.equal(codigoDe(() => validarPrecioPremio(5, -1, 20)), "premio_invalido");
+    assert.equal(codigoDe(() => validarPrecioPremio(5, 1.5, 20)), "premio_invalido");
+  });
+
+  it("usa la comisión que se le pase", () => {
+    assert.equal(disponibleParaPremio(5, 20, 20), 80);
+    assert.equal(codigoDe(() => validarPrecioPremio(5, 81, 20, 20)), "premio_invalido");
   });
 });
