@@ -51,9 +51,10 @@ class FlujoReal extends StatefulWidget {
 }
 
 class _FlujoRealState extends State<FlujoReal> {
-  // Se crea una sola vez: cada reconstrucción no debe abrir otra suscripción.
-  late final Stream<List<SalaEnVivo>> _salas =
-      widget.repositorio.salasAbiertas();
+  // Una sola suscripción: el diseño cambia con el teclado y no debe abrir otra.
+  StreamSubscription<List<SalaEnVivo>>? _suscripcion;
+  List<SalaEnVivo>? _salas;
+  bool _errorSalas = false;
 
   final _texto = TextEditingController();
   final _foco = FocusNode();
@@ -65,10 +66,19 @@ class _FlujoRealState extends State<FlujoReal> {
   void initState() {
     super.initState();
     _texto.addListener(_alEscribir);
+    _foco.addListener(() => setState(() {}));
+    _suscripcion = widget.repositorio.salasAbiertas().listen(
+      (salas) => setState(() {
+        _salas = salas;
+        _errorSalas = false;
+      }),
+      onError: (_) => setState(() => _errorSalas = true),
+    );
   }
 
   @override
   void dispose() {
+    _suscripcion?.cancel();
     _texto.dispose();
     _foco.dispose();
     super.dispose();
@@ -153,23 +163,25 @@ class _FlujoRealState extends State<FlujoReal> {
       organizador: sala?.organizador ?? '',
       filasLibres: _libres,
       verFilasHabilitado: puede,
-      bajoElQr: StreamBuilder<List<SalaEnVivo>>(
-        stream: _salas,
-        builder:
-            (context, foto) => SalasAbiertas(
-              salas: foto.data == null ? null : salasConSitio(foto.data!),
-              error: foto.hasError,
-              atenuada: _texto.text.isNotEmpty,
-              alElegirSala:
-                  (sala) => _ir(
-                    context,
-                    _ElegirFilaReal(
-                      repositorio: widget.repositorio,
-                      sala: sala,
-                    ),
+      // Quien escribe un código no necesita ver las salas.
+      bajoElQr:
+          (desplazable) =>
+              _foco.hasFocus
+                  ? const SizedBox.shrink()
+                  : SalasAbiertas(
+                    salas: _salas == null ? null : salasConSitio(_salas!),
+                    error: _errorSalas,
+                    atenuada: _texto.text.isNotEmpty,
+                    desplazable: desplazable,
+                    alElegirSala:
+                        (sala) => _ir(
+                          context,
+                          _ElegirFilaReal(
+                            repositorio: widget.repositorio,
+                            sala: sala,
+                          ),
+                        ),
                   ),
-            ),
-      ),
       casillas: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _foco.requestFocus,

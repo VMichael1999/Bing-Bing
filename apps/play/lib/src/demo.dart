@@ -36,6 +36,9 @@ List<SalaEnVivo> salasDemo() {
   ];
 }
 
+Widget _sinSalas(bool desplazable) =>
+    SalasAbiertas(salas: const [], desplazable: desplazable);
+
 /// Pantalla del diseño por su identificador (`jug-01-codigo`, …), con los datos
 /// del modo demo. Sirve para revisar una pantalla sin recorrer el flujo.
 Widget? pantallaDemo(String id) => switch (id) {
@@ -46,7 +49,11 @@ Widget? pantallaDemo(String id) => switch (id) {
     filasLibres: 0,
     resultado: const SizedBox(height: 40),
     alEscanear: () {},
-    bajoElQr: SalasAbiertas(salas: salasConSitio(salasDemo())),
+    bajoElQr:
+        (desplazable) => SalasAbiertas(
+          salas: salasConSitio(salasDemo()),
+          desplazable: desplazable,
+        ),
   ),
   'jug-07b-inicio-sin-salas' => const CodigoPage(
     codigo: '',
@@ -54,7 +61,7 @@ Widget? pantallaDemo(String id) => switch (id) {
     organizador: '',
     filasLibres: 0,
     resultado: SizedBox(height: 40),
-    bajoElQr: SalasAbiertas(salas: []),
+    bajoElQr: _sinSalas,
   ),
   'jug-01-codigo' => const CodigoPage(
     codigo: salaDemoCodigo,

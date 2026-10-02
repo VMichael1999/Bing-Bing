@@ -10,6 +10,7 @@ class SalasAbiertas extends StatelessWidget {
     required this.salas,
     this.error = false,
     this.atenuada = false,
+    this.desplazable = false,
     this.alElegirSala,
   });
 
@@ -21,6 +22,9 @@ class SalasAbiertas extends StatelessWidget {
 
   /// Hay un código escrito: la lista pasa a segundo plano.
   final bool atenuada;
+
+  /// Ocupa el alto que le den y solo las tarjetas se mueven; si no, se ajusta.
+  final bool desplazable;
   final ValueChanged<SalaEnVivo>? alElegirSala;
 
   @override
@@ -28,47 +32,97 @@ class SalasAbiertas extends StatelessWidget {
     final paleta = BingTema.of(context);
     final lista = salas;
     final estilo = BingTexto.figtree(13, 600).copyWith(color: paleta.apagado);
+    final titulo = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Text(
+        'SALAS ABIERTAS AHORA',
+        style: BingTexto.cabeceraSeccion.copyWith(color: paleta.apagado),
+      ),
+    );
+    final Widget contenido;
+    if (error) {
+      contenido = const BingAviso(
+        icono: 'bell',
+        texto: 'No pudimos cargar las salas. Escribe el código o escanea.',
+      );
+    } else if (lista == null) {
+      contenido = const Column(
+        children: [_TarjetaFantasma(), SizedBox(height: 8), _TarjetaFantasma()],
+      );
+    } else if (lista.isEmpty) {
+      contenido = Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        child: Text(
+          'Ahora no hay salas abiertas. Escribe un código o escanea un QR.',
+          style: estilo,
+        ),
+      );
+    } else {
+      contenido = Column(
+        children: [
+          for (var i = 0; i < lista.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            _TarjetaSala(
+              sala: lista[i],
+              alPresionar: () => alElegirSala?.call(lista[i]),
+            ),
+          ],
+        ],
+      );
+    }
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 150),
       opacity: atenuada ? 0.45 : 1,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Text(
-              'SALAS ABIERTAS AHORA',
-              style: BingTexto.cabeceraSeccion.copyWith(color: paleta.apagado),
-            ),
-          ),
-          const SizedBox(height: 10),
-          if (error)
-            const BingAviso(
-              icono: 'bell',
-              texto:
-                  'No pudimos cargar las salas. Escribe el código o escanea.',
-            )
-          else if (lista == null) ...[
-            const _TarjetaFantasma(),
-            const SizedBox(height: 8),
-            const _TarjetaFantasma(),
-          ] else if (lista.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-              child: Text(
-                'Ahora no hay salas abiertas. Escribe un código o escanea un QR.',
-                style: estilo,
+      child:
+          desplazable
+              ? LayoutBuilder(
+                builder: (context, caja) {
+                  // Si casi no queda sitio, mejor no mostrar una franja cortada.
+                  if (caja.maxHeight < _altoMinimoLista) {
+                    return const SizedBox.shrink();
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titulo,
+                      const SizedBox(height: 10),
+                      Expanded(child: _ConDesvanecido(hijo: contenido)),
+                    ],
+                  );
+                },
+              )
+              : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [titulo, const SizedBox(height: 10), contenido],
               ),
-            )
-          else
-            for (var i = 0; i < lista.length; i++) ...[
-              if (i > 0) const SizedBox(height: 8),
-              _TarjetaSala(
-                sala: lista[i],
-                alPresionar: () => alElegirSala?.call(lista[i]),
-              ),
-            ],
-        ],
+    );
+  }
+}
+
+/// Alto mínimo de la zona de salas para mostrarla.
+const _altoMinimoLista = 100.0;
+
+/// Zona con scroll que se desvanece en el borde de abajo: así se nota que hay
+/// más tarjetas.
+class _ConDesvanecido extends StatelessWidget {
+  const _ConDesvanecido({required this.hijo});
+
+  final Widget hijo;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback:
+          (rect) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFFFFFF), Color(0xFFFFFFFF), Color(0x00FFFFFF)],
+            stops: [0, 0.88, 1],
+          ).createShader(rect),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: hijo,
       ),
     );
   }

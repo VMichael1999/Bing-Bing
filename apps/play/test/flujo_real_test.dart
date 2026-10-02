@@ -1,5 +1,6 @@
 import 'package:bing_core/bing_core.dart';
 import 'package:bing_play/main.dart';
+import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -16,6 +17,15 @@ void main() {
     return repo;
   }
 
+  /// Abre la app en un teléfono alto, donde las salas quedan a la vista.
+  Future<void> abrir(WidgetTester tester, RepositorioMemoria repo) async {
+    tester.view
+      ..devicePixelRatio = 2
+      ..physicalSize = const Size(360 * 2, 800 * 2);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(BingPlayApp(repositorio: repo));
+  }
+
   Future<void> escribirCodigo(WidgetTester tester, String codigo) async {
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(EditableText).first, codigo);
@@ -26,7 +36,7 @@ void main() {
     testWidgets('el inicio lista las públicas con sus filas libres', (
       tester,
     ) async {
-      await tester.pumpWidget(BingPlayApp(repositorio: sala()));
+      await abrir(tester, sala());
       await tester.pumpAndSettle();
       expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
       expect(find.text('Bingo de los sábados'), findsOneWidget);
@@ -37,7 +47,7 @@ void main() {
     testWidgets('tocar una sala lleva directo a elegir fila, sin código', (
       tester,
     ) async {
-      await tester.pumpWidget(BingPlayApp(repositorio: sala()));
+      await abrir(tester, sala());
       await tester.pumpAndSettle();
       await tester.tap(find.text('Bingo de los sábados'));
       await tester.pumpAndSettle();
@@ -52,7 +62,7 @@ void main() {
         cartillas: cartillasDemo,
         publica: false,
       );
-      await tester.pumpWidget(BingPlayApp(repositorio: privada));
+      await abrir(tester, privada);
       await tester.pumpAndSettle();
       expect(find.text('Bingo de los sábados'), findsNothing);
       expect(
@@ -66,7 +76,7 @@ void main() {
 
     testWidgets('una sala llena no se muestra en el inicio', (tester) async {
       final repo = sala(ocupadas: 20);
-      await tester.pumpWidget(BingPlayApp(repositorio: repo));
+      await abrir(tester, repo);
       await tester.pumpAndSettle();
       expect(find.text('Bingo de los sábados'), findsNothing);
       expect(
@@ -78,7 +88,7 @@ void main() {
     testWidgets('el inicio es el código y el QR, con las salas debajo', (
       tester,
     ) async {
-      await tester.pumpWidget(BingPlayApp(repositorio: sala()));
+      await abrir(tester, sala());
       await tester.pumpAndSettle();
       expect(
         find.text('Escribe el código que te dio quien organiza'),
@@ -88,10 +98,29 @@ void main() {
       expect(find.text('Ver filas libres'), findsOneWidget);
     });
 
+    testWidgets('al escribir el código se esconden las salas', (tester) async {
+      await abrir(tester, sala());
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find
+            .ancestor(
+              of: find.byType(BingCasillasCodigo),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsNothing);
+      // Al soltar el foco vuelven.
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
+    });
+
     testWidgets('al volver de elegir fila se regresa al inicio', (
       tester,
     ) async {
-      await tester.pumpWidget(BingPlayApp(repositorio: sala()));
+      await abrir(tester, sala());
       await tester.pumpAndSettle();
       await tester.tap(find.text('Bingo de los sábados'));
       await tester.pumpAndSettle();
@@ -103,7 +132,7 @@ void main() {
 
     testWidgets('una sala nueva aparece sola en la lista', (tester) async {
       final repo = sala(ocupadas: 0);
-      await tester.pumpWidget(BingPlayApp(repositorio: repo));
+      await abrir(tester, repo);
       await tester.pumpAndSettle();
       expect(find.text('Quedan 20'), findsOneWidget);
       repo.ocupar(1, 'Ana', 'u1');
