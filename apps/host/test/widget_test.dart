@@ -1,7 +1,11 @@
 import 'package:bing_host/main.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'cargar_fuentes.dart';
+
 void main() {
+  setUpAll(cargarFuentesBing);
+
   testWidgets('el recorrido demo llega de entrar a nueva partida', (
     tester,
   ) async {

@@ -27,7 +27,9 @@ class BingBolilla extends StatelessWidget {
 
   /// Índice de columna (0 = B).
   final int columna;
-  final int numero;
+
+  /// `null` muestra un signo de pregunta (aún no ha salido ninguna).
+  final int? numero;
 
   /// Letra pequeña sobre el número (solo con 5 columnas).
   final String? letra;
@@ -53,7 +55,10 @@ class BingBolilla extends StatelessWidget {
     ).copyWith(color: bingLetraBolilla);
 
     return Semantics(
-      label: letra == null ? '$numero' : '$letra-$numero',
+      label:
+          numero == null
+              ? 'Bolilla sin sacar'
+              : (letra == null ? '$numero' : '$letra-$numero'),
       image: true,
       child: ExcludeSemantics(
         child: CustomPaint(
@@ -82,7 +87,7 @@ class BingBolilla extends StatelessWidget {
                       Text(letra!, style: estiloLetra),
                       const SizedBox(height: 1),
                     ],
-                    Text('$numero', style: estiloNumero),
+                    Text(numero?.toString() ?? '?', style: estiloNumero),
                   ],
                 ),
               ),
