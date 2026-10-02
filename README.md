@@ -22,31 +22,36 @@
   <img alt="Plataformas: Android e iOS" src="https://img.shields.io/badge/plataformas-Android%20%7C%20iOS-3DDC84">
   <img alt="Tema claro y oscuro" src="https://img.shields.io/badge/tema-claro%20%2B%20oscuro-181C33">
   <br>
-  <img alt="85 pruebas pasan" src="https://img.shields.io/badge/pruebas-85%20pasan-13895A">
-  <img alt="Cobertura 99 %" src="https://img.shields.io/badge/cobertura-99%25-13895A">
+  <img alt="116 pruebas pasan" src="https://img.shields.io/badge/pruebas-116%20pasan-13895A">
+  <img alt="Cobertura 92 %" src="https://img.shields.io/badge/cobertura-92%25-13895A">
   <img alt="Backend: TypeScript y Firebase" src="https://img.shields.io/badge/backend-TypeScript%20%7C%20Firebase-3178C6?logo=typescript&logoColor=white">
   <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-C81B60">
 </p>
 
 La sala tiene 20 filas, una por jugador, de 5 números (75 bolillas) o de 6 (90 bolillas).
-Gana la primera fila completa; el backend (ya escrito, aún sin conectar) verifica la
-fila y avisa a todos. Las apps replican un diseño HTML aprobado, con tema oscuro en Host
-y claro en Play.
+Gana la primera fila completa; el backend (Cloud Functions de Firebase) hace el sorteo,
+verifica la fila y todos lo ven en vivo. Las apps replican un diseño HTML aprobado, con
+tema oscuro en Host y claro en Play.
 
 ## Estado
 
-Las **15 pantallas** del diseño están hechas en **modo demo** (datos en memoria,
-sin Firebase): 9 de Host y 6 de Play. La lógica del juego y el backend tienen
-pruebas; **aún no hay conexión entre las apps y Firebase**.
+Las **15 pantallas** del diseño están hechas (9 de Host y 6 de Play) y las dos apps
+funcionan **de punta a punta contra el backend**: probadas en un emulador de Android
+con el emulador local de Firebase (crear la sala, llenarla en vivo, sortear hasta el
+bingo y ¡Ganaste!). Sin configuración de Firebase siguen en **modo demo** con datos
+falsos. Todavía **no está publicado** en Firebase (faltan las reglas y las Functions).
 
 | Parte | Estado |
 | --- | --- |
 | Reglas del juego (`bing_core`) | Hecho, con pruebas |
 | Sistema visual (`bing_ui`): tokens, bolilla, celdas, filas, componentes | Hecho, con pruebas golden |
-| Play `jug-01` a `jug-06` | Hecho en modo demo |
-| Host `org-01` a `org-09` | Hecho en modo demo, con sorteo animado |
-| Backend (`backend/`): reservas, sorteo y ganadores | Escrito y probado en lógica; sin probar con el emulador de Firebase |
-| Conectar las apps a Firebase | Pendiente (necesita un proyecto de Firebase) |
+| Play `jug-01` a `jug-06` | Hecho: demo y conectado al backend |
+| Host `org-01` a `org-09` | Hecho: demo y conectado al backend |
+| Backend (`backend/`): reservas, sorteo y ganadores | Hecho; probado contra el emulador de Firebase |
+| Conexión con Firebase (`bing_firebase`) | Hecho; sesión anónima y de prueba, Google sin probar |
+| Publicar reglas y Functions en Firebase | Pendiente (plan Blaze y `firebase login`) |
+| Inicio de sesión con Google real | Pendiente (huella SHA-1 en Android y esquema URL en iOS) |
+| Partidas de 6 columnas (90 bolillas) en Host | Pendiente: avisa "llegan pronto" |
 
 ## Métricas
 
@@ -54,19 +59,20 @@ Medidas el 2 de octubre de 2026 sobre el proyecto completo.
 
 | Métrica | Valor |
 | --- | --- |
-| Pruebas de Flutter | **69** (`bing_core` 16, `bing_ui` 19, Host 21, Play 13) |
-| Pruebas del backend | **16** |
-| Cobertura de líneas | **99,0 %** (`bing_ui` 99,8 %, `bing_core` 94,9 %, Host 98,1 %, Play 99,1 %) |
-| Código Dart | 5 391 líneas en `lib` y 1 233 en pruebas (sin líneas en blanco) |
-| Código TypeScript | 515 líneas (funciones y pruebas) |
+| Pruebas de Flutter | **99** (`bing_core` 23, `bing_ui` 19, `bing_firebase` 10, Host 31, Play 16) |
+| Pruebas del backend | **17** |
+| Cobertura de líneas | **92,4 %** (`bing_ui` 99,8 %, Play 93,8 %, `bing_core` 92,8 %, Host 91,1 %, `bing_firebase` 37,9 %) |
+| Código Dart | 7 123 líneas en `lib` y 1 856 en pruebas (sin líneas en blanco) |
+| Código TypeScript | 538 líneas (funciones y pruebas) y 194 en scripts de prueba |
 | Pantallas del diseño | **15 de 15** (9 de Host y 6 de Play) |
 | Fidelidad con el diseño | ≈ 2,8 % de píxeles distintos de media; solo 3 de 15 cumplen el objetivo de menos de 1,5 % |
 | Versiones | Flutter 3.29.2 (estable), Dart 3.7.2, Node 20 |
 
-La cobertura cuenta las líneas ejecutables que cargan las pruebas, incluyendo los
-paquetes `bing_ui` y `bing_core` cuando las ejercitan las pantallas de las apps. Los
-valores de las insignias son fijos: hay que actualizarlos a mano al volver a medir.
-Las pruebas golden solo corren en macOS.
+La cobertura cuenta las líneas ejecutables que cargan las pruebas. `bing_firebase` queda
+baja porque sus llamadas a Firestore, Auth y Functions solo se ejercen contra el
+emulador (ver [Backend](#backend)), no con pruebas automáticas. Los valores de las
+insignias son fijos: hay que actualizarlos a mano al volver a medir. Las pruebas golden
+solo corren en macOS.
 
 ```bash
 cd apps/host && flutter test --coverage --coverage-package='^(bing_ui|bing_core|bing_host)$'
@@ -108,6 +114,13 @@ falsos: en Play, la sala se va llenando sola tras reservar y las bolillas salen 
 hasta que gana tu fila; en Host, la sala se llena, sube "¡Cartilla llena!" y la
 partida se puede jugar a mano o con el interruptor "Automático".
 
+### Modo real
+
+Con los valores de Firebase en `.env` (ver [Configurar Firebase](#configurar-firebase)),
+las apps usan la sala de verdad: Play entra de forma anónima, busca la sala por su
+código y reserva la fila en el servidor; Host entra con Google, crea la sala, ve
+cómo se llena en vivo y sortea con el servidor.
+
 Los identificadores son los del diseño: `org-01-entrar` … `org-09-ganador` y
 `jug-01-codigo` … `jug-06-ganaste`. En Host, `org-06-bolilla` parte con 17 bolillas y
 cada toque saca la siguiente de la partida del diseño; con la 32 gana Lucía.
@@ -143,7 +156,32 @@ las reservas se resuelven en el servidor y las reglas de Firestore
 (`backend/firestore.rules`) no permiten escribir desde los clientes.
 
 ```bash
-cd backend/functions && npm install && npm test
+cd backend/functions && npm install && npm test     # pruebas de la lógica
+```
+
+### Probar con el emulador (gratis, sin Blaze)
+
+```bash
+npx firebase-tools emulators:start --only auth,functions,firestore --project bingbing-f1491
+node backend/scripts/humo.mjs                       # una partida completa, sin apps
+```
+
+Con el emulador en marcha, las apps se conectan con `--dart-define=USE_FIREBASE_EMULATOR=true`
+(desde el emulador de Android, el Mac es `10.0.2.2`):
+
+```bash
+cd apps/play && flutter run --dart-define-from-file=../../.env --dart-define=USE_FIREBASE_EMULATOR=true
+cd apps/host && flutter run --dart-define-from-file=../../.env --dart-define=USE_FIREBASE_EMULATOR=true
+```
+
+En ese modo Host entra con una cuenta de prueba en lugar de Google. Para simular a
+la organizadora y a los demás jugadores mientras pruebas una app:
+
+```bash
+node backend/scripts/sala-demo.mjs crear            # sala nueva con 4 filas tomadas
+node backend/scripts/sala-demo.mjs llenar CODIGO    # el resto de jugadores
+node backend/scripts/sala-demo.mjs empezar CODIGO
+node backend/scripts/sala-demo.mjs ganar CODIGO 5   # hace ganar la fila 5
 ```
 
 ## Configurar Firebase
@@ -165,7 +203,11 @@ cd apps/host && flutter run --dart-define-from-file=../../.env
 Registra las apps en Firebase con estos identificadores:
 
 - Android: `pe.bingbing.bing_host` y `pe.bingbing.bing_play`
-- iOS: el *bundle id* de cada app en Xcode (revísalo en `ios/Runner.xcodeproj`)
+- iOS: `pe.bingbing.bingHost` y `pe.bingbing.bingPlay`
+
+En Authentication activa **Anónimo** (jugadores) y **Google** (organizadores) y crea
+una base de datos de Firestore en modo producción; las reglas se publican desde
+`backend/firestore.rules`.
 
 Para el inicio de sesión con Google en Android, Firebase pide el SHA-1 de tu llave de
 depuración: `cd apps/host/android && ./gradlew signingReport`. Las Cloud Functions
