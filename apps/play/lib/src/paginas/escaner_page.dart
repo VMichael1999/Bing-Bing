@@ -189,7 +189,12 @@ class _EscanerPageState extends State<EscanerPage>
                           ],
                         ),
                       ),
-                      Center(child: _Marco(color: paleta.dauber)),
+                      Center(
+                        child: _Marco(
+                          color: paleta.dauber,
+                          conMovimiento: _conMovimiento,
+                        ),
+                      ),
                       Positioned(
                         bottom: 24,
                         left: 0,
@@ -350,31 +355,119 @@ class _Pildora extends StatelessWidget {
   }
 }
 
-/// Marco de 226 × 226 con las cuatro esquinas y la línea de lectura.
-class _Marco extends StatelessWidget {
-  const _Marco({required this.color});
+/// Marco de 226 × 226 con las cuatro esquinas y la línea de lectura, que sube y
+/// baja como si estuviera leyendo. Sin movimiento queda a la altura del diseño.
+class _Marco extends StatefulWidget {
+  const _Marco({required this.color, required this.conMovimiento});
 
   final Color color;
+  final bool conMovimiento;
+
+  @override
+  State<_Marco> createState() => _MarcoState();
+}
+
+class _MarcoState extends State<_Marco> with SingleTickerProviderStateMixin {
+  static const _lado = 226.0;
+  static const _margen = 14.0;
+  static const _alturaLinea = 2.0;
+  static const _alturaEstela = 46.0;
+
+  late final AnimationController _barrido = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 2200),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _ajustar();
+  }
+
+  @override
+  void didUpdateWidget(_Marco anterior) {
+    super.didUpdateWidget(anterior);
+    if (anterior.conMovimiento != widget.conMovimiento) _ajustar();
+  }
+
+  void _ajustar() {
+    if (widget.conMovimiento) {
+      _barrido.repeat(reverse: true);
+    } else {
+      _barrido.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _barrido.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final color = widget.color;
+    const recorrido = _lado - 2 * _margen - _alturaLinea;
     return SizedBox(
-      width: 226,
-      height: 226,
+      width: _lado,
+      height: _lado,
       child: Stack(
         children: [
           for (final e in _Esquina.values) e.dibujar(),
-          Positioned(
-            left: 14,
-            right: 14,
-            top: 226 * 0.52,
-            child: Container(
-              height: 2,
-              decoration: BoxDecoration(
-                color: color,
-                boxShadow: [BoxShadow(color: color, blurRadius: 14)],
-              ),
-            ),
+          AnimatedBuilder(
+            animation: _barrido,
+            builder: (context, _) {
+              final bajando = _barrido.status != AnimationStatus.reverse;
+              final top =
+                  widget.conMovimiento
+                      ? _margen +
+                          recorrido * Curves.easeInOut.transform(_barrido.value)
+                      : _lado * 0.52;
+              return Positioned(
+                left: _margen,
+                right: _margen,
+                top: top,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Estela: un resplandor que queda detrás de la línea.
+                    if (widget.conMovimiento)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: bajando ? -_alturaEstela : _alturaLinea,
+                        height: _alturaEstela,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin:
+                                  bajando
+                                      ? Alignment.topCenter
+                                      : Alignment.bottomCenter,
+                              end:
+                                  bajando
+                                      ? Alignment.bottomCenter
+                                      : Alignment.topCenter,
+                              colors: [
+                                color.withValues(alpha: 0),
+                                color.withValues(alpha: 0.28),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    Container(
+                      key: const ValueKey('linea-de-lectura'),
+                      height: _alturaLinea,
+                      decoration: BoxDecoration(
+                        color: color,
+                        boxShadow: [BoxShadow(color: color, blurRadius: 14)],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
