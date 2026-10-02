@@ -63,6 +63,9 @@ String mensajeDeError(Object error) {
     'columnas_no_disponible' => 'Las 6 columnas llegan pronto.',
     'sala_ya_empezada' => 'La partida ya empezó: se juega hasta el final.',
     'motivo_invalido' => 'El motivo admite hasta 120 caracteres.',
+    'precio_invalido' => 'El precio por fila debe ser un número de 0 a 1000.',
+    'premio_invalido' =>
+      'El premio no puede pasar de lo que queda tras la comisión.',
     _ => 'No se pudo completar la acción. Inténtalo de nuevo.',
   };
 }
@@ -298,7 +301,13 @@ class _NuevaPartidaRealState extends State<_NuevaPartidaReal> {
   String? _error;
   bool _creando = false;
 
-  Future<void> _abrir(String nombre, int columnas, bool publica) async {
+  Future<void> _abrir(
+    String nombre,
+    int columnas,
+    bool publica,
+    int precioFila,
+    int premio,
+  ) async {
     if (columnas == 6) {
       // La pantalla de partida aún dibuja solo las 75 bolillas de 5 columnas.
       setState(() => _error = 'Las 6 columnas llegan pronto.');
@@ -313,6 +322,8 @@ class _NuevaPartidaRealState extends State<_NuevaPartidaReal> {
         nombre: nombre,
         columnas: columnas,
         publica: publica,
+        precioFila: precioFila,
+        premio: premio,
       );
       if (!mounted) return;
       _ir(

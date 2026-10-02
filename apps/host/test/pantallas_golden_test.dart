@@ -39,6 +39,7 @@ void main() {
     'org-09-ganador',
     'org-11-compartir',
     'org-12-qr-pantalla',
+    'org-10b-precio-premio',
     'org-13-ajustes',
     'org-14-cerrar-sala',
   ];

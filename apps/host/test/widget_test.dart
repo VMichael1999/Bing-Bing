@@ -21,8 +21,8 @@ void main() {
     expect(find.text('Carmen · organizadora'), findsOneWidget);
     await tester.tap(find.text('Nueva partida'));
     await tester.pumpAndSettle();
-    expect(find.text('PARTIDA CON PREMIO'), findsOneWidget);
-    expect(find.text('Pronto'), findsOneWidget);
+    expect(find.text('PRECIO Y PREMIO'), findsOneWidget);
+    expect(find.text('5 por fila · premio 80'), findsOneWidget);
   });
 
   testWidgets('la opción "Hasta 3" está bloqueada y no se puede elegir', (
