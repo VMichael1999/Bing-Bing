@@ -10,8 +10,8 @@ class EsperandoPage extends StatelessWidget {
     required this.nombre,
     required this.salaNombre,
     required this.organizador,
-    required this.fila,
-    required this.numeros,
+    required this.filas,
+    required this.cartillas,
     required this.ocupadas,
     required this.total,
   });
@@ -19,8 +19,10 @@ class EsperandoPage extends StatelessWidget {
   final String nombre;
   final String salaNombre;
   final String organizador;
-  final int fila;
-  final List<int> numeros;
+
+  /// Filas reservadas (base 1) y sus números, en el mismo orden.
+  final List<int> filas;
+  final List<List<int>> cartillas;
   final int ocupadas;
   final int total;
 
@@ -35,17 +37,25 @@ class EsperandoPage extends StatelessWidget {
           child: Column(
             children: [
               BingEncontrada(
-                titulo: 'Tu fila está reservada',
-                detalle: '$nombre · fila $fila · $salaNombre',
+                titulo:
+                    filas.length == 1
+                        ? 'Tu fila está reservada'
+                        : 'Tus filas están reservadas',
+                detalle:
+                    filas.length == 1
+                        ? '$nombre · fila ${filas.first} · $salaNombre'
+                        : '$nombre · filas ${listaDeFilas(filas)} · $salaNombre',
               ),
-              const SizedBox(height: 12),
-              BingMiFila(
-                titulo: 'Tu fila · la $fila',
-                chip: const BingChip('Reservada', icono: 'lock'),
-                numeros: numeros,
-                salidas: const {},
-                letras: letrasBingo,
-              ),
+              for (var i = 0; i < filas.length; i++) ...[
+                const SizedBox(height: 12),
+                BingMiFila(
+                  titulo: 'Tu fila · la ${filas[i]}',
+                  chip: const BingChip('Reservada', icono: 'lock'),
+                  numeros: cartillas[i],
+                  salidas: const {},
+                  letras: letrasBingo,
+                ),
+              ],
               const SizedBox(height: 12),
               BingProgreso(
                 ocupadas: ocupadas,

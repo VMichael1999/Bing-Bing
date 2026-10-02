@@ -70,7 +70,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Bingo de los sábados'));
       await tester.pumpAndSettle();
-      expect(find.text('Elige tu fila'), findsOneWidget);
+      expect(find.text('Elige tus filas'), findsOneWidget);
       expect(find.text('Seguir con la fila 5'), findsOneWidget);
     });
 
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Bingo de los sábados'));
       await tester.pumpAndSettle();
-      expect(find.text('Elige tu fila'), findsOneWidget);
+      expect(find.text('Elige tus filas'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Volver'));
       await tester.pumpAndSettle();
       expect(find.text('SALAS ABIERTAS AHORA'), findsOneWidget);
@@ -163,7 +163,7 @@ void main() {
     expect(find.textContaining('No encontramos una sala'), findsOneWidget);
     await tester.tap(find.text('Ver filas libres'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
   });
 
   testWidgets(
@@ -181,7 +181,7 @@ void main() {
 
       await tester.tap(find.text('Ver filas libres'));
       await tester.pumpAndSettle();
-      expect(find.text('Elige tu fila'), findsOneWidget);
+      expect(find.text('Elige tus filas'), findsOneWidget);
       // La primera libre es la 5.
       expect(find.text('Seguir con la fila 5'), findsOneWidget);
       await tester.tap(find.text('Seguir con la fila 5'));

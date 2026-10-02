@@ -42,7 +42,7 @@ void main() {
     final repo = await abrir(tester);
     await tester.tap(find.text('Bingo de los sábados'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
 
     await repo.cancelarSala('K7Q4', motivo: 'No se llenó');
     await tester.pumpAndSettle();
@@ -53,7 +53,7 @@ void main() {
     await tester.tap(find.text('Entendido'));
     await tester.pumpAndSettle();
     expect(find.text('La sala se cerró'), findsNothing);
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     expect(find.text('Escanear el QR'), findsOneWidget);
   });
 
@@ -99,7 +99,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.text('Esa sala se cerró.'), findsOneWidget);
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 }

@@ -405,14 +405,36 @@ class _ElegirFilaReal extends StatelessWidget {
             return ColoredBox(color: BingTema.of(context).fondo);
           }
           final primeraLibre = filas.indexWhere((f) => f.libre);
+          final saldo = AlcanceSesion.saldoDe(context);
+          // Sin saldo para ni una fila no se preselecciona ninguna.
+          final alcanza =
+              sala.precioFila == 0 || saldo == null || saldo >= sala.precioFila;
           return ElegirFilaPage(
             salaNombre: sala.nombre,
             cartillas: [for (final f in filas) f.numeros],
             duenos: [for (final f in filas) f.libre ? null : (f.nombre ?? '')],
-            seleccionInicial: primeraLibre < 0 ? 1 : primeraLibre + 1,
+            seleccionInicial:
+                primeraLibre < 0 || !alcanza ? const {} : {primeraLibre + 1},
+            precioFila: sala.precioFila,
+            premio: sala.premio,
+            saldo: saldo,
+            limite: sala.filasPorJugador,
+            alRecargar: () {
+              final billetera = AlcanceSesion.billeteraDe(context);
+              if (billetera != null) {
+                _ir(context, BilleteraReal(billetera: billetera));
+              }
+            },
             alVolver: () => Navigator.of(context).pop(),
-            alSeguir: (fila) async {
-              if (!filas[fila - 1].libre) return;
+            alSeguir: (elegidas) async {
+              // Otra persona pudo tomar alguna mientras se elegía.
+              if (elegidas.any((f) => !filas[f - 1].libre)) {
+                mostrarAvisoBing(
+                  context,
+                  'Alguna de esas filas ya tiene dueño',
+                );
+                return;
+              }
               // Mirar la sala es libre; para elegir fila hace falta una cuenta.
               final sesion = AlcanceSesion.de(context);
               if (sesion != null && !sesion.actual.tieneCuenta) {
@@ -424,8 +446,8 @@ class _ElegirFilaReal extends StatelessWidget {
                 _ReservarReal(
                   repositorio: repositorio,
                   sala: sala,
-                  fila: fila,
-                  numeros: filas[fila - 1].numeros,
+                  filas: elegidas,
+                  cartillas: [for (final f in elegidas) filas[f - 1].numeros],
                 ),
               );
             },
@@ -440,14 +462,16 @@ class _ReservarReal extends StatefulWidget {
   const _ReservarReal({
     required this.repositorio,
     required this.sala,
-    required this.fila,
-    required this.numeros,
+    required this.filas,
+    required this.cartillas,
   });
 
   final RepositorioSala repositorio;
   final SalaEnVivo sala;
-  final int fila;
-  final List<int> numeros;
+
+  /// Filas elegidas (base 1) y sus números.
+  final List<int> filas;
+  final List<List<int>> cartillas;
 
   @override
   State<_ReservarReal> createState() => _ReservarRealState();
@@ -459,7 +483,13 @@ class _ReservarRealState extends State<_ReservarReal> {
 
   Future<void> _reservar(String nombre) async {
     if (nombre.isEmpty) {
-      setState(() => _error = 'Escribe tu nombre para reservar la fila.');
+      setState(
+        () =>
+            _error =
+                widget.filas.length == 1
+                    ? 'Escribe tu nombre para reservar la fila.'
+                    : 'Escribe tu nombre para reservar las filas.',
+      );
       return;
     }
     setState(() {
@@ -467,9 +497,9 @@ class _ReservarRealState extends State<_ReservarReal> {
       _reservando = true;
     });
     try {
-      await widget.repositorio.reservarFila(
+      await widget.repositorio.reservarFilas(
         codigo: widget.sala.codigo,
-        fila: widget.fila,
+        filas: widget.filas,
         nombre: nombre,
       );
       if (!mounted) return;
@@ -478,7 +508,7 @@ class _ReservarRealState extends State<_ReservarReal> {
         _EsperandoReal(
           repositorio: widget.repositorio,
           sala: widget.sala,
-          fila: widget.fila - 1,
+          filas: [for (final f in widget.filas) f - 1],
           nombre: nombre,
         ),
         reemplazar: true,
@@ -500,8 +530,10 @@ class _ReservarRealState extends State<_ReservarReal> {
       child: ReservarPage(
         salaNombre: widget.sala.nombre,
         organizador: widget.sala.organizador,
-        fila: widget.fila,
-        numeros: widget.numeros,
+        filas: widget.filas,
+        cartillas: widget.cartillas,
+        precioFila: widget.sala.precioFila,
+        saldo: AlcanceSesion.saldoDe(context),
         nombreInicial: AlcanceSesion.de(context)?.actual?.primerNombre ?? '',
         alVolver: () => Navigator.of(context).pop(),
         alReservar: _reservar,
@@ -516,15 +548,15 @@ class _EsperandoReal extends StatefulWidget {
   const _EsperandoReal({
     required this.repositorio,
     required this.sala,
-    required this.fila,
+    required this.filas,
     required this.nombre,
   });
 
   final RepositorioSala repositorio;
   final SalaEnVivo sala;
 
-  /// Fila reservada (base 0).
-  final int fila;
+  /// Filas reservadas (base 0).
+  final List<int> filas;
   final String nombre;
 
   @override
@@ -556,7 +588,7 @@ class _EsperandoRealState extends State<_EsperandoReal> {
                 _EnVivoReal(
                   repositorio: widget.repositorio,
                   sala: widget.sala,
-                  fila: widget.fila,
+                  filas: widget.filas,
                   nombre: widget.nombre,
                 ),
                 reemplazar: true,
@@ -567,8 +599,8 @@ class _EsperandoRealState extends State<_EsperandoReal> {
             nombre: widget.nombre,
             salaNombre: sala.nombre,
             organizador: sala.organizador,
-            fila: widget.fila + 1,
-            numeros: filas[widget.fila].numeros,
+            filas: [for (final f in widget.filas) f + 1],
+            cartillas: [for (final f in widget.filas) filas[f].numeros],
             ocupadas: filas.where((f) => !f.libre).length,
             total: filas.length,
           );
@@ -582,13 +614,15 @@ class _EnVivoReal extends StatefulWidget {
   const _EnVivoReal({
     required this.repositorio,
     required this.sala,
-    required this.fila,
+    required this.filas,
     required this.nombre,
   });
 
   final RepositorioSala repositorio;
   final SalaEnVivo sala;
-  final int fila;
+
+  /// Filas del jugador (base 0).
+  final List<int> filas;
   final String nombre;
 
   @override
@@ -617,15 +651,19 @@ class _EnVivoRealState extends State<_EnVivoReal> {
   }
 
   void _celebrar(SalaEnVivo sala, List<FilaEnVivo> filas) {
-    final g = sala.ganadoras.firstWhere((g) => g.fila == widget.fila + 1);
+    // Si varias de sus filas ganan, se celebra la primera en salir.
+    final g = sala.ganadoras.firstWhere(
+      (g) => widget.filas.contains(g.fila - 1),
+    );
+    final fila = g.fila - 1;
     Future<void>.delayed(const Duration(milliseconds: 520), () {
       if (!mounted) return;
       _ir(
         context,
         GanastePage(
           nombre: widget.nombre,
-          fila: widget.fila + 1,
-          numeros: filas[widget.fila].numeros,
+          fila: fila + 1,
+          numeros: filas[fila].numeros,
           bolillaFinal: sala.bolillas[g.bolillaIndice - 1],
           cantidadBolillas: g.bolillaIndice,
           organizador: sala.organizador,
@@ -649,7 +687,7 @@ class _EnVivoRealState extends State<_EnVivoReal> {
             _vistas = sala.bolillas.length;
             _ultimaSalida = DateTime.now();
           }
-          if (sala.ganoLaFila(widget.fila) && !_celebrado) {
+          if (widget.filas.any(sala.ganoLaFila) && !_celebrado) {
             _celebrado = true;
             _celebrar(sala, filas);
           }
@@ -659,8 +697,8 @@ class _EnVivoRealState extends State<_EnVivoReal> {
               nombre: widget.nombre,
               salaNombre: sala.nombre,
               organizador: sala.organizador,
-              fila: widget.fila + 1,
-              numeros: filas[widget.fila].numeros,
+              filas: [for (final f in widget.filas) f + 1],
+              cartillas: [for (final f in widget.filas) filas[f].numeros],
               ocupadas: filas.where((f) => !f.libre).length,
               total: filas.length,
             );
@@ -670,7 +708,7 @@ class _EnVivoRealState extends State<_EnVivoReal> {
             organizador: sala.organizador,
             cartillas: [for (final f in filas) f.numeros],
             nombres: [for (final f in filas) f.nombre ?? ''],
-            miFila: widget.fila + 1,
+            misFilas: [for (final f in widget.filas) f + 1],
             bolillas: sala.bolillas,
             hace: textoHace(_ultimaSalida, DateTime.now()),
             mostrar: filas.length - 1,

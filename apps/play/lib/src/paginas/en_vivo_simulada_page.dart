@@ -98,7 +98,7 @@ class _EnVivoSimuladaPageState extends State<EnVivoSimuladaPage> {
             organizador: salaDemoOrganizador,
             cartillas: widget.sala.cartillas,
             nombres: [for (final d in widget.sala.duenos) d ?? ''],
-            miFila: widget.fila + 1,
+            misFilas: [widget.fila + 1],
             bolillas: List.of(widget.sala.bolillas),
             hace: textoHace(widget.sala.ultimaSalida, DateTime.now()),
             // La sala completa: los otros 19 jugadores (más la fila propia, arriba).

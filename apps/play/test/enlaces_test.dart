@@ -34,21 +34,21 @@ void main() {
     await abrir(tester);
     enlaces.add(Uri.parse('https://bingbing-f1491.web.app/sala/K7Q4'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
   });
 
   testWidgets('el enlace de la app abre la sala', (tester) async {
     await abrir(tester);
     enlaces.add(Uri.parse('bingbing://sala/K7Q4'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
   });
 
   testWidgets('un enlace que no es de una sala se ignora', (tester) async {
     await abrir(tester);
     enlaces.add(Uri.parse('https://ejemplo.com/sala/K7Q4'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     expect(find.text('Escanear el QR'), findsOneWidget);
   });
 
@@ -63,7 +63,7 @@ void main() {
       find.text('No encontramos esa sala. Revisa el código.'),
       findsOneWidget,
     );
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 
@@ -86,7 +86,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Volver'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     expect(find.text('Escanear el QR'), findsOneWidget);
   });
 }

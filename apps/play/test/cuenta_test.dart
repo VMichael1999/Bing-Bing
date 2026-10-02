@@ -30,7 +30,7 @@ void main() {
   Future<void> entrarAElegirFila(WidgetTester tester) async {
     await tester.tap(find.text('Bingo de los sábados'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
     await tester.tap(find.text('Seguir con la fila 5'));
     await tester.pumpAndSettle();
   }
@@ -49,7 +49,7 @@ void main() {
       await tester.tap(find.text('Ahora no'));
       await tester.pumpAndSettle();
       expect(find.text('Inicia sesión para jugar'), findsNothing);
-      expect(find.text('Elige tu fila'), findsOneWidget);
+      expect(find.text('Elige tus filas'), findsOneWidget);
     });
 
     testWidgets('con Google sigue a reservar y propone el nombre', (

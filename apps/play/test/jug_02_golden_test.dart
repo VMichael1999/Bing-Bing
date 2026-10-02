@@ -36,7 +36,7 @@ void main() {
           // El HTML solo dibuja las 9 primeras filas.
           cartillas: cartillasDemo.take(9).toList(),
           duenos: filasDemoDuenos.take(9).toList(),
-          seleccionInicial: 5,
+          seleccionInicial: const {5},
         ),
       ),
     );

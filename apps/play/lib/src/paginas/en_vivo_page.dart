@@ -12,7 +12,7 @@ class EnVivoPage extends StatelessWidget {
     required this.organizador,
     required this.cartillas,
     required this.nombres,
-    required this.miFila,
+    required this.misFilas,
     required this.bolillas,
     required this.hace,
     this.mostrar = 6,
@@ -23,8 +23,8 @@ class EnVivoPage extends StatelessWidget {
   final List<List<int>> cartillas;
   final List<String> nombres;
 
-  /// Fila del jugador (base 1).
-  final int miFila;
+  /// Filas del jugador (base 1).
+  final List<int> misFilas;
 
   /// Bolillas en orden de salida.
   final List<int> bolillas;
@@ -40,12 +40,11 @@ class EnVivoPage extends StatelessWidget {
     final paleta = BingTema.of(context);
     final salidas = bolillas.toSet();
     final ultima = bolillas.last;
-    final mia = cartillas[miFila - 1];
-    final hits = mia.where(salidas.contains).length;
+    final mias = misFilas.map((f) => f - 1).toSet();
     final orden = ordenarPorAvance(
       cartillas,
       salidas,
-    ).where((i) => i != miFila - 1).take(mostrar);
+    ).where((i) => !mias.contains(i)).take(mostrar);
 
     return ColoredBox(
       color: paleta.fondo,
@@ -73,14 +72,20 @@ class EnVivoPage extends StatelessWidget {
                     '$hace · bolilla ${bolillas.length} de ${totalBolillas(5)}',
               ),
               const SizedBox(height: 10),
-              BingMiFila(
-                titulo: 'Tu fila · la $miFila',
-                chip: BingChip('$hits de ${mia.length}'),
-                numeros: mia,
-                salidas: salidas,
-                letras: letrasBingo,
-                recientes: {ultima},
-              ),
+              for (var i = 0; i < misFilas.length; i++) ...[
+                if (i > 0) const SizedBox(height: 10),
+                BingMiFila(
+                  titulo: 'Tu fila · la ${misFilas[i]}',
+                  chip: BingChip(
+                    '${cartillas[misFilas[i] - 1].where(salidas.contains).length}'
+                    ' de ${cartillas[misFilas[i] - 1].length}',
+                  ),
+                  numeros: cartillas[misFilas[i] - 1],
+                  salidas: salidas,
+                  letras: letrasBingo,
+                  recientes: {ultima},
+                ),
+              ],
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

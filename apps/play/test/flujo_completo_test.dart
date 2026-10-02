@@ -66,8 +66,10 @@ void main() {
     await tester.pumpWidget(const BingPlayApp());
     await tester.tap(find.text('Ver filas libres'));
     await tester.pumpAndSettle();
-    // Elegir la fila 6 en lugar de la 5.
-    await tester.tap(find.text('Libre').first);
+    // Elegir la fila 6 en lugar de la 5: se quita la 5 y se pone la 6.
+    await tester.tap(find.text('Elegida'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Libre').at(1));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Seguir con la fila 6'));
     await tester.pumpAndSettle();

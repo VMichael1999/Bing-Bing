@@ -64,6 +64,7 @@ void main() {
     'jug-09-iniciar-sesion',
     'jug-13-cuenta',
     'jug-14-sala-cerrada',
+    'jug-10-sin-saldo',
     'jug-11-billetera',
     'jug-12-recargar',
   ]) {
@@ -85,8 +86,8 @@ void main() {
       ReservarPage(
         salaNombre: salaDemoNombre,
         organizador: salaDemoOrganizador,
-        fila: 5,
-        numeros: lucia,
+        filas: [5],
+        cartillas: [lucia],
         nombreInicial: 'Lucía',
       ),
     );
@@ -100,8 +101,8 @@ void main() {
         nombre: 'Lucía',
         salaNombre: salaDemoNombre,
         organizador: salaDemoOrganizador,
-        fila: 5,
-        numeros: lucia,
+        filas: [5],
+        cartillas: [lucia],
         ocupadas: 17,
         total: 20,
       ),
@@ -117,7 +118,7 @@ void main() {
         organizador: salaDemoOrganizador,
         cartillas: cartillasDemo,
         nombres: jugadoresDemo,
-        miFila: 5,
+        misFilas: [5],
         bolillas: bolillasDemo.take(17).toList(),
         hace: 'hace 3 s',
       ),

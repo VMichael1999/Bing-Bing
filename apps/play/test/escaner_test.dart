@@ -53,7 +53,7 @@ void main() {
     final leer = await abrirEscaner(tester, sala());
     leer('https://bingbing-f1491.web.app/sala/K7Q4');
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
     // El escáner no queda en la pila: volver lleva al inicio.
     await tester.tap(find.bySemanticsLabel('Volver'));
     await tester.pumpAndSettle();
@@ -67,7 +67,7 @@ void main() {
     final leer = await abrirEscaner(tester, sala());
     leer('bingbing://sala/k7q4');
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
   });
 
   testWidgets('un QR que no es de una sala avisa y sigue escaneando', (
@@ -77,12 +77,12 @@ void main() {
     leer('https://ejemplo.com/otra-cosa');
     await tester.pump();
     expect(find.text('Ese QR no es de una sala de Bing Bing'), findsOneWidget);
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
     // Un QR bueno después sí entra.
     leer('K7Q4');
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
   });
 
   testWidgets('una sala que no existe se explica', (tester) async {
@@ -94,7 +94,7 @@ void main() {
       find.text('No encontramos esa sala. Revisa el código.'),
       findsOneWidget,
     );
-    expect(find.text('Elige tu fila'), findsNothing);
+    expect(find.text('Elige tus filas'), findsNothing);
     await tester.pumpAndSettle(const Duration(seconds: 3));
   });
 

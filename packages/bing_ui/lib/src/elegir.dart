@@ -15,6 +15,7 @@ class BingFilaElegir extends StatelessWidget {
     required this.numeros,
     this.dueno,
     this.elegida = false,
+    this.bloqueada = false,
     this.alPresionar,
   });
 
@@ -24,6 +25,9 @@ class BingFilaElegir extends StatelessWidget {
   /// Nombre de quien la reservó; `null` si está libre.
   final String? dueno;
   final bool elegida;
+
+  /// Está libre pero no se puede elegir (por ejemplo, sin saldo): se ve apagada.
+  final bool bloqueada;
   final VoidCallback? alPresionar;
 
   bool get tomada => dueno != null;
@@ -113,14 +117,14 @@ class BingFilaElegir extends StatelessWidget {
     );
 
     return Semantics(
-      button: !tomada,
+      button: !tomada && !bloqueada,
       selected: elegida,
       label: 'Fila $indice, ${tomada ? 'de $dueno' : 'libre'}',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: tomada ? null : alPresionar,
+        onTap: tomada || bloqueada ? null : alPresionar,
         child: Opacity(
-          opacity: tomada ? 0.5 : 1,
+          opacity: tomada ? 0.5 : (bloqueada ? 0.55 : 1),
           child: ExcludeSemantics(child: fila),
         ),
       ),

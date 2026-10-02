@@ -14,8 +14,8 @@ void main() {
         inicio: ReservarPage(
           salaNombre: salaDemoNombre,
           organizador: salaDemoOrganizador,
-          fila: 5,
-          numeros: cartillasDemo[4],
+          filas: [5],
+          cartillas: [cartillasDemo[4]],
           nombreInicial: '  Lucía ',
           alReservar: (n) => recibido = n,
         ),

@@ -139,20 +139,21 @@ class _FlujoDemoState extends State<_FlujoDemo> {
               salaNombre: salaDemoNombre,
               cartillas: cartillasDemo,
               duenos: _sala.duenos,
-              seleccionInicial: 5,
+              seleccionInicial: const {5},
               alVolver: () => Navigator.of(context).pop(),
               alSeguir:
-                  (fila) => _ir(
+                  (filas) => _ir(
                     context,
                     (context) => ReservarPage(
                       salaNombre: salaDemoNombre,
                       organizador: salaDemoOrganizador,
-                      fila: fila,
-                      numeros: cartillasDemo[fila - 1],
+                      filas: [filas.first],
+                      cartillas: [cartillasDemo[filas.first - 1]],
                       nombreInicial: 'Lucía',
                       alVolver: () => Navigator.of(context).pop(),
                       alReservar: (nombre) {
                         final nombreFinal = nombre.isEmpty ? 'Lucía' : nombre;
+                        final fila = filas.first;
                         if (!_sala.reservar(fila - 1, nombreFinal)) return;
                         _ir(
                           context,

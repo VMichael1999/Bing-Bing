@@ -33,7 +33,7 @@ void main() {
     await tester.pumpWidget(const BingPlayApp());
     await tester.tap(find.text('Ver filas libres'));
     await tester.pumpAndSettle();
-    expect(find.text('Elige tu fila'), findsOneWidget);
+    expect(find.text('Elige tus filas'), findsOneWidget);
     await tester.tap(find.text('Seguir con la fila 5'));
     await tester.pumpAndSettle();
     expect(find.text('Reserva tu fila'), findsOneWidget);
