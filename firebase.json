@@ -1,0 +1,4 @@
+{
+  "firestore": { "rules": "backend/firestore.rules" },
+  "functions": [{ "source": "backend/functions", "codebase": "default", "runtime": "nodejs20" }]
+}
