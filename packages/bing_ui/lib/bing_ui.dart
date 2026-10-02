@@ -2,9 +2,12 @@
 library;
 
 export 'src/bolilla.dart';
+export 'src/boton.dart';
 export 'src/celda.dart';
+export 'src/codigo.dart';
 export 'src/colores.dart';
 export 'src/fila.dart';
+export 'src/icono.dart';
 export 'src/medidas.dart';
 export 'src/punto.dart';
 export 'src/tema.dart';
