@@ -14,6 +14,12 @@ abstract final class BingMedidas {
   // Fila compacta (`.row`).
   static const double filaIndice = 18;
   static const double filaCelda = 33;
+
+  /// Tope al que crecen las celdas en pantallas más anchas que las del diseño.
+  static const double filaCeldaMax = 52;
+
+  /// Ancho del contenido de una fila compacta en el diseño (320 dp de pantalla).
+  static const double filaContenidoDiseno = 276;
   static const double filaGap = 4;
   static const double filaRadio = 11;
   static const double celdaRadio = 9;
