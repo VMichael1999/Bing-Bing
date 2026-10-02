@@ -71,6 +71,8 @@ class BingCartilla extends StatelessWidget {
               ],
             ),
           ),
+          // La cabecera suma su margen de 2 y el espacio de 2 de la rejilla.
+          const SizedBox(height: 2),
           for (var i = 0; i < filas.length; i++) ...[
             if (i > 0) const SizedBox(height: 2),
             filas[i],
@@ -120,8 +122,18 @@ class BingUltimaBolilla extends StatelessWidget {
                     800,
                   ).copyWith(color: paleta.tinta),
                 ),
+                // El `<span>` es inline: su línea usa el interlineado del padre
+                // (14 px × 1.38), no el propio.
                 Text(
                   detalle,
+                  strutStyle: const StrutStyle(
+                    fontFamily: 'Figtree',
+                    package: 'bing_ui',
+                    fontSize: 14,
+                    height: BingTexto.alturaBase,
+                    leadingDistribution: TextLeadingDistribution.even,
+                    forceStrutHeight: true,
+                  ),
                   style: BingTexto.figtree(
                     12,
                     600,
