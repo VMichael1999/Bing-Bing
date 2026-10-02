@@ -56,7 +56,14 @@ class CodigoPage extends StatelessWidget {
                 ),
               ),
             ),
-            _Pie(alVerFilas: alVerFilas),
+            BingPie(
+              boton: BingBoton(
+                texto: 'Ver filas libres',
+                tipo: BingBotonTipo.tinta,
+                alPresionar: alVerFilas,
+              ),
+              nota: 'Sin cuenta. Tu nombre lo pones al elegir la fila.',
+            ),
           ],
         ),
       ),
@@ -102,47 +109,6 @@ class _Encabezado extends StatelessWidget {
                 altura: 1.38,
               ).copyWith(color: paleta.apagado),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Pie extends StatelessWidget {
-  const _Pie({this.alVerFilas});
-
-  final VoidCallback? alVerFilas;
-
-  @override
-  Widget build(BuildContext context) {
-    final paleta = BingTema.of(context);
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 22),
-      decoration: BoxDecoration(
-        color: paleta.fondo,
-        border: Border(
-          top: BorderSide(color: paleta.linea, width: BingMedidas.pieBorde),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          BingBoton(
-            texto: 'Ver filas libres',
-            tipo: BingBotonTipo.tinta,
-            alPresionar: alVerFilas,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Sin cuenta. Tu nombre lo pones al elegir la fila.',
-            textAlign: TextAlign.center,
-            style: BingTexto.figtree(
-              12,
-              600,
-              altura: 1.38,
-            ).copyWith(color: paleta.apagado),
           ),
         ],
       ),
