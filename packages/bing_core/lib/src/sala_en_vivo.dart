@@ -37,6 +37,8 @@ class SalaEnVivo {
     this.publica = false,
     this.ocupadas = 0,
     this.motivoCierre,
+    this.precioFila = 0,
+    this.premio = 0,
   });
 
   final String codigo;
@@ -57,6 +59,12 @@ class SalaEnVivo {
 
   /// Filas con jugador.
   final int ocupadas;
+
+  /// Créditos que cuesta cada fila; 0 es una partida sin premio.
+  final int precioFila;
+
+  /// Créditos que gana la fila ganadora.
+  final int premio;
 
   /// Por qué quien organiza cerró la sala (si lo dijo); solo en las canceladas.
   final String? motivoCierre;
@@ -134,6 +142,8 @@ abstract class RepositorioOrganizador implements RepositorioSala {
     required String nombre,
     required int columnas,
     bool publica = true,
+    int precioFila = 0,
+    int premio = 0,
   });
 
   Future<void> empezar(String codigo);

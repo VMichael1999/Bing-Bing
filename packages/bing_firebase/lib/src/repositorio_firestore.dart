@@ -122,11 +122,15 @@ class RepositorioFirestore implements RepositorioOrganizador {
     required String nombre,
     required int columnas,
     bool publica = true,
+    int precioFila = 0,
+    int premio = 0,
   }) async {
     final r = await _llamar('crearSala', {
       'nombre': nombre,
       'columnas': columnas,
       'publica': publica,
+      'precioFila': precioFila,
+      'premio': premio,
     });
     return r['codigo'] as String;
   }
@@ -198,6 +202,8 @@ SalaEnVivo salaDesdeMapa(String codigo, Map<String, dynamic> datos) {
     publica: datos['publica'] == true,
     ocupadas: (datos['ocupadas'] as num?)?.toInt() ?? 0,
     motivoCierre: datos['motivoCierre'] as String?,
+    precioFila: (datos['precioFila'] as num?)?.toInt() ?? 0,
+    premio: (datos['premio'] as num?)?.toInt() ?? 0,
     ganadoras: [
       for (final g in datos['ganadores'] as List? ?? [])
         (

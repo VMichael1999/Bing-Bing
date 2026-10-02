@@ -17,6 +17,8 @@ class RepositorioMemoria implements RepositorioOrganizador {
     this.miUid = 'yo',
     this.ordenBolillas = const [],
     this.publica = true,
+    this.precioFila = 0,
+    this.premio = 0,
   }) : _filas = [for (final n in cartillas) FilaEnVivo(numeros: n)];
 
   final List<List<int>> cartillas;
@@ -30,6 +32,10 @@ class RepositorioMemoria implements RepositorioOrganizador {
 
   /// Visibilidad de la sala; cambia al crearla con `crearSala`.
   bool publica;
+
+  /// Precio y premio de la sala; cambian al crearla con `crearSala`.
+  int precioFila;
+  int premio;
 
   final List<FilaEnVivo> _filas;
   final List<int> _bolillas = [];
@@ -56,6 +62,8 @@ class RepositorioMemoria implements RepositorioOrganizador {
     publica: publica,
     ocupadas: _filas.where((f) => !f.libre).length,
     motivoCierre: _motivoCierre,
+    precioFila: precioFila,
+    premio: premio,
   );
 
   @override
@@ -166,8 +174,12 @@ class RepositorioMemoria implements RepositorioOrganizador {
     required String nombre,
     required int columnas,
     bool publica = true,
+    int precioFila = 0,
+    int premio = 0,
   }) async {
     this.publica = publica;
+    this.precioFila = precioFila;
+    this.premio = premio;
     return codigo;
   }
 

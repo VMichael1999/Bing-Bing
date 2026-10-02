@@ -26,6 +26,15 @@ void main() {
     expect(sala.ganadoras.single.fila, 5);
   });
 
+  test('salaDesdeMapa lee el precio y el premio, o 0 si no hay', () {
+    final sala = salaDesdeMapa('K7Q4', {'precioFila': 5, 'premio': 80});
+    expect(sala.precioFila, 5);
+    expect(sala.premio, 80);
+    final vieja = salaDesdeMapa('K7Q4', {'nombre': 'X'});
+    expect(vieja.precioFila, 0);
+    expect(vieja.premio, 0);
+  });
+
   test('una sala cerrada trae el motivo con el que se cerró', () {
     final sala = salaDesdeMapa('K7Q4', {
       'nombre': 'Bingo',

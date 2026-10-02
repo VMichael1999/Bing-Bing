@@ -173,7 +173,21 @@ void main() {
         'nombre': 'Bingo',
         'columnas': 5,
         'publica': true,
+        'precioFila': 0,
+        'premio': 0,
       });
+    });
+
+    test('crearSala envía el precio y el premio', () async {
+      respuesta = {'codigo': 'AB23'};
+      await repo().crearSala(
+        nombre: 'Bingo',
+        columnas: 5,
+        precioFila: 5,
+        premio: 80,
+      );
+      expect(llamadas.single.$2['precioFila'], 5);
+      expect(llamadas.single.$2['premio'], 80);
     });
 
     test('crearSala envía que es privada cuando se pide', () async {
