@@ -49,3 +49,12 @@ final List<String?> filasDemoDuenos = [
   for (var i = 0; i < jugadoresDemo.length; i++)
     i < 4 ? jugadoresDemo[i] : null,
 ];
+
+/// Horas de reserva de las filas 1 a 5 en la sala abierta (`org-04`).
+const List<String> horasReservaDemo = [
+  '20:44',
+  '20:44',
+  '20:45',
+  '20:46',
+  '20:49',
+];
