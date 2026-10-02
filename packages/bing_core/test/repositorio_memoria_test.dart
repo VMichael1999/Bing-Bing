@@ -50,6 +50,8 @@ void main() {
     final sala = (await repo.sala('K7Q4').first)!;
     expect(sala.estado, EstadoSala.enJuego);
     expect(sala.ganoLaFila(4), isTrue);
+    // Como el servidor: la fila ganadora cuenta desde 1.
+    expect(sala.ganadoras.single.fila, 5);
     expect(sala.ganadoras.single.bolillaIndice, 32);
   });
 

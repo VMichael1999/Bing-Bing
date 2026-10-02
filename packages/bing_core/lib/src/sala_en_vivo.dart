@@ -13,7 +13,10 @@ enum EstadoSala {
   };
 }
 
-/// Una fila que ya salió ganadora, y con qué bolilla (base 1) se completó.
+/// Una fila que ya salió ganadora y con qué bolilla se completó.
+///
+/// Las dos cuentas son **base 1**, como las guarda el servidor: `fila: 15` es
+/// la fila número 15 y `bolillaIndice: 47` es la bolilla 47 de la partida.
 typedef GanadoraEnVivo = ({int fila, int bolillaIndice});
 
 /// Foto de la sala tal como la ven los jugadores.
@@ -44,8 +47,8 @@ class SalaEnVivo {
   final String? organizadorUid;
   final DateTime? creadaEn;
 
-  /// Ganó [fila] (base 0).
-  bool ganoLaFila(int fila) => ganadoras.any((g) => g.fila == fila);
+  /// Ganó la fila en la posición [indice] de la lista de filas (base 0).
+  bool ganoLaFila(int indice) => ganadoras.any((g) => g.fila == indice + 1);
 }
 
 /// Una fila de la sala: sus números y, si está tomada, quién la tiene.

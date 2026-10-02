@@ -39,7 +39,7 @@ String detalleDeSala(SalaEnVivo sala) {
   final gano =
       sala.ganadoras.isEmpty
           ? null
-          : 'ganó la fila ${sala.ganadoras.first.fila + 1}';
+          : 'ganó la fila ${sala.ganadoras.first.fila}';
   return [
     if (cuando != null) cuando,
     estado,

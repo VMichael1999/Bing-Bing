@@ -13,15 +13,17 @@ void main() {
       'filasTotal': 20,
       'bolillas': [9, 30, 12],
       'ganadores': [
-        {'fila': 4, 'bolillaIndice': 3},
+        {'fila': 5, 'bolillaIndice': 3},
       ],
     });
     expect(sala.codigo, 'K7Q4');
     expect(sala.organizador, 'Carmen');
     expect(sala.estado, EstadoSala.enJuego);
     expect(sala.bolillas, [9, 30, 12]);
+    // El servidor guarda la fila 5 (base 1): es la posición 4 de la lista.
     expect(sala.ganoLaFila(4), isTrue);
     expect(sala.ganoLaFila(5), isFalse);
+    expect(sala.ganadoras.single.fila, 5);
   });
 
   test('una sala sin datos opcionales usa valores por defecto', () {

@@ -176,7 +176,7 @@ void main() {
       columnas: 5,
       filasTotal: 20,
       bolillas: const [],
-      ganadoras: const [(fila: 4, bolillaIndice: 32)],
+      ganadoras: const [(fila: 5, bolillaIndice: 32)],
       creadaEn: DateTime(2026, 9, 26),
     );
     expect(detalleDeSala(sala), '26 set · terminada · ganó la fila 5');

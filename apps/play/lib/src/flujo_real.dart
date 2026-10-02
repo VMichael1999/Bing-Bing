@@ -413,7 +413,7 @@ class _EnVivoRealState extends State<_EnVivoReal> {
   }
 
   void _celebrar(SalaEnVivo sala, List<FilaEnVivo> filas) {
-    final g = sala.ganadoras.firstWhere((g) => g.fila == widget.fila);
+    final g = sala.ganadoras.firstWhere((g) => g.fila == widget.fila + 1);
     Future<void>.delayed(const Duration(milliseconds: 520), () {
       if (!mounted) return;
       _ir(

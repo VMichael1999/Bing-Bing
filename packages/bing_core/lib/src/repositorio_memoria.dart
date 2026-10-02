@@ -126,9 +126,9 @@ class RepositorioMemoria implements RepositorioOrganizador {
     _bolillas.add(numero);
     final salidas = _bolillas.toSet();
     for (var i = 0; i < cartillas.length; i++) {
-      if (_ganadoras.any((g) => g.fila == i)) continue;
+      if (_ganadoras.any((g) => g.fila == i + 1)) continue;
       if (cartillas[i].every(salidas.contains)) {
-        _ganadoras.add((fila: i, bolillaIndice: _bolillas.length));
+        _ganadoras.add((fila: i + 1, bolillaIndice: _bolillas.length));
       }
     }
     _salaCambios.add(null);
