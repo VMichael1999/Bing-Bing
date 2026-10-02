@@ -1,23 +1,33 @@
+import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const BingApp());
+import 'src/paginas/codigo_page.dart';
 
-class BingApp extends StatelessWidget {
-  const BingApp({super.key});
+void main() => runApp(const BingPlayApp());
+
+class BingPlayApp extends StatelessWidget {
+  const BingPlayApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return WidgetsApp(
-      color: Color(0xFF10132A),
-      debugShowCheckedModeBanner: false,
-      onGenerateRoute: _route,
+    return BingTema(
+      paleta: BingPaleta.claro,
+      child: WidgetsApp(
+        color: BingPaleta.claro.fondo,
+        debugShowCheckedModeBanner: false,
+        title: 'Bing Bing Play',
+        pageRouteBuilder:
+            <T>(settings, builder) => PageRouteBuilder<T>(
+              settings: settings,
+              pageBuilder: (context, _, __) => builder(context),
+            ),
+        home: const CodigoPage(
+          codigo: 'K7Q4',
+          salaNombre: 'Bingo de los sábados',
+          organizador: 'Carmen',
+          filasLibres: 16,
+        ),
+      ),
     );
   }
 }
-
-Route<void> _route(RouteSettings settings) => PageRouteBuilder<void>(
-  pageBuilder:
-      (_, __, ___) => const Center(
-        child: Text('Bing Bing Play', textDirection: TextDirection.ltr),
-      ),
-);

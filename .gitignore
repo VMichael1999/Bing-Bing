@@ -8,3 +8,6 @@ build/
 .idea/
 .vscode/
 node_modules/
+
+# Imágenes de fallos de las pruebas golden
+**/test/failures/
