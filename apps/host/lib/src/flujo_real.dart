@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'ajustes_real.dart';
 import 'compartir.dart';
 import 'paginas/cartilla_llena_sheet.dart';
+import 'paginas/cerrar_sala_hoja.dart';
 import 'paginas/entrar_page.dart';
 import 'paginas/juego_page.dart';
 import 'paginas/mis_partidas_page.dart';
@@ -37,6 +38,7 @@ String detalleDeSala(SalaEnVivo sala) {
     EstadoSala.llena => 'sala llena',
     EstadoSala.enJuego => 'en juego',
     EstadoSala.terminada => 'terminada',
+    EstadoSala.cancelada => 'cerrada',
   };
   final gano =
       sala.ganadoras.isEmpty
@@ -59,6 +61,8 @@ String mensajeDeError(Object error) {
     'sala_no_llena' => 'Aún faltan jugadores para llenar la cartilla.',
     'permission-denied' => 'Esta cuenta no puede organizar partidas.',
     'columnas_no_disponible' => 'Las 6 columnas llegan pronto.',
+    'sala_ya_empezada' => 'La partida ya empezó: se juega hasta el final.',
+    'motivo_invalido' => 'El motivo admite hasta 120 caracteres.',
     _ => 'No se pudo completar la acción. Inténtalo de nuevo.',
   };
 }
@@ -244,7 +248,11 @@ class _MisPartidasReal extends StatelessWidget {
           partidas: [
             for (final s in salas)
               (
-                icono: s.estado == EstadoSala.terminada ? 'trophy' : 'cal',
+                icono: switch (s.estado) {
+                  EstadoSala.terminada => 'trophy',
+                  EstadoSala.cancelada => 'close',
+                  _ => 'cal',
+                },
                 titulo: s.nombre,
                 detalle: detalleDeSala(s),
               ),
@@ -267,7 +275,7 @@ class _MisPartidasReal extends StatelessWidget {
                   context,
                   _AbrirJuego(repositorio: repositorio, codigo: sala.codigo),
                 );
-              case EstadoSala.terminada:
+              case EstadoSala.terminada || EstadoSala.cancelada:
                 break;
             }
           },
@@ -370,6 +378,35 @@ class _SalaAbiertaRealState extends State<_SalaAbiertaReal> {
     }
   }
 
+  Future<void> _cerrarSala(int ocupadas) async {
+    final cierre = await Navigator.of(context).push<CierreDeSala>(
+      PageRouteBuilder<CierreDeSala>(
+        opaque: false,
+        pageBuilder:
+            (c, _, __) => CerrarSalaHoja(
+              ocupadas: ocupadas,
+              alConfirmar: (cierre) => Navigator.of(c).pop(cierre),
+              alSeguir: () => Navigator.of(c).pop(),
+            ),
+      ),
+    );
+    if (cierre == null || !mounted) return;
+    try {
+      await widget.repositorio.cancelarSala(
+        widget.codigo,
+        motivo: cierre.motivo,
+      );
+      if (!mounted) return;
+      final navegador = Navigator.of(context);
+      navegador.pop();
+      final overlay = navegador.overlay;
+      if (overlay != null) mostrarAvisoBingEn(overlay, 'Sala cerrada');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _error = mensajeDeError(e));
+    }
+  }
+
   void _mostrarHoja(SalaEnVivo sala, List<FilaEnVivo> filas) {
     // La hoja sube un instante después de que entra la última fila.
     Future<void>.delayed(const Duration(milliseconds: 700), () {
@@ -442,6 +479,7 @@ class _SalaAbiertaRealState extends State<_SalaAbiertaReal> {
             mostrarAvisoBing(context, 'Código copiado');
           },
           alEmpezar: llena && !_empezando ? () => _empezar(sala, filas) : null,
+          alCerrarSala: () => _cerrarSala(ocupadas),
           error: _error,
         );
       },

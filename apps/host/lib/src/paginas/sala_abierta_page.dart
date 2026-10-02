@@ -17,6 +17,7 @@ class SalaAbiertaPage extends StatelessWidget {
     this.alCompartir,
     this.alCopiar,
     this.alEmpezar,
+    this.alCerrarSala,
     this.error,
     this.datosQr,
   });
@@ -33,6 +34,10 @@ class SalaAbiertaPage extends StatelessWidget {
   /// Con la cartilla llena el botón pasa a "Empezar partida" (estado que el
   /// diseño no muestra: solo enseña la hoja `org-05`).
   final VoidCallback? alEmpezar;
+
+  /// Cierra la sala sin jugarla (por ejemplo, si no se llenó). Sin él no hay
+  /// botón, como en el diseño.
+  final VoidCallback? alCerrarSala;
 
   /// Por qué falló empezar la partida, si falló.
   final String? error;
@@ -100,6 +105,14 @@ class SalaAbiertaPage extends StatelessWidget {
                                 : 'Esperando a $faltan jugadores',
                         tipo: BingBotonTipo.linea,
                         deshabilitado: true,
+                      ),
+              botonSecundario:
+                  alCerrarSala == null
+                      ? null
+                      : BingBoton(
+                        texto: 'Cerrar sala',
+                        tipo: BingBotonTipo.linea,
+                        alPresionar: alCerrarSala,
                       ),
               nota:
                   faltan == 0

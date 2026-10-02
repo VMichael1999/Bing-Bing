@@ -1,6 +1,5 @@
 import 'package:bing_core/bing_core.dart';
 import 'package:bing_host/main.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'cargar_fuentes.dart';
@@ -68,8 +67,11 @@ void main() {
     await tester.tap(find.text('Eliminar mi cuenta'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Sí, eliminar mi cuenta'));
-    await tester.pumpAndSettle(const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(sesion.borrados, 1);
+    expect(find.text('Tu cuenta se eliminó'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
     expect(find.text('Continuar con Google'), findsOneWidget);
   });
 

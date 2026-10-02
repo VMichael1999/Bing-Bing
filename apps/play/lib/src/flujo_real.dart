@@ -16,6 +16,7 @@ import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/reservar_page.dart';
 import 'paginas/salas_abiertas.dart';
+import 'sala_cerrada.dart';
 
 /// Mensaje en español para un error del servidor.
 String mensajeDeError(Object error) {
@@ -169,6 +170,7 @@ class _FlujoRealState extends State<FlujoReal> with WidgetsBindingObserver {
           sala.estado == EstadoSala.llena ||
           (sala.estado == EstadoSala.abierta && sala.libres <= 0);
       if (llena) return 'Esa sala ya está llena.';
+      if (sala.estado == EstadoSala.cancelada) return 'Esa sala se cerró.';
       if (sala.estado != EstadoSala.abierta) {
         return 'Esa sala ya no recibe jugadores.';
       }
@@ -383,40 +385,44 @@ class _ElegirFilaReal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<FilaEnVivo>>(
-      stream: repositorio.filas(sala.codigo),
-      builder: (context, foto) {
-        final filas = foto.data;
-        if (filas == null) {
-          return ColoredBox(color: BingTema.of(context).fondo);
-        }
-        final primeraLibre = filas.indexWhere((f) => f.libre);
-        return ElegirFilaPage(
-          salaNombre: sala.nombre,
-          cartillas: [for (final f in filas) f.numeros],
-          duenos: [for (final f in filas) f.libre ? null : (f.nombre ?? '')],
-          seleccionInicial: primeraLibre < 0 ? 1 : primeraLibre + 1,
-          alVolver: () => Navigator.of(context).pop(),
-          alSeguir: (fila) async {
-            if (!filas[fila - 1].libre) return;
-            // Mirar la sala es libre; para elegir fila hace falta una cuenta.
-            final sesion = AlcanceSesion.de(context);
-            if (sesion != null && !sesion.actual.tieneCuenta) {
-              if (!await mostrarHojaSesion(context, sesion)) return;
-              if (!context.mounted) return;
-            }
-            _ir(
-              context,
-              _ReservarReal(
-                repositorio: repositorio,
-                sala: sala,
-                fila: fila,
-                numeros: filas[fila - 1].numeros,
-              ),
-            );
-          },
-        );
-      },
+    return VigilaSalaCerrada(
+      repositorio: repositorio,
+      codigo: sala.codigo,
+      child: StreamBuilder<List<FilaEnVivo>>(
+        stream: repositorio.filas(sala.codigo),
+        builder: (context, foto) {
+          final filas = foto.data;
+          if (filas == null) {
+            return ColoredBox(color: BingTema.of(context).fondo);
+          }
+          final primeraLibre = filas.indexWhere((f) => f.libre);
+          return ElegirFilaPage(
+            salaNombre: sala.nombre,
+            cartillas: [for (final f in filas) f.numeros],
+            duenos: [for (final f in filas) f.libre ? null : (f.nombre ?? '')],
+            seleccionInicial: primeraLibre < 0 ? 1 : primeraLibre + 1,
+            alVolver: () => Navigator.of(context).pop(),
+            alSeguir: (fila) async {
+              if (!filas[fila - 1].libre) return;
+              // Mirar la sala es libre; para elegir fila hace falta una cuenta.
+              final sesion = AlcanceSesion.de(context);
+              if (sesion != null && !sesion.actual.tieneCuenta) {
+                if (!await mostrarHojaSesion(context, sesion)) return;
+                if (!context.mounted) return;
+              }
+              _ir(
+                context,
+                _ReservarReal(
+                  repositorio: repositorio,
+                  sala: sala,
+                  fila: fila,
+                  numeros: filas[fila - 1].numeros,
+                ),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
@@ -479,16 +485,20 @@ class _ReservarRealState extends State<_ReservarReal> {
 
   @override
   Widget build(BuildContext context) {
-    return ReservarPage(
-      salaNombre: widget.sala.nombre,
-      organizador: widget.sala.organizador,
-      fila: widget.fila,
-      numeros: widget.numeros,
-      nombreInicial: AlcanceSesion.de(context)?.actual?.primerNombre ?? '',
-      alVolver: () => Navigator.of(context).pop(),
-      alReservar: _reservar,
-      error: _error,
-      reservando: _reservando,
+    return VigilaSalaCerrada(
+      repositorio: widget.repositorio,
+      codigo: widget.sala.codigo,
+      child: ReservarPage(
+        salaNombre: widget.sala.nombre,
+        organizador: widget.sala.organizador,
+        fila: widget.fila,
+        numeros: widget.numeros,
+        nombreInicial: AlcanceSesion.de(context)?.actual?.primerNombre ?? '',
+        alVolver: () => Navigator.of(context).pop(),
+        alReservar: _reservar,
+        error: _error,
+        reservando: _reservando,
+      ),
     );
   }
 }
@@ -517,40 +527,44 @@ class _EsperandoRealState extends State<_EsperandoReal> {
 
   @override
   Widget build(BuildContext context) {
-    return SalaEnVivoBuilder(
+    return VigilaSalaCerrada(
       repositorio: widget.repositorio,
       codigo: widget.sala.codigo,
-      espera: ColoredBox(color: BingTema.of(context).fondo),
-      constructor: (context, sala, filas) {
-        // La partida empieza cuando sale la primera bolilla.
-        if (sala.estado == EstadoSala.enJuego &&
-            sala.bolillas.isNotEmpty &&
-            !_pasando) {
-          _pasando = true;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!mounted) return;
-            _ir(
-              context,
-              _EnVivoReal(
-                repositorio: widget.repositorio,
-                sala: widget.sala,
-                fila: widget.fila,
-                nombre: widget.nombre,
-              ),
-              reemplazar: true,
-            );
-          });
-        }
-        return EsperandoPage(
-          nombre: widget.nombre,
-          salaNombre: sala.nombre,
-          organizador: sala.organizador,
-          fila: widget.fila + 1,
-          numeros: filas[widget.fila].numeros,
-          ocupadas: filas.where((f) => !f.libre).length,
-          total: filas.length,
-        );
-      },
+      child: SalaEnVivoBuilder(
+        repositorio: widget.repositorio,
+        codigo: widget.sala.codigo,
+        espera: ColoredBox(color: BingTema.of(context).fondo),
+        constructor: (context, sala, filas) {
+          // La partida empieza cuando sale la primera bolilla.
+          if (sala.estado == EstadoSala.enJuego &&
+              sala.bolillas.isNotEmpty &&
+              !_pasando) {
+            _pasando = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              _ir(
+                context,
+                _EnVivoReal(
+                  repositorio: widget.repositorio,
+                  sala: widget.sala,
+                  fila: widget.fila,
+                  nombre: widget.nombre,
+                ),
+                reemplazar: true,
+              );
+            });
+          }
+          return EsperandoPage(
+            nombre: widget.nombre,
+            salaNombre: sala.nombre,
+            organizador: sala.organizador,
+            fila: widget.fila + 1,
+            numeros: filas[widget.fila].numeros,
+            ocupadas: filas.where((f) => !f.libre).length,
+            total: filas.length,
+          );
+        },
+      ),
     );
   }
 }
@@ -614,42 +628,46 @@ class _EnVivoRealState extends State<_EnVivoReal> {
 
   @override
   Widget build(BuildContext context) {
-    return SalaEnVivoBuilder(
+    return VigilaSalaCerrada(
       repositorio: widget.repositorio,
       codigo: widget.sala.codigo,
-      espera: ColoredBox(color: BingTema.of(context).fondo),
-      constructor: (context, sala, filas) {
-        if (sala.bolillas.length != _vistas) {
-          _vistas = sala.bolillas.length;
-          _ultimaSalida = DateTime.now();
-        }
-        if (sala.ganoLaFila(widget.fila) && !_celebrado) {
-          _celebrado = true;
-          _celebrar(sala, filas);
-        }
-        if (sala.bolillas.isEmpty) {
-          // Se deshizo la única bolilla: se vuelve a esperar la primera.
-          return EsperandoPage(
-            nombre: widget.nombre,
+      child: SalaEnVivoBuilder(
+        repositorio: widget.repositorio,
+        codigo: widget.sala.codigo,
+        espera: ColoredBox(color: BingTema.of(context).fondo),
+        constructor: (context, sala, filas) {
+          if (sala.bolillas.length != _vistas) {
+            _vistas = sala.bolillas.length;
+            _ultimaSalida = DateTime.now();
+          }
+          if (sala.ganoLaFila(widget.fila) && !_celebrado) {
+            _celebrado = true;
+            _celebrar(sala, filas);
+          }
+          if (sala.bolillas.isEmpty) {
+            // Se deshizo la única bolilla: se vuelve a esperar la primera.
+            return EsperandoPage(
+              nombre: widget.nombre,
+              salaNombre: sala.nombre,
+              organizador: sala.organizador,
+              fila: widget.fila + 1,
+              numeros: filas[widget.fila].numeros,
+              ocupadas: filas.where((f) => !f.libre).length,
+              total: filas.length,
+            );
+          }
+          return EnVivoPage(
             salaNombre: sala.nombre,
             organizador: sala.organizador,
-            fila: widget.fila + 1,
-            numeros: filas[widget.fila].numeros,
-            ocupadas: filas.where((f) => !f.libre).length,
-            total: filas.length,
+            cartillas: [for (final f in filas) f.numeros],
+            nombres: [for (final f in filas) f.nombre ?? ''],
+            miFila: widget.fila + 1,
+            bolillas: sala.bolillas,
+            hace: textoHace(_ultimaSalida, DateTime.now()),
+            mostrar: filas.length - 1,
           );
-        }
-        return EnVivoPage(
-          salaNombre: sala.nombre,
-          organizador: sala.organizador,
-          cartillas: [for (final f in filas) f.numeros],
-          nombres: [for (final f in filas) f.nombre ?? ''],
-          miFila: widget.fila + 1,
-          bolillas: sala.bolillas,
-          hace: textoHace(_ultimaSalida, DateTime.now()),
-          mostrar: filas.length - 1,
-        );
-      },
+        },
+      ),
     );
   }
 }

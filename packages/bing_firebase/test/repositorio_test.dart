@@ -26,6 +26,17 @@ void main() {
     expect(sala.ganadoras.single.fila, 5);
   });
 
+  test('una sala cerrada trae el motivo con el que se cerró', () {
+    final sala = salaDesdeMapa('K7Q4', {
+      'nombre': 'Bingo',
+      'estado': 'cancelada',
+      'motivoCierre': 'No se llenó',
+    });
+    expect(sala.estado, EstadoSala.cancelada);
+    expect(sala.motivoCierre, 'No se llenó');
+    expect(salaDesdeMapa('K7Q4', {'estado': 'cancelada'}).motivoCierre, isNull);
+  });
+
   test('una sala sin datos opcionales usa valores por defecto', () {
     final sala = salaDesdeMapa('AAAA', {'nombre': 'X'});
     expect(sala.estado, EstadoSala.abierta);

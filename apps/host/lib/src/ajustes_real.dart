@@ -57,12 +57,8 @@ class _AjustesRealState extends State<AjustesReal> {
       final navegador = Navigator.of(context);
       widget.alSalir();
       // El aviso se muestra sobre la pantalla a la que se vuelve.
-      Future<void>.delayed(const Duration(milliseconds: 300), () {
-        final contexto = navegador.context;
-        if (contexto.mounted) {
-          mostrarAvisoBing(contexto, 'Tu cuenta se eliminó');
-        }
-      });
+      final overlay = navegador.overlay;
+      if (overlay != null) mostrarAvisoBingEn(overlay, 'Tu cuenta se eliminó');
     } catch (_) {
       if (!mounted) return;
       setState(() => _ocupado = false);

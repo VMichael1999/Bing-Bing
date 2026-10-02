@@ -10,6 +10,7 @@ import 'paginas/escaner_page.dart';
 import 'paginas/esperando_page.dart';
 import 'paginas/ganaste_page.dart';
 import 'paginas/iniciar_sesion_hoja.dart';
+import 'sala_cerrada.dart';
 import 'paginas/reservar_page.dart';
 import 'paginas/salas_abiertas.dart';
 
@@ -76,6 +77,25 @@ Widget? pantallaDemo(String id) => switch (id) {
       seleccionInicial: 5,
     ),
     alAhoraNo: () {},
+  ),
+  'jug-14-sala-cerrada' => SalaCerradaHoja(
+    sala: SalaEnVivo(
+      codigo: salaDemoCodigo,
+      nombre: salaDemoNombre,
+      organizador: salaDemoOrganizador,
+      estado: EstadoSala.cancelada,
+      columnas: 5,
+      filasTotal: 20,
+      bolillas: const [],
+      ganadoras: const [],
+      motivoCierre: 'No se llenó',
+    ),
+    fondo: ElegirFilaPage(
+      salaNombre: salaDemoNombre,
+      cartillas: cartillasDemo.take(6).toList(),
+      duenos: filasDemoDuenos.take(6).toList(),
+      seleccionInicial: 5,
+    ),
   ),
   'jug-13-cuenta' => const CuentaPage(
     nombre: 'Lucía Torres',

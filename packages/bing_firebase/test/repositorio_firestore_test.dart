@@ -187,6 +187,17 @@ void main() {
       expect(await repo().sacarBolilla('K7Q4'), 47);
     });
 
+    test('cancelarSala envía el código y el motivo, si lo hay', () async {
+      final r = repo();
+      await r.cancelarSala('K7Q4', motivo: ' No se llenó ');
+      await r.cancelarSala('K7Q4');
+      await r.cancelarSala('K7Q4', motivo: '   ');
+      expect(llamadas.map((l) => l.$1), everyElement('cancelarSala'));
+      expect(llamadas[0].$2, {'codigo': 'K7Q4', 'motivo': 'No se llenó'});
+      expect(llamadas[1].$2, {'codigo': 'K7Q4'});
+      expect(llamadas[2].$2, {'codigo': 'K7Q4'});
+    });
+
     test('empezar, deshacer y terminar llaman a su Function', () async {
       final r = repo();
       await r.empezar('K7Q4');
