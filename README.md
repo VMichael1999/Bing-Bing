@@ -1,13 +1,37 @@
-# Bing Bing
+<p align="center">
+  <img src="docs/iconos/host/icon-redondeado-256.png" width="132" alt="Ícono de Bing Bing Host">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/iconos/play/icon-redondeado-256.png" width="132" alt="Ícono de Bing Bing Play">
+</p>
 
-Bingo para reuniones, en dos apps Flutter para Android e iOS.
+<h1 align="center">Bing Bing</h1>
 
-| App | Para quién | Qué hace |
-| --- | --- | --- |
-| **Bing Bing Host** | Quien organiza | Crea la sala, comparte el código y saca las bolillas. |
-| **Bing Bing Play** | Quien juega | Entra con código o QR, reserva una fila y sigue la partida en vivo. |
+<p align="center"><b>Bingo para reuniones, en dos apps Flutter para Android e iOS.</b></p>
 
-La sala tiene 20 filas, una por jugador, de 5 números (75 bolillas) o de 6 (90 bolillas). Gana la primera fila completa.
+<table align="center">
+  <tr>
+    <td align="center"><b>Bing Bing Host</b><br><sub>Quien organiza: crea la sala,<br>comparte el código y saca las bolillas.</sub></td>
+    <td align="center"><b>Bing Bing Play</b><br><sub>Quien juega: entra con código o QR,<br>reserva una fila y sigue la partida en vivo.</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <a href="https://github.com/VMichael1999/Bing-Bing/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/VMichael1999/Bing-Bing/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="Flutter 3.29.2" src="https://img.shields.io/badge/Flutter-3.29.2-02569B?logo=flutter&logoColor=white">
+  <img alt="Dart 3.7.2" src="https://img.shields.io/badge/Dart-3.7.2-0175C2?logo=dart&logoColor=white">
+  <img alt="Plataformas: Android e iOS" src="https://img.shields.io/badge/plataformas-Android%20%7C%20iOS-3DDC84">
+  <img alt="Tema claro y oscuro" src="https://img.shields.io/badge/tema-claro%20%2B%20oscuro-181C33">
+  <br>
+  <img alt="85 pruebas pasan" src="https://img.shields.io/badge/pruebas-85%20pasan-13895A">
+  <img alt="Cobertura 99 %" src="https://img.shields.io/badge/cobertura-99%25-13895A">
+  <img alt="Backend: TypeScript y Firebase" src="https://img.shields.io/badge/backend-TypeScript%20%7C%20Firebase-3178C6?logo=typescript&logoColor=white">
+  <img alt="Licencia MIT" src="https://img.shields.io/badge/licencia-MIT-C81B60">
+</p>
+
+La sala tiene 20 filas, una por jugador, de 5 números (75 bolillas) o de 6 (90 bolillas).
+Gana la primera fila completa; el backend (ya escrito, aún sin conectar) verifica la
+fila y avisa a todos. Las apps replican un diseño HTML aprobado, con tema oscuro en Host
+y claro en Play.
 
 ## Estado
 
@@ -23,6 +47,31 @@ pruebas; **aún no hay conexión entre las apps y Firebase**.
 | Host `org-01` a `org-09` | Hecho en modo demo, con sorteo animado |
 | Backend (`backend/`): reservas, sorteo y ganadores | Escrito y probado en lógica; sin probar con el emulador de Firebase |
 | Conectar las apps a Firebase | Pendiente (necesita un proyecto de Firebase) |
+
+## Métricas
+
+Medidas el 2 de octubre de 2026 sobre el proyecto completo.
+
+| Métrica | Valor |
+| --- | --- |
+| Pruebas de Flutter | **69** (`bing_core` 16, `bing_ui` 19, Host 21, Play 13) |
+| Pruebas del backend | **16** |
+| Cobertura de líneas | **99,0 %** (`bing_ui` 99,8 %, `bing_core` 94,9 %, Host 98,1 %, Play 99,1 %) |
+| Código Dart | 5 391 líneas en `lib` y 1 233 en pruebas (sin líneas en blanco) |
+| Código TypeScript | 515 líneas (funciones y pruebas) |
+| Pantallas del diseño | **15 de 15** (9 de Host y 6 de Play) |
+| Fidelidad con el diseño | ≈ 2,8 % de píxeles distintos de media; solo 3 de 15 cumplen el objetivo de menos de 1,5 % |
+| Versiones | Flutter 3.29.2 (estable), Dart 3.7.2, Node 20 |
+
+La cobertura cuenta las líneas ejecutables que cargan las pruebas, incluyendo los
+paquetes `bing_ui` y `bing_core` cuando las ejercitan las pantallas de las apps. Los
+valores de las insignias son fijos: hay que actualizarlos a mano al volver a medir.
+Las pruebas golden solo corren en macOS.
+
+```bash
+cd apps/host && flutter test --coverage --coverage-package='^(bing_ui|bing_core|bing_host)$'
+cd backend/functions && npm test
+```
 
 ## Capturas
 
