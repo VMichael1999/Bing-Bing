@@ -4,6 +4,7 @@ import 'package:bing_ui/bing_ui.dart';
 import 'package:flutter/widgets.dart';
 
 import 'src/demo.dart';
+import 'src/flujo_real.dart';
 import 'src/paginas/entrar_page.dart';
 import 'src/paginas/juego_page.dart';
 import 'src/paginas/sala_simulada_page.dart';
@@ -17,15 +18,50 @@ const _pantallaElegida = String.fromEnvironment('BING_PANTALLA');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Sin los valores de .env (ver .env.example) sigue el modo demostración.
-  await iniciarFirebase(AppBing.host);
-  runApp(const BingHostApp());
+  if (!await iniciarFirebase(AppBing.host)) {
+    runApp(const BingHostApp());
+    return;
+  }
+  final sesion = SesionBing();
+  runApp(
+    BingHostApp(
+      repositorio: RepositorioFirestore(),
+      organizadorActual:
+          sesion.esOrganizador
+              ? sesion.usuario!.displayName ?? 'Organizador'
+              : null,
+      entrar: () async {
+        // Con el emulador no hay cuenta de Google real: entra una de prueba.
+        final usuario =
+            ConfigFirebase.entorno.usarEmulador
+                ? await sesion.entrarDePrueba()
+                : await sesion.entrarConGoogle();
+        return usuario == null ? null : usuario.displayName ?? 'Organizador';
+      },
+    ),
+  );
 }
 
 class BingHostApp extends StatelessWidget {
-  const BingHostApp({super.key, this.inicio});
+  const BingHostApp({
+    super.key,
+    this.inicio,
+    this.repositorio,
+    this.entrar,
+    this.organizadorActual,
+  });
 
   /// Pantalla con la que arranca; por defecto, el recorrido demo.
   final Widget? inicio;
+
+  /// Sala real (Firebase o en memoria); sin ella corre la demostración.
+  final RepositorioOrganizador? repositorio;
+
+  /// Inicia sesión y devuelve el nombre de quien organiza; `null` si cancela.
+  final Future<String?> Function()? entrar;
+
+  /// Si ya hay una sesión de organizadora, se salta la pantalla de entrar.
+  final String? organizadorActual;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +77,16 @@ class BingHostApp extends StatelessWidget {
               pageBuilder: (context, _, __) => builder(context),
             ),
         builder: (context, child) => BingSistema(child: child!),
-        home: inicio ?? pantallaDemo(_pantallaElegida) ?? const _FlujoDemo(),
+        home:
+            inicio ??
+            pantallaDemo(_pantallaElegida) ??
+            (repositorio == null
+                ? const _FlujoDemo()
+                : FlujoHostReal(
+                  repositorio: repositorio!,
+                  entrar: entrar ?? () async => 'Organizador',
+                  organizadorActual: organizadorActual,
+                )),
       ),
     );
   }
