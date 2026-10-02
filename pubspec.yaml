@@ -1,0 +1,14 @@
+name: bing_bing_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.7.2
+
+workspace:
+  - apps/host
+  - apps/play
+  - packages/bing_ui
+  - packages/bing_core
+
+flutter:
+  uses-material-design: false
