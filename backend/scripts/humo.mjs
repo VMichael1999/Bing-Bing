@@ -210,8 +210,20 @@ while (ganadoras.length === 0 && salidas.size < 75) {
 assert.ok(ganadoras.length > 0, "nadie ganó con las 75 bolillas");
 console.log(`✔ gana la fila ${ganadoras} con ${salidas.size} bolillas`);
 
+// Al terminar, el premio va a la billetera de la fila ganadora y lo que sobra a quien organiza, una sola vez.
+const sala = await (await leerDoc(`salas/${codigo}`, organizador)).json();
+const premio = Number(sala.fields.premio.integerValue);
+const ganadora = jugadores[ganadoras[0] - 1];
+const antesGanadora = await saldoDe(ganadora);
+const antesOrg = await saldoDe(organizador);
+await ok("terminarPartida", organizador, { codigo });
+assert.equal(await saldoDe(ganadora), antesGanadora + Math.floor(premio / ganadoras.length), "la ganadora cobra el premio");
+const cobroOrg = (await saldoDe(organizador)) - antesOrg;
+assert.ok(cobroOrg >= 0);
+await ok("terminarPartida", organizador, { codigo });
+assert.equal((await saldoDe(organizador)) - antesOrg, cobroOrg, "terminar dos veces no paga dos veces");
+assert.equal(await saldoDe(ganadora), antesGanadora + Math.floor(premio / ganadoras.length));
 const deshecha = await ok("deshacerBolilla", organizador, { codigo });
 assert.equal(deshecha.bolillas, salidas.size - 1);
-await ok("terminarPartida", organizador, { codigo });
-console.log("✔ deshacer y terminar la partida");
+console.log("✔ terminar paga el premio y lo que sobra, una sola vez");
 console.log("\nPrueba de humo OK");

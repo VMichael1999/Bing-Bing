@@ -8,6 +8,7 @@ import {
   aplicarReserva,
   aplicarReservas,
   cobrar,
+  repartirPremio,
   validarRecarga,
   validarFilasPorJugador,
   cancelar,
@@ -352,5 +353,47 @@ describe("billetera", () => {
     assert.equal(codigoDe(() => validarFilasPorJugador(0, 20)), "filas_invalidas");
     assert.equal(codigoDe(() => validarFilasPorJugador(21, 20)), "filas_invalidas");
     assert.equal(codigoDe(() => validarFilasPorJugador(2.5, 20)), "filas_invalidas");
+  });
+});
+
+describe("repartirPremio", () => {
+  const llenas = (dueños: Record<number, string>): Fila[] =>
+    filasLibres().map((f, i) => ({ ...f, jugadorUid: dueños[i + 1] ?? `j${i + 1}` }));
+
+  it("paga el premio a la ganadora y lo que sobra a quien organiza", () => {
+    const pagos = repartirPremio(
+      sala({ estado: "en_juego", ganadores: [{ fila: 3, bolillaIndice: 20 }] }),
+      llenas({ 3: "ana" }),
+    );
+    assert.deepEqual(pagos, [
+      { uid: "ana", monto: 80, motivo: "premio" },
+      { uid: "carmen", monto: 10, motivo: "sobrante" },
+    ]);
+  });
+
+  it("en un empate reparte a partes iguales y el resto es de quien organiza", () => {
+    const pagos = repartirPremio(
+      sala({
+        premio: 25,
+        ganadores: [
+          { fila: 1, bolillaIndice: 9 },
+          { fila: 2, bolillaIndice: 9 },
+          { fila: 3, bolillaIndice: 9 },
+        ],
+      }),
+      llenas({}),
+    );
+    assert.deepEqual(pagos.filter((p) => p.motivo === "premio").map((p) => p.monto), [8, 8, 8]);
+    assert.equal(pagos.find((p) => p.motivo === "sobrante")?.monto, 66);
+  });
+
+  it("sin ganadora, todo lo disponible queda con quien organiza", () => {
+    const pagos = repartirPremio(sala(), llenas({}));
+    assert.deepEqual(pagos, [{ uid: "carmen", monto: 90, motivo: "sobrante" }]);
+  });
+
+  it("sin precio o sin jugadores no hay nada que repartir", () => {
+    assert.deepEqual(repartirPremio(sala({ precioFila: 0, premio: 0 }), llenas({})), []);
+    assert.deepEqual(repartirPremio(sala(), filasLibres()), []);
   });
 });

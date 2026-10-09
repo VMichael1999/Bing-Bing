@@ -179,11 +179,11 @@ sin jugar (decidido: no) y qué pasa con lo que sobra tras el premio.
 
 Pendiente de la billetera:
 
-- **Pagar el premio** a quien gana: hoy la fila ganadora se muestra pero **no se acredita** el
-  premio. Falta decidir qué pasa si ganan varias filas a la vez (empate): propuesta, dividir
-  el premio en partes iguales (el resto, a quien organiza).
-- **Lo de quien organiza:** lo que queda tras el premio y la comisión (en el prototipo,
-  "Te quedan 10 créditos") aún no se acredita a su billetera.
+- ~~Pagar el premio y lo de quien organiza~~ **Hecho en el servidor:** al terminar la partida
+  (`terminarPartida`), el premio va a la billetera de la fila ganadora; en un empate se
+  divide en partes iguales y el resto es de quien organiza. Lo que queda tras premio y
+  comisión también es de quien organiza. Sin ganadora, todo lo disponible queda con quien
+  organiza. Se paga una sola vez. Falta que las apps lo muestren (aviso "Ganaste N créditos").
 - Recargas con dinero real, solo tras validar lo legal.
 - Con el emulador, Play entra con una cuenta de prueba en vez de Google (no hay Google real
   contra el emulador).
