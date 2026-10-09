@@ -9,6 +9,7 @@ import {
   aplicarReservas,
   cancelar,
   cobrar,
+  repartirPremio,
   validarFilasPorJugador,
   validarRecarga,
   CREDITOS_INICIALES,
@@ -351,6 +352,31 @@ export const terminarPartida = onCall(async (request) => {
     return await db.runTransaction(async (t) => {
       const { ref, sala } = await leerSala(t, codigo);
       exigirOrganizador(sala, uid);
+      if (sala.estado === "en_juego") {
+        // Se paga una sola vez: solo al pasar de en_juego a terminada.
+        const filas = await leerFilas(t, codigo, sala.filasTotal);
+        const pagos = repartirPremio(sala, filas);
+        const cuentas = [...new Set(pagos.map((p) => p.uid))];
+        const saldos = new Map<string, { saldo: number; nueva: boolean }>();
+        for (const cuenta of cuentas) saldos.set(cuenta, await leerSaldo(t, cuenta));
+        for (const cuenta of cuentas) {
+          const actual = saldos.get(cuenta);
+          if (actual === undefined) continue;
+          const mios = pagos.filter((p) => p.uid === cuenta);
+          guardarSaldo(t, cuenta, actual.saldo + mios.reduce((a, p) => a + p.monto, 0), actual.nueva);
+          for (const p of mios) {
+            anotar(t, cuenta, {
+              tipo: "premio",
+              monto: p.monto,
+              detalle:
+                p.motivo === "premio"
+                  ? `Premio · ${sala.nombre}`
+                  : `Lo que sobró · ${sala.nombre}`,
+              sala: codigo,
+            });
+          }
+        }
+      }
       t.update(ref, { estado: "terminada" });
       return { estado: "terminada" };
     });

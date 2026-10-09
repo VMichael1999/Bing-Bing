@@ -334,3 +334,37 @@ export function sinUltima(sala: Sala, uid: string): number[] {
   }
   return sala.bolillas.slice(0, -1);
 }
+
+/** Lo que cobra cada cuenta al terminar la partida. */
+export interface Pago {
+  uid: string;
+  monto: number;
+  motivo: "premio" | "sobrante";
+}
+
+/**
+ * Reparte lo recaudado al terminar una partida. El premio va a las filas que
+ * ganaron con la primera bolilla que completó alguna (si hay empate, partes
+ * iguales; lo que no divide exacto se queda con quien organiza). Lo que no es
+ * premio ni comisión también es de quien organiza. Sin ganadora, el premio
+ * entero queda con quien organiza. Cada cuenta recibe un solo pago por motivo.
+ */
+export function repartirPremio(sala: Sala, filas: Fila[]): Pago[] {
+  const ocupadas = filas.filter((f) => f.jugadorUid !== undefined).length;
+  if (sala.precioFila <= 0 || ocupadas === 0) return [];
+  const disponible = disponibleParaPremio(sala.precioFila, ocupadas, sala.comisionPorcentaje);
+  const premio = Math.min(sala.premio, disponible);
+  const primera = Math.min(...sala.ganadores.map((g) => g.bolillaIndice));
+  const ganadoras = sala.ganadores.filter((g) => g.bolillaIndice === primera);
+  const parte = ganadoras.length > 0 ? Math.floor(premio / ganadoras.length) : 0;
+  const porCuenta = new Map<string, number>();
+  for (const g of ganadoras) {
+    const uid = filas[g.fila - 1]?.jugadorUid;
+    if (uid !== undefined && parte > 0) porCuenta.set(uid, (porCuenta.get(uid) ?? 0) + parte);
+  }
+  const pagado = [...porCuenta.values()].reduce((a, b) => a + b, 0);
+  const pagos: Pago[] = [...porCuenta].map(([uid, monto]) => ({ uid, monto, motivo: "premio" }));
+  const sobrante = disponible - pagado;
+  if (sobrante > 0) pagos.push({ uid: sala.organizadorUid, monto: sobrante, motivo: "sobrante" });
+  return pagos;
+}
