@@ -14,6 +14,8 @@ class GanastePage extends StatelessWidget {
     required this.bolillaFinal,
     required this.cantidadBolillas,
     required this.organizador,
+    this.premio = 0,
+    this.pagado = false,
     this.alVerCartilla,
   });
 
@@ -27,6 +29,12 @@ class GanastePage extends StatelessWidget {
   /// Cuántas bolillas habían salido en ese momento.
   final int cantidadBolillas;
   final String organizador;
+
+  /// Créditos que le tocan por esta victoria; 0 si la partida no tenía premio.
+  final int premio;
+
+  /// Quien organiza ya terminó la partida y el premio está en la billetera.
+  final bool pagado;
   final VoidCallback? alVerCartilla;
 
   @override
@@ -81,6 +89,18 @@ class GanastePage extends StatelessWidget {
                               ],
                             ),
                           ),
+                          if (premio > 0) ...[
+                            const SizedBox(height: 14),
+                            BingAviso(
+                              icono: 'trophy',
+                              destacado: 'Ganaste $premio créditos.',
+                              texto:
+                                  pagado
+                                      ? 'Ya están en tu billetera.'
+                                      : 'Se suman a tu billetera cuando '
+                                          '$organizador termine la partida.',
+                            ),
+                          ],
                           const SizedBox(height: 14),
                           Text(
                             'Con la ${etiqueta(bolillaFinal, 5)}, la bolilla '
