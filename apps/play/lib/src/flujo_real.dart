@@ -650,6 +650,18 @@ class _EnVivoRealState extends State<_EnVivoReal> {
     super.dispose();
   }
 
+  /// Lo que le toca por sus filas ganadoras: el premio en partes iguales entre
+  /// las filas que completaron con la primera bolilla ganadora.
+  int _premioPropio(SalaEnVivo sala) {
+    if (sala.ganadoras.isEmpty || sala.premio <= 0) return 0;
+    final primera = sala.ganadoras
+        .map((g) => g.bolillaIndice)
+        .reduce((a, b) => a < b ? a : b);
+    final grupo = sala.ganadoras.where((g) => g.bolillaIndice == primera);
+    final mias = grupo.where((g) => widget.filas.contains(g.fila - 1)).length;
+    return (sala.premio ~/ grupo.length) * mias;
+  }
+
   void _celebrar(SalaEnVivo sala, List<FilaEnVivo> filas) {
     // Si varias de sus filas ganan, se celebra la primera en salir.
     final g = sala.ganadoras.firstWhere(
@@ -660,14 +672,22 @@ class _EnVivoRealState extends State<_EnVivoReal> {
       if (!mounted) return;
       _ir(
         context,
-        GanastePage(
-          nombre: widget.nombre,
-          fila: fila + 1,
-          numeros: filas[fila].numeros,
-          bolillaFinal: sala.bolillas[g.bolillaIndice - 1],
-          cantidadBolillas: g.bolillaIndice,
-          organizador: sala.organizador,
-          alVerCartilla: () => Navigator.of(context).pop(),
+        SalaEnVivoBuilder(
+          repositorio: widget.repositorio,
+          codigo: sala.codigo,
+          espera: ColoredBox(color: BingTema.of(context).fondo),
+          constructor:
+              (c, actual, _) => GanastePage(
+                nombre: widget.nombre,
+                fila: fila + 1,
+                numeros: filas[fila].numeros,
+                bolillaFinal: sala.bolillas[g.bolillaIndice - 1],
+                cantidadBolillas: g.bolillaIndice,
+                organizador: sala.organizador,
+                premio: _premioPropio(actual),
+                pagado: actual.estado == EstadoSala.terminada,
+                alVerCartilla: () => Navigator.of(c).pop(),
+              ),
         ),
       );
     });
