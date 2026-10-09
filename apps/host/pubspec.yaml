@@ -32,6 +32,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  bing_core: any
+  bing_ui: any
+  bing_firebase: any
+  share_plus: ^10.1.4
+  wakelock_plus: ^1.2.10
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

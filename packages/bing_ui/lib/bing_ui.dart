@@ -1,5 +1,34 @@
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+/// Tokens visuales, fuentes, íconos y componentes de Bing Bing.
+library;
+
+export 'src/aviso.dart';
+export 'src/bolilla.dart';
+export 'src/boton.dart';
+export 'src/campo.dart';
+export 'src/cartilla.dart';
+export 'src/celda.dart';
+export 'src/chip.dart';
+export 'src/codigo.dart';
+export 'src/colores.dart';
+export 'src/cuenta.dart';
+export 'src/confeti.dart';
+export 'src/confirmar_eliminar.dart';
+export 'src/elegir.dart';
+export 'src/fila.dart';
+export 'src/hero.dart';
+export 'src/hoja.dart';
+export 'src/icono.dart';
+export 'src/lista.dart';
+export 'src/medidas.dart';
+export 'src/mifila.dart';
+export 'src/pantalla.dart';
+export 'src/paso.dart';
+export 'src/progreso.dart';
+export 'src/punto.dart';
+export 'src/qr.dart';
+export 'src/sala.dart';
+export 'src/sistema.dart';
+export 'src/tablero.dart';
+export 'src/tabs.dart';
+export 'src/tema.dart';
+export 'src/tipografia.dart';

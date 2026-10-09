@@ -1,0 +1,187 @@
+import 'package:bing_ui/bing_ui.dart';
+import 'package:flutter/widgets.dart';
+
+/// `jug-01-codigo`: entrar a una sala con el código o el QR.
+class CodigoPage extends StatelessWidget {
+  const CodigoPage({
+    super.key,
+    required this.codigo,
+    required this.salaNombre,
+    required this.organizador,
+    required this.filasLibres,
+    this.alVerFilas,
+    this.alEscanear,
+    this.casillas,
+    this.resultado,
+    this.verFilasHabilitado = true,
+    this.alVolver,
+    this.bajoElQr,
+    this.accion,
+    this.accionAncha = false,
+  });
+
+  final String codigo;
+  final String salaNombre;
+  final String organizador;
+  final int filasLibres;
+  final VoidCallback? alVerFilas;
+  final VoidCallback? alEscanear;
+
+  /// Casillas del código; por defecto las del diseño, con [codigo] escrito.
+  final Widget? casillas;
+
+  /// Lo que se muestra bajo las casillas; por defecto la sala encontrada.
+  final Widget? resultado;
+  final bool verFilasHabilitado;
+
+  /// Con él aparece un botón de volver arriba a la izquierda (cuando la pantalla
+  /// se abre desde otra); sin él queda idéntica al diseño.
+  final VoidCallback? alVolver;
+
+  /// Contenido bajo el botón del QR (las salas abiertas); sin él, el diseño.
+  /// Recibe `true` cuando ocupa el espacio que sobra y debe moverse solo.
+  final Widget Function(bool desplazable)? bajoElQr;
+
+  /// Arriba a la derecha: "Iniciar sesión" o la cuenta abierta; sin él, el diseño.
+  final Widget? accion;
+
+  /// La acción de arriba no cabe junto a las bolillas: se le deja su propia fila.
+  final bool accionAncha;
+
+  @override
+  Widget build(BuildContext context) {
+    final paleta = BingTema.of(context);
+    return ColoredBox(
+      color: paleta.fondo,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, caja) {
+                  final lista = bajoElQr;
+                  // Con espacio, lo de arriba queda quieto y solo se mueven las
+                  // salas; en pantallas muy bajas todo se mueve junto.
+                  final fija = lista != null && caja.maxHeight >= _altoMinimo;
+                  // En pantallas angostas el chip de arriba taparía las bolillas:
+                  // se baja un poco lo de abajo.
+                  final arriba = _arriba(
+                    context,
+                    desplazable: !fija,
+                    margenSuperior:
+                        accion != null && (accionAncha || caja.maxWidth < 350)
+                            ? 44
+                            : 14,
+                  );
+                  return Stack(
+                    children: [
+                      if (fija)
+                        Column(
+                          children: [
+                            _desplazar(arriba),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  14,
+                                  18,
+                                  14,
+                                  0,
+                                ),
+                                child: lista(true),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.fromLTRB(14, 4, 14, 14),
+                          child: Column(
+                            children: [
+                              arriba,
+                              if (lista != null) ...[
+                                const SizedBox(height: 22),
+                                lista(false),
+                              ],
+                            ],
+                          ),
+                        ),
+                      if (accion != null)
+                        Positioned(right: 14, top: 11, child: accion!),
+                      if (alVolver != null)
+                        Positioned(
+                          left: 14,
+                          top: 4,
+                          child: BingBotonIcono(
+                            icono: 'left',
+                            etiqueta: 'Volver',
+                            alPresionar: alVolver,
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+            BingPie(
+              boton: BingBoton(
+                texto: 'Ver filas libres',
+                tipo: BingBotonTipo.tinta,
+                deshabilitado: !verFilasHabilitado,
+                alPresionar: alVerFilas,
+              ),
+              nota: 'Sin cuenta. Tu nombre lo pones al elegir la fila.',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _desplazar(Widget hijo) => SingleChildScrollView(
+    padding: const EdgeInsets.fromLTRB(14, 4, 14, 0),
+    child: hijo,
+  );
+
+  /// Bolillas, código y QR. Con [desplazable] falso se ajusta a su alto.
+  Widget _arriba(
+    BuildContext context, {
+    required bool desplazable,
+    required double margenSuperior,
+  }) {
+    return Column(
+      children: [
+        BingHero(
+          arriba: margenSuperior,
+          bolillas: [
+            (columna: 0, numero: 9, letra: 'B'),
+            (columna: 1, numero: 30, letra: 'I'),
+            (columna: 2, numero: 38, letra: 'N'),
+          ],
+          texto: 'Escribe el código que te dio quien organiza',
+        ),
+        const SizedBox(height: 14),
+        casillas ?? BingCasillasCodigo(codigo: codigo),
+        const SizedBox(height: 14),
+        resultado ??
+            BingEncontrada(
+              titulo: salaNombre,
+              detalle:
+                  'Organiza $organizador · quedan $filasLibres '
+                  'filas libres',
+            ),
+        const SizedBox(height: 14),
+        const BingSeparadorO(),
+        const SizedBox(height: 14),
+        BingBoton(
+          texto: 'Escanear el QR',
+          tipo: BingBotonTipo.linea,
+          icono: 'qr',
+          alPresionar: alEscanear,
+        ),
+      ],
+    );
+  }
+}
+
+/// Alto de la zona central por debajo del cual todo se mueve junto.
+const _altoMinimo = 520.0;

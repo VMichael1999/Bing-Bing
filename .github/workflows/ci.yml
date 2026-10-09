@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.2
+          channel: stable
+          cache: true
+      - name: Dependencias
+        run: flutter pub get
+      - name: Formato
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Análisis estático
+        run: flutter analyze
+      - name: Pruebas
+        run: |
+          for d in apps/host apps/play packages/bing_ui packages/bing_core; do
+            (cd "$d" && flutter test)
+          done

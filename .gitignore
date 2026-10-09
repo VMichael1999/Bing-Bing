@@ -8,3 +8,23 @@ build/
 .idea/
 .vscode/
 node_modules/
+
+# Imágenes de fallos de las pruebas golden
+**/test/failures/
+
+# Secretos y configuración de Firebase: nunca se suben
+.env
+.env.*
+!.env.example
+**/google-services.json
+**/GoogleService-Info.plist
+**/*-firebase-adminsdk-*.json
+**/serviceAccount*.json
+.firebase/
+firebase-debug.log
+
+# Cobertura generada por flutter test --coverage
+coverage/
+
+# Registros del emulador de Firebase
+*-debug.log

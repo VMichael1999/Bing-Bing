@@ -32,10 +32,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  bing_core: any
+  bing_ui: any
+  bing_firebase: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  mobile_scanner: ^6.0.11
+  app_settings: ^6.1.1
+  app_links: ^6.4.1
 
 dev_dependencies:
   flutter_test:
